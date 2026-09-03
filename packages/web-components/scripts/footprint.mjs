@@ -41,7 +41,11 @@ import {
 } from './plugins.mjs';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
-const PKGS = path.resolve(dir, '../..'); // the packages/ dir
+// The widgets package's install location — resolved, not assumed as a
+// sibling, so this works from the workspace AND from a host's store.
+const WIDGETS_DIR = path.dirname(
+  createRequire(import.meta.url).resolve('@openeventkit/widgets/package.json'),
+);
 
 const NODE_BUILTINS = new RegExp(
   `^(node:)?(${[...STUBBED_NODE_BUILTINS, ...POLYFILLED_NODE_BUILTINS].join('|')})$`,
@@ -65,7 +69,7 @@ export const pkgNameOf = (spec) => {
 // reader so the "what" (declared) and the "how" (orchestrated) can't drift.
 async function readManifest(name) {
   for (const ext of ['ts', 'tsx']) {
-    const p = path.join(PKGS, `widgets/src/${name}/manifest.${ext}`);
+    const p = path.join(WIDGETS_DIR, `src/${name}/manifest.${ext}`);
     let src;
     try { src = await fs.readFile(p, 'utf8'); } catch { continue; }
     const load = src.match(/load:\s*\(\)\s*=>\s*import\(\s*['"]([^'"]+)['"]/);
@@ -155,7 +159,7 @@ async function signatureFor(name) {
     const fromOwnPkg = inOwnTree && !abs.slice(ownPkgRoot.length).includes(nm);
     const fromKit =
       file.endsWith('.wc.js') || // the stdin entry
-      (abs.startsWith(PKGS + path.sep) && !abs.includes(nm));
+      ((abs.startsWith(WIDGETS_DIR + path.sep) || abs.startsWith(path.resolve(dir, '..') + path.sep)) && !abs.includes(nm));
     // uicore files count for the MUI surface: modules the runtime does not
     // serve bundle INTO widgets (company-input-v2 → registration), and their
     // MUI imports must still resolve through the served surface.
