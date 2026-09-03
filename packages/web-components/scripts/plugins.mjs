@@ -58,6 +58,21 @@ const isMuiInternal = (importer) => /[\\/]\.pnpm[\\/]@(mui|emotion)\+/.test(impo
 export const muiReact17Plugin = {
   name: 'mui-react17',
   setup(build) {
+    // react itself rides the same pin: source bundled from the widgets
+    // package (the kit compat modules) would otherwise resolve react and
+    // react/jsx-runtime through THAT package's peer — React 19 — putting a
+    // second React in the runtime graph next to the React 17 the entries
+    // serve (null hooks dispatcher at render).
+    build.onResolve({ filter: /^(react|react-dom|scheduler)(\/.*)?$/ }, async (args) => {
+      if (args.pluginData?.mui5) return null;
+      const r = await build.resolve(args.path, {
+        kind: args.kind,
+        resolveDir: pkgRoot,
+        pluginData: { mui5: true },
+      });
+      if (r.errors.length) return null;
+      return { path: r.path, external: r.external };
+    });
     build.onResolve({ filter: /^@(mui|emotion)\// }, async (args) => {
       if (args.pluginData?.mui5) return null; // recursion guard for our re-resolve
       if (isMuiInternal(args.importer)) return null;
