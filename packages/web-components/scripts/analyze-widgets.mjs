@@ -22,6 +22,10 @@ import { fileURLToPath } from 'node:url';
 import { analyzeFleet } from './footprint.mjs';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
+// The discovery footprint must be identical on every machine: ambient
+// NODE_ENV (set globally on CI hosts) must not reach the esbuild graph.
+process.env.NODE_ENV = 'development';
+
 const BASELINE_FILE = path.join(dir, 'analyze-widgets.baseline.json');
 // --update-baseline writes next to this script — running the installed bin
 // would write into a host's node_modules, silently lost on reinstall.

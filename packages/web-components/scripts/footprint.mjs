@@ -150,8 +150,9 @@ async function signatureFor(name) {
 
   const nm = `${path.sep}node_modules${path.sep}`;
   for (const [file, data] of Object.entries(metafile.inputs)) {
-    // Metafile keys are cwd-relative; plugin virtual inputs carry a namespace.
-    const abs = file.includes(':') ? file : path.resolve(file);
+    // Metafile keys are relative to the build's absWorkingDir (pkgRoot in
+    // baseOptions); plugin virtual inputs carry a namespace.
+    const abs = file.includes(':') ? file : path.resolve(path.resolve(dir, '..'), file);
     if (abs.includes(`${path.sep}src${path.sep}shims${path.sep}`)) continue; // build machinery
     // "Own package" means the widget's shipped files — not the nested
     // node_modules a link:-installed package carries.
