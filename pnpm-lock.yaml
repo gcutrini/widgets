@@ -156,7 +156,7 @@ importers:
         version: 0.5.48
       openstack-uicore-foundation:
         specifier: github:gcutrini/openstack-uicore-foundation#deploy
-        version: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(3c9426b812e26fbeadf9299c8fdf55cd)
+        version: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(3c9426b812e26fbeadf9299c8fdf55cd)
       prop-types:
         specifier: ^15.8.1
         version: 15.8.1
@@ -299,7 +299,7 @@ importers:
         version: 5.9.3
       event-feedback-widget:
         specifier: 2.0.1
-        version: 2.0.1(4f6a94ecc8446a08794f582687946fec)
+        version: 2.0.1(c324f2a733373348bc15731b94795e95)
       extend:
         specifier: ^3.0.1
         version: 3.0.2
@@ -311,7 +311,7 @@ importers:
         version: 4.7.0
       full-schedule-widget:
         specifier: 3.1.3
-        version: 3.1.3(d11798ce43a8b1aa2dc79a9670dbde5f)
+        version: 3.1.3(f4c26b33120cf6838310547e4544a582)
       history:
         specifier: ^4.7.2
         version: 4.10.1
@@ -332,10 +332,10 @@ importers:
         version: 3.0.8
       lite-schedule-widget:
         specifier: 3.0.3
-        version: 3.0.3(7054b3e434144940b809c9edf652ff85)
+        version: 3.0.3(88daa99c079c841c457a8f1b117a7a51)
       live-event-widget:
         specifier: 4.0.4
-        version: 4.0.4(9572a9b824d24d7224e563c58cdb8484)
+        version: 4.0.4(0d71720d3085e33aa124087f8c544087)
       lodash:
         specifier: ^4.18.1
         version: 4.18.1
@@ -347,10 +347,10 @@ importers:
         version: 0.5.48
       my-orders-tickets-widget:
         specifier: 1.0.16
-        version: 1.0.16(@mui/system@9.4.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(crypto-js@4.2.0)(i18n-react@0.7.0(react@19.2.8))(idtoken-verifier@2.2.4)(moment@2.30.1)(openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a))(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react-redux@7.2.9(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8))(react@19.2.8)(redux-persist@5.10.0(react@19.2.8)(redux@4.2.1))(redux-thunk@2.4.2(redux@4.2.1))(redux@4.2.1)(sweetalert2@11.26.25)
+        version: 1.0.16(@mui/system@9.4.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(crypto-js@4.2.0)(i18n-react@0.7.0(react@19.2.8))(idtoken-verifier@2.2.4)(moment@2.30.1)(openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a))(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react-redux@7.2.9(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8))(react@19.2.8)(redux-persist@5.10.0(react@19.2.8)(redux@4.2.1))(redux-thunk@2.4.2(redux@4.2.1))(redux@4.2.1)(sweetalert2@11.26.25)
       openstack-uicore-foundation:
         specifier: github:gcutrini/openstack-uicore-foundation#deploy
-        version: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a)
+        version: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a)
       react-bootstrap:
         specifier: ^0.33.1
         version: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -401,16 +401,16 @@ importers:
         version: 2.4.2(redux@4.2.1)
       schedule-filter-widget:
         specifier: 3.0.8
-        version: 3.0.8(4e004246969218b039042f8770d476a6)
+        version: 3.0.8(729619387f72638fb6a610e9ba2174a7)
       spark-md5:
         specifier: ^3.0.2
         version: 3.0.2
       speakers-widget:
         specifier: 4.0.2
-        version: 4.0.2(700796ebd3c9c041e78aa16c38e30e1a)
+        version: 4.0.2(ce86f3afb566e84fa2d6e24f00aade54)
       summit-registration-lite:
         specifier: github:gcutrini/summit-registration-lite#deploy/wc-registration
-        version: https://codeload.github.com/gcutrini/summit-registration-lite/tar.gz/b50bd612f4fbc08034893cea475326a1d28d161e(3dc3f9adeb2c3a4302437c59ea585820)
+        version: https://codeload.github.com/gcutrini/summit-registration-lite/tar.gz/b50bd612f4fbc08034893cea475326a1d28d161e(2575de6d7b31960c86b78082b52135bf)
       superagent:
         specifier: ^3.8.3
         version: 3.8.3
@@ -419,7 +419,7 @@ importers:
         version: 11.26.25
       upcoming-events-widget:
         specifier: 3.0.7
-        version: 3.0.7(b1e7263e8719ab497e8ad0938a5a38f4)
+        version: 3.0.7(020166ac7e1c850aa3b73c5fba8a9ea4)
       urijs:
         specifier: ^1.19.1
         version: 1.19.11
@@ -3312,8 +3312,8 @@ packages:
     resolution: {integrity: sha512-MVHddDVweXZF3awtlAS+6pgKLlm/JgxZ90+/NBurBoQctVOOB/zDdVjcyPzQ+0laDGbsWgrRkflI65sQeOgT9Q==}
     engines: {node: '>=8'}
 
-  openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401:
-    resolution: {tarball: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401}
+  openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e:
+    resolution: {tarball: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e}
     version: 4.2.34
     peerDependencies:
       '@emotion/react': ^11.11.4
@@ -5104,7 +5104,7 @@ snapshots:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 22.20.1
+      '@types/node': 26.4.1
       '@types/yargs': 17.0.35
       chalk: 4.1.2
 
@@ -6057,7 +6057,6 @@ snapshots:
   '@types/node@26.4.1':
     dependencies:
       undici-types: 8.3.0
-    optional: true
 
   '@types/parse-json@4.0.2': {}
 
@@ -6475,7 +6474,7 @@ snapshots:
 
   chrome-launcher@0.15.2:
     dependencies:
-      '@types/node': 22.20.1
+      '@types/node': 26.4.1
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 1.4.2
@@ -6486,7 +6485,7 @@ snapshots:
 
   chromium-edge-launcher@0.3.0:
     dependencies:
-      '@types/node': 22.20.1
+      '@types/node': 26.4.1
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 1.4.2
@@ -6909,7 +6908,7 @@ snapshots:
 
   etag@1.8.1: {}
 
-  event-feedback-widget@2.0.1(4f6a94ecc8446a08794f582687946fec):
+  event-feedback-widget@2.0.1(c324f2a733373348bc15731b94795e95):
     dependencies:
       awesome-bootstrap-checkbox: 2.0.1
       font-awesome: 4.7.0
@@ -6920,7 +6919,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-datetime: 2.16.3(moment@2.30.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -7074,7 +7073,7 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  full-schedule-widget@3.1.3(d11798ce43a8b1aa2dc79a9670dbde5f):
+  full-schedule-widget@3.1.3(f4c26b33120cf6838310547e4544a582):
     dependencies:
       '@mui/base': 5.0.0-alpha.127(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@react-pdf/renderer': 3.4.5(encoding@0.1.13)(react@19.2.8)
@@ -7090,7 +7089,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a)
       pure-react-carousel: 1.35.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -7375,7 +7374,7 @@ snapshots:
   jest-util@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 22.20.1
+      '@types/node': 26.4.1
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -7392,13 +7391,13 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 22.20.1
+      '@types/node': 26.4.1
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
   jest-worker@29.7.0:
     dependencies:
-      '@types/node': 22.20.1
+      '@types/node': 26.4.1
       jest-util: 29.7.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
@@ -7540,7 +7539,7 @@ snapshots:
 
   lines-and-columns@1.2.4: {}
 
-  lite-schedule-widget@3.0.3(7054b3e434144940b809c9edf652ff85):
+  lite-schedule-widget@3.0.3(88daa99c079c841c457a8f1b117a7a51):
     dependencies:
       awesome-bootstrap-checkbox: 2.0.1
       font-awesome: 4.7.0
@@ -7551,7 +7550,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a)
       pure-react-carousel: 1.35.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -7570,7 +7569,7 @@ snapshots:
       use-fit-text: 2.4.0(react@19.2.8)
       validator: 9.4.1
 
-  live-event-widget@4.0.4(9572a9b824d24d7224e563c58cdb8484):
+  live-event-widget@4.0.4(0d71720d3085e33aa124087f8c544087):
     dependencies:
       awesome-bootstrap-checkbox: 2.0.1
       font-awesome: 4.7.0
@@ -7581,7 +7580,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-datetime: 2.16.3(moment@2.30.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -7911,7 +7910,7 @@ snapshots:
       '@babel/runtime': 7.29.7
       global: 4.4.0
 
-  my-orders-tickets-widget@1.0.16(@mui/system@9.4.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(crypto-js@4.2.0)(i18n-react@0.7.0(react@19.2.8))(idtoken-verifier@2.2.4)(moment@2.30.1)(openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a))(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react-redux@7.2.9(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8))(react@19.2.8)(redux-persist@5.10.0(react@19.2.8)(redux@4.2.1))(redux-thunk@2.4.2(redux@4.2.1))(redux@4.2.1)(sweetalert2@11.26.25):
+  my-orders-tickets-widget@1.0.16(@mui/system@9.4.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(crypto-js@4.2.0)(i18n-react@0.7.0(react@19.2.8))(idtoken-verifier@2.2.4)(moment@2.30.1)(openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a))(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react-redux@7.2.9(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8))(react@19.2.8)(redux-persist@5.10.0(react@19.2.8)(redux@4.2.1))(redux-thunk@2.4.2(redux@4.2.1))(redux@4.2.1)(sweetalert2@11.26.25):
     dependencies:
       '@emotion/react': 11.14.0(@types/react@19.2.18)(react@19.2.8)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
@@ -7932,7 +7931,7 @@ snapshots:
       i18next-browser-languagedetector: 8.2.1
       idtoken-verifier: 2.2.4
       js-cookie: 3.0.8
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a)
       p-limit: 3.0.0
       prop-types: 15.8.1
       react: 19.2.8
@@ -8032,7 +8031,7 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
-  openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(3c9426b812e26fbeadf9299c8fdf55cd):
+  openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(3c9426b812e26fbeadf9299c8fdf55cd):
     dependencies:
       '@emotion/react': 11.14.0(@types/react@19.2.18)(react@17.0.2)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@17.0.2))(@types/react@19.2.18)(react@17.0.2)
@@ -8079,7 +8078,7 @@ snapshots:
       validator: 9.4.1
       video.js: 7.21.7
 
-  openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a):
+  openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a):
     dependencies:
       '@emotion/react': 11.14.0(@types/react@19.2.18)(react@19.2.8)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
@@ -9016,7 +9015,7 @@ snapshots:
     dependencies:
       xmlchars: 2.2.0
 
-  schedule-filter-widget@3.0.8(4e004246969218b039042f8770d476a6):
+  schedule-filter-widget@3.0.8(729619387f72638fb6a610e9ba2174a7):
     dependencies:
       awesome-bootstrap-checkbox: 2.0.1
       browser-tabs-lock: 1.3.0
@@ -9029,7 +9028,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a)
       react: 19.2.8
       react-datetime: 2.16.3(moment@2.30.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-dom: 19.2.8(react@19.2.8)
@@ -9194,7 +9193,7 @@ snapshots:
 
   spark-md5@3.0.2: {}
 
-  speakers-widget@4.0.2(700796ebd3c9c041e78aa16c38e30e1a):
+  speakers-widget@4.0.2(ce86f3afb566e84fa2d6e24f00aade54):
     dependencies:
       awesome-bootstrap-checkbox: 2.0.1
       browser-tabs-lock: 1.3.0
@@ -9206,7 +9205,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-datetime: 2.16.3(moment@2.30.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -9288,7 +9287,7 @@ snapshots:
 
   stylis@4.4.0: {}
 
-  summit-registration-lite@https://codeload.github.com/gcutrini/summit-registration-lite/tar.gz/b50bd612f4fbc08034893cea475326a1d28d161e(3dc3f9adeb2c3a4302437c59ea585820):
+  summit-registration-lite@https://codeload.github.com/gcutrini/summit-registration-lite/tar.gz/b50bd612f4fbc08034893cea475326a1d28d161e(2575de6d7b31960c86b78082b52135bf):
     dependencies:
       '@emotion/react': 11.14.0(@types/react@19.2.18)(react@19.2.8)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
@@ -9310,7 +9309,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-content-loader: 7.1.2(react@19.2.8)
@@ -9491,8 +9490,7 @@ snapshots:
 
   undici-types@6.21.0: {}
 
-  undici-types@8.3.0:
-    optional: true
+  undici-types@8.3.0: {}
 
   undici@8.10.1: {}
 
@@ -9510,7 +9508,7 @@ snapshots:
 
   unpipe@1.0.0: {}
 
-  upcoming-events-widget@3.0.7(b1e7263e8719ab497e8ad0938a5a38f4):
+  upcoming-events-widget@3.0.7(020166ac7e1c850aa3b73c5fba8a9ea4):
     dependencies:
       awesome-bootstrap-checkbox: 2.0.1
       browser-tabs-lock: 1.3.0
@@ -9522,7 +9520,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(fe7901f2dd3f9daec47dbaf3be47b81a)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/d581b993511addf7d594ea9c71af895875c4443e(fe7901f2dd3f9daec47dbaf3be47b81a)
       pure-react-carousel: 1.35.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
