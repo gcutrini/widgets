@@ -52,30 +52,6 @@ declare module 'speakers-widget/dist' {
   export default Widget;
 }
 
-declare module 'openstack-uicore-foundation/lib/components/clock-context' {
-  import type { ComponentType, ReactNode } from 'react';
-  export const ClockProvider: ComponentType<{
-    timezone?: string;
-    now?: number;
-    children: ReactNode;
-  }>;
-  /**
-   * The synchronized clock's "now" in epoch SECONDS (`null` until the
-   * first tick). Subscribing re-renders the consumer every second —
-   * prefer a `useClockSelector` derivation (minute, phase) unless
-   * per-second granularity is genuinely needed.
-   */
-  export function useClock(): number | null;
-  /**
-   * Derive from the clock; the consumer re-renders only when the
-   * selected value changes (per `equalityFn`, default `Object.is`).
-   * `now` is epoch SECONDS, `null` until the first tick.
-   */
-  export function useClockSelector<T>(
-    selector: (now: number | null) => T,
-    equalityFn?: (a: T, b: T) => boolean,
-  ): T;
-}
 
 
 declare module 'openstack-uicore-foundation/lib/components/extra-questions' {
