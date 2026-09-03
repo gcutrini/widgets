@@ -7,7 +7,7 @@
  * `exports`. This barrel carries only the small client-safe shared surface.
  */
 
-export { ClockProvider, useClock, useClockSelector } from './kit/ClockProvider';
+export { ClockProvider, useClockSelector } from './kit/ClockProvider';
 
 // This barrel is imported from client code and its import graph gets
 // pulled into every page that touches it. Exports below must stay
