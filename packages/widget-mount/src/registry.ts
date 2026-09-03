@@ -1,9 +1,9 @@
 import type { RendererId, WidgetRenderer } from './WidgetRenderer';
 
 /**
- * The app registers its concrete renderers here at startup; widget Clients
+ * The host registers its concrete renderers here at startup; widget Clients
  * resolve them by id via the Widget dispatcher. This is the seam that lets
- * widget definitions stay free of the app's (Next/Sentry/uicore-coupled)
+ * widget definitions stay free of the host's (Next/Sentry/uicore-coupled)
  * renderer implementations.
  */
 const renderers = new Map<RendererId, WidgetRenderer>();

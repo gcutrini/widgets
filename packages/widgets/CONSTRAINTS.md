@@ -4,7 +4,9 @@
 >
 > **What this is not.** A refactor plan for our own decisions. Those live in the task list. If a workaround here looks fixable, it isn't — check the "why the widgets force it" column and the "what upstream fix would remove it" column.
 >
-> **One hosting model, two renderers.** Every widget mounts through the Widget contract (`manifest` + `compose` + `Client` → `<Widget>`) into a shadow root — see `RC-U`. `<Widget>` picks a renderer: `reactComponent` (the app's React 19, into a `createWidgetShadow`) or `webComponent` (the widget's own React 17 as a self-contained custom element). Both are shadow-DOM, so the trade-offs below apply to both.
+> **One hosting model, two renderers.** Every widget mounts through the Widget contract (`manifest` + `compose` + `Client` → `<Widget>`) into a shadow root — see `RC-U`. `<Widget>` picks a renderer: `reactComponent` (the host's React 19, into a `createWidgetShadow`) or `webComponent` (the widget's own React 17 as a self-contained custom element). Both are shadow-DOM, so the trade-offs below apply to both.
+>
+> **Host paths.** Constraints marked HOST are configuration the host owns, not this repo. Bare `src/…` paths in host-side items (`src/widgets/<w>/`, `src/components/widget/…`, `src/lib/…`) are the reference host's, not this repo's.
 
 ## Contents
 
@@ -17,7 +19,7 @@
   - [RC-D — Prop model is Gatsby + Redux-shaped](#rc-d--prop-model-is-gatsby--redux-shaped)
   - [RC-E — Side-effect CSS chain in widget dists](#rc-e--side-effect-css-chain-in-widget-dists)
   - [RC-F — Ambient globals contract](#rc-f--ambient-globals-contract)
-  - [RC-G — Legacy dep tree isolation via subpackage](#rc-g--legacy-dep-tree-isolation-via-subpackage)
+  - [RC-G — Legacy dep tree isolation via this package](#rc-g--legacy-dep-tree-isolation-via-this-package)
   - [RC-H — Visual identity mismatch](#rc-h--visual-identity-mismatch)
   - [RC-I — Real-time model mismatch](#rc-i--real-time-model-mismatch)
   - [RC-J — PDF pipeline coupling](#rc-j--pdf-pipeline-coupling)
@@ -64,8 +66,8 @@ Most are legacy React 16 / Redux 4.x class-heavy code, pre-bundled by webpack ye
 ## The widgets in play
 
 Every widget spans two places: its uicore-bound `manifest` + `vendor-styles`
-live here at `packages/widgets/src/<name>/`, and its integration glue lives in
-the app at `src/widgets/<name>/` — `index.tsx` (Server Component) fetches data,
+live here at `src/<name>/`, and its integration glue lives in
+the host at `src/widgets/<name>/` — `index.tsx` (Server Component) fetches data,
 `Client.tsx` binds live state via `compose.ts`, and `<Widget>` mounts the dist
 inside a shadow root via `createWidgetShadow`.
 This adds CSS containment, a stable per-widget root for Sentry, and bridges for
@@ -85,7 +87,7 @@ The widgets and `openstack-uicore-foundation` were written when React 16 was cur
 
 - **A.1 — React pinned to `^18.3.1` project-wide.** `openstack-uicore-foundation` uses `react-select@2.4.4` in its `dropdown`, `radio-list`, `checkbox-list` inputs. `react-select@2.4.4` calls `ReactDOM.findDOMNode`. React 19 removed `findDOMNode`. Every widget that reaches for a uicore input (schedule widgets, extra-questions form, registration form, my-orders-tickets) crashes at runtime on React 19. We downgraded project-wide. This forecloses React 19 features (`use()` hook, `useActionState`, `useOptimistic`, ref-as-prop, `<Context>` as its own provider).
 - **A.2 — Widgets own their Redux store; the host renders none.** Legacy widgets call `useSelector`/`useDispatch` unconditionally, so each that reads from a store mounts its own inner `<Provider>` with its own store before its selectors fire; those that don't, never call `useSelector`/`connect`. The host adds no Provider. Widgets still cannot share state or a store across a page — inherent to the widgets, not to us.
-- **A.3 — Legacy peer warnings are accepted, not suppressed.** Install prints the widgets' React-16-era peer complaints (React version mismatches; optional transitive peers like `react-native`, `@react-three/fiber`, `react-onclickoutside` that we never install). pnpm reads `pnpm.peerDependencyRules` only at the workspace root, and the root declares none — the warnings are noise by design, and a NEW warning is still signal worth reading.
+- **A.3 — Legacy peer warnings are accepted, not suppressed.** Install prints the widgets' React-16-era peer complaints (React version mismatches; optional transitive peers like `react-native`, `@react-three/fiber`, `react-onclickoutside` that we never install). pnpm reads `pnpm.peerDependencyRules` only at the installing workspace's root — this repo's root declares none, and so does the reference host's — the warnings are noise by design, and a NEW warning is still signal worth reading.
 - **A.5 — `react-final-form@6` + `final-form@4` pinned.** uicore `ExtraQuestionsForm` is built on final-form v4. We inherit the whole v4/v6 API.
 
 **Why the widgets force it.** All of the above trace to one fact: uicore is on `react-select@2.4.4`. Every dropdown/radio/checkbox input in every widget goes through this component, and it uses `findDOMNode`. There is no per-widget workaround.
@@ -100,8 +102,8 @@ The widget `dist/index.js` files were bundled with webpack in the ~2020 era as C
 
 **Downstream:**
 
-- **B.1 — `experimental.esmExternals: 'loose'` in `next.config.ts`.** `my-orders-tickets-widget/dist/index.js` contains the literal line `module.exports = require("@react-pdf/renderer")` — the SOLE live consumer (the linked `summit-registration-lite` v7.0.10 does not import @react-pdf; only a vestigial `package.json` dep remains, and building with the flag off surfaces exactly this one error). `@react-pdf/renderer` v4 is ESM-only. Webpack rejects CJS→ESM require. `esmExternals: 'loose'` synthesizes the CJS bridge. Next warns this flag is discouraged; we accept the warning because this is precisely what the flag exists for. Removing it = finishing + publishing the my-orders pdfmake migration.
-- **B.2 — Dev must use webpack.** `next dev --webpack` in `package.json`. Turbopack's chunk resolver fails to produce module factories for CSS files inline-required inside vendored dist bundles. Vercel tracks this as PACK-2958 (open since April 2024, currently unresolved). This affects every widget dist because they all inline-require CSS at runtime. The app is 100% webpack today — both `dev`/`dev:https` and `build` pass `--webpack`; Turbopack is blocked for dev AND build by this inline-CSS-require path (and separately by `esmExternals: 'loose'`, which Turbopack rejects outright).
+- **B.1 — HOST: `experimental.esmExternals: 'loose'` in the host's `next.config.ts`.** `my-orders-tickets-widget/dist/index.js` contains the literal line `module.exports = require("@react-pdf/renderer")` — the SOLE live consumer (the linked `summit-registration-lite` v7.0.10 does not import @react-pdf; only a vestigial `package.json` dep remains, and building with the flag off surfaces exactly this one error). `@react-pdf/renderer` v4 is ESM-only. Webpack rejects CJS→ESM require. `esmExternals: 'loose'` synthesizes the CJS bridge. Next warns this flag is discouraged; we accept the warning because this is precisely what the flag exists for. Removing it = finishing + publishing the my-orders pdfmake migration.
+- **B.2 — HOST: dev must use webpack.** `next dev --webpack` in the host's `package.json`. Turbopack's chunk resolver fails to produce module factories for CSS files inline-required inside vendored dist bundles. Vercel tracks this as PACK-2958 (open since April 2024, currently unresolved). This affects every widget dist because they all inline-require CSS at runtime. The reference host is 100% webpack — both `dev`/`dev:https` and `build` pass `--webpack`; Turbopack is blocked for dev AND build by this inline-CSS-require path (and separately by `esmExternals: 'loose'`, which Turbopack rejects outright).
 - **B.3 — No tree-shaking of widget internals.** Dist files are opaque bundles. We pay full bundle-size cost for every widget even if we use one feature.
 - **B.4 — Inline CSS side-effect imports inside vendored dist bundles.** uicore CSS, Bootstrap-3 CSS, and widget internal SCSS all get pulled in at module evaluation, whether visible or not.
 
@@ -117,9 +119,9 @@ No `.d.ts` files. No JSDoc types. No documented prop tables.
 
 **Downstream:**
 
-- **C.1 — `packages/widgets/src/kit/widget-modules.d.ts`.** Ten ambient `declare module '<widget>/dist' { ... }` blocks — every widget declares its default export as `ComponentType<Record<string, unknown>>`. Loose. Any typo in a prop name silently succeeds at compile time.
+- **C.1 — `src/kit/widget-modules.d.ts` (this package).** Ten ambient `declare module '<widget>/dist' { ... }` blocks — every widget declares its default export as `ComponentType<Record<string, unknown>>`. Loose. Any typo in a prop name silently succeeds at compile time.
 - **C.2 — Widget prop interfaces widen with `[key: string]: unknown`.** Where a widget's server-props interface ends with an index signature (registration's `types.ts`), callers can pass undocumented props the widget accepts — TypeScript cannot catch prop-name typos there.
-- **C.3 — Widget code never renders server-side.** Widgets access `window` at module scope, so the shadow-react renderer loads them with `next/dynamic({ ssr: false })` (injected by the app in `src/components/widget/renderers/react-component.tsx`) and the web-component path is client-only by nature. Costs us initial HTML for widget content and SEO signal on widget-heavy routes.
+- **C.3 — Widget code never renders server-side.** Widgets access `window` at module scope, so the shadow-react renderer loads them with `next/dynamic({ ssr: false })` (injected by the host in `src/components/widget/renderers/react-component.tsx`) and the web-component path is client-only by nature. Costs us initial HTML for widget content and SEO signal on widget-heavy routes.
 
 **Why the widgets force it.** No published types means every prop shape must be reconstructed from reading widget source. Widgets change internal expectations without notice.
 
@@ -152,7 +154,7 @@ Widget `dist/index.js` files inline-require CSS. `openstack-uicore-foundation/li
 
 - **E.1 — `awesome-bootstrap-checkbox` global CSS gets loaded** any time a widget rendering uses uicore extra-questions. Legacy Bootstrap-3 CSS bleeds into our page. *Largely neutralized by the shadow-DOM modules:* widget markup lives inside a shadow root, so head-injected legacy rules match nothing in the light DOM — the bytes still ship, the visual bleed is gone.
 - **E.2 — uicore CSS chain (`circle-button.css`, etc.) inline-required from widget dists.** Every schedule widget pulls the button styling; if unused visually it still ships. *Inverted by the shadow-DOM modules:* head-injected CSS can't reach into a shadow root, so each side-effect stylesheet a widget actually needs (pure-react-carousel layout, uicore circle-button) is generated as a typed vendor-css module by the package's `scripts/generate-assets.mjs` and listed in that module's `sheets` — see each module's `vendor-styles.ts`.
-- **E.3 — Subpath exports in `@openeventkit/widgets` for what must not live in the client barrel.** The barrel `packages/widgets/src/index.ts` intentionally re-exports only the clock hooks — anything uicore-heavy (the extra-questions manifest, `uicore-host`, the compat modules) would compile the entire uicore chain into every widget-touching page. Consumers import those via their subpaths (`./extra-questions/manifest`, `./uicore-host`, `./compat/*`). A widget's uicore-bound `manifest` is exported via its own subpath (`@openeventkit/widgets/registration/manifest`, etc.) so the app-side Client imports just that declaration without dragging the barrel; the widget's Server Component + integration glue live in the app (`src/widgets/<widget>/`), not here.
+- **E.3 — Subpath exports in `@openeventkit/widgets` for what must not live in the client barrel.** The barrel `src/index.ts` intentionally re-exports only the clock hooks — anything uicore-heavy (the extra-questions manifest, `uicore-host`, the compat modules) would compile the entire uicore chain into every widget-touching page. Consumers import those via their subpaths (`./extra-questions/manifest`, `./uicore-host`, `./compat/*`). A widget's uicore-bound `manifest` is exported via its own subpath (`@openeventkit/widgets/registration/manifest`, etc.) so the host-side Client imports just that declaration without dragging the barrel; the widget's Server Component + integration glue live in the host (`src/widgets/<widget>/`), not here.
 
 **Why the widgets force it.** The dist bundles literally contain `require('.css')` calls at the JS level. There's no way to intercept this without rebundling the widget.
 
@@ -166,11 +168,11 @@ Widgets read state from process-level globals: `window.*`, `document.cookie`, `l
 
 **Downstream:**
 
-- **F.1 — uicore config through `setConfig`.** uicore reads its settings through the getters in `lib/utils/config` (`buildAPIBaseUrl`, `getTimeServiceUrl`, `getOAuth2IDPBaseUrl`, `getOAuth2ClientId`, ...). Each getter returns the value set through `setConfig` and falls back to a `window.*` global (`window.API_BASE_URL`, `window.TIMEINTERVALSINCE1970_API_URL`, `window.IDP_BASE_URL`, `window.OAUTH2_CLIENT_ID`) when nothing is set. The app sets nothing on `window`. `src/components/widget/register-host.ts` fills the `HostConfig` port with `SUMMIT_PROXY_BASE`, `NEXT_PUBLIC_IDP_BASE_URL`, `NEXT_PUBLIC_OAUTH2_CLIENT_ID` and `NEXT_PUBLIC_TIME_API_URL`, then calls `configureUicore()` (`kit/uicore-host.ts`), which passes them to `setConfig` as `apiBaseUrl`, `idpBaseUrl`, `oauth2ClientId`, `timeApiUrl`. The module runs at eval time (imported by `Providers`), before any uicore read. The web-component runtime does the same on its own uicore copy (RC-X).
-- **F.2 — uicore `ClockProvider` mounted in the app chrome.** Widgets that depend on time state (schedule, live events) internally consume the uicore Clock. We host their expected context: `kit/ClockProvider.tsx` re-exports uicore's clock context, and `src/components/Layout/index.tsx` mounts it (`ClockProvider` from `@openeventkit/widgets`). The clock reads the time-service URL through F.1.
-- **F.3 — uicore's own token lifecycle is bypassed by the resolver.** uicore's default `getAccessToken()` reads a localStorage `authInfo` record (`{ accessToken, expiresIn, accessTokenUpdatedAt, refreshToken, idToken }`) and refreshes client-side against the IDP; on a failed refresh it wipes the record. This app keeps the token in the encrypted JWE cookie (`__session`) server-side and never writes tokens to localStorage (`AuthContext` removes any leftover `authInfo` on mount). `configureUicore()` calls `setAccessTokenResolver`, and uicore's `getAccessToken()` returns the resolver's answer before touching localStorage, so the refresh path never runs. The resolver returns the `SESSION_PRESENT` placeholder while `HostAuth.isSignedIn()` is true (or the port is not filled) and throws only when the host is certain there is no session. Every uicore caller is covered, `query-actions` included, so the widgets that ride the ambient path (`full-schedule`, `lite-schedule`, `upcoming-events`, `live-event`, `speakers`, `schedule-filter`, plus internal thunks in the prop-driven widgets) all reach the host session. Details in RC-X.
+- **F.1 — uicore config through `setConfig`.** uicore reads its settings through the getters in `lib/utils/config` (`buildAPIBaseUrl`, `getTimeServiceUrl`, `getOAuth2IDPBaseUrl`, `getOAuth2ClientId`, ...). Each getter returns the value set through `setConfig` and falls back to a `window.*` global (`window.API_BASE_URL`, `window.TIMEINTERVALSINCE1970_API_URL`, `window.IDP_BASE_URL`, `window.OAUTH2_CLIENT_ID`) when nothing is set. The host sets nothing on `window`. The host's `src/components/widget/register-host.ts` fills the `HostConfig` port with `SUMMIT_PROXY_BASE`, `NEXT_PUBLIC_IDP_BASE_URL`, `NEXT_PUBLIC_OAUTH2_CLIENT_ID` and `NEXT_PUBLIC_TIME_API_URL`, then calls `configureUicore()` (`kit/uicore-host.ts`), which passes them to `setConfig` as `apiBaseUrl`, `idpBaseUrl`, `oauth2ClientId`, `timeApiUrl`. The module runs at eval time (imported by `Providers`), before any uicore read. The web-component runtime does the same on its own uicore copy (RC-X).
+- **F.2 — uicore `ClockProvider` mounted in the host chrome.** Widgets that depend on time state (schedule, live events) internally consume the uicore Clock. We host their expected context: `kit/ClockProvider.tsx` re-exports uicore's clock context, and `src/components/Layout/index.tsx` mounts it (`ClockProvider` from `@openeventkit/widgets`). The clock reads the time-service URL through F.1.
+- **F.3 — uicore's own token lifecycle is bypassed by the resolver.** uicore's default `getAccessToken()` reads a localStorage `authInfo` record (`{ accessToken, expiresIn, accessTokenUpdatedAt, refreshToken, idToken }`) and refreshes client-side against the IDP; on a failed refresh it wipes the record. The host keeps the token in the encrypted JWE cookie (`__session`) server-side and never writes tokens to localStorage (`AuthContext` removes any leftover `authInfo` on mount). `configureUicore()` calls `setAccessTokenResolver`, and uicore's `getAccessToken()` returns the resolver's answer before touching localStorage, so the refresh path never runs. The resolver returns the `SESSION_PRESENT` placeholder while `HostAuth.isSignedIn()` is true (or the port is not filled) and throws only when the host is certain there is no session. Every uicore caller is covered, `query-actions` included, so the widgets that ride the ambient path (`full-schedule`, `lite-schedule`, `upcoming-events`, `live-event`, `speakers`, `schedule-filter`, plus internal thunks in the prop-driven widgets) all reach the host session. Details in RC-X.
 - **F.4 — URL-fragment reads.** uicore Clock reads `window.location.hash` for `#now=YYYY-MM-DD,hh:mm:ss` at module load — an undocumented time-jump backdoor. Widget prop values sometimes come from URL hash reads that we bridge (see RC-N).
-- **F.5 — uicore auth flows through `setAuthHandlers`.** uicore's default `initLogOut` redirects to `${idpBaseUrl}/oauth2/end-session?client_id=${oauth2ClientId}&...` with the localStorage `idToken`, and its `utils/actions` `authErrorHandler` runs `doLogin` on 401 and hands `initLogOut` to the notify callback on 403. `configureUicore()` calls `setAuthHandlers({ initLogOut, authErrorHandler })`: `initLogOut` delegates to `HostAuth.logout` (the app's `initiateLogout`), and the 401/403 handler raises the `widget-auth-error` event for `<WidgetAuthErrorDialog>`. Any widget that surfaces a "log out" or account-menu action, and every 401/403 from a widget request, lands on the host's flows.
+- **F.5 — uicore auth flows through `setAuthHandlers`.** uicore's default `initLogOut` redirects to `${idpBaseUrl}/oauth2/end-session?client_id=${oauth2ClientId}&...` with the localStorage `idToken`, and its `utils/actions` `authErrorHandler` runs `doLogin` on 401 and hands `initLogOut` to the notify callback on 403. `configureUicore()` calls `setAuthHandlers({ initLogOut, authErrorHandler })`: `initLogOut` delegates to `HostAuth.logout` (the host's `initiateLogout`), and the 401/403 handler raises the `widget-auth-error` event for `<WidgetAuthErrorDialog>`. Any widget that surfaces a "log out" or account-menu action, and every 401/403 from a widget request, lands on the host's flows.
 - **F.6 — config keys uicore reads that the host does not set.** `lib/utils/config` also serves `oauth2Flow`, `oauth2UseRefreshToken`, `scopes`, `allowedUserGroups` and `exclusiveSections`, falling back to `window.OAUTH2_FLOW`, `window.OAUTH2_USE_REFRESH_TOKEN`, `window.SCOPES`, `window.ALLOWED_USER_GROUPS`, `window.EXCLUSIVE_SECTIONS`. `HostConfig` carries none of them, so they read as undefined (or uicore's built-in default). The flow / refresh / scopes keys feed uicore's own login and refresh paths, which F.3 and F.5 bypass. If a widget path ever needs one of the others, the route is the same as F.1: add the key to `HostConfig` and to the `setConfig` call in `configureUicore()`, never a `window.*` write.
 
 **Why the widgets force it.** Ambient config is the API contract these widgets exposed to hosts: they read uicore's config and token state, nothing comes through props. uicore's setters let the host supply that state without `window.*` globals or localStorage; the widgets still read it ambiently.
@@ -179,18 +181,18 @@ Widgets read state from process-level globals: `window.*`, `document.cookie`, `l
 
 ---
 
-### RC-G — Legacy dep tree isolation via subpackage
+### RC-G — Legacy dep tree isolation via this package
 
-The widget dep tree includes react-16-era peers (redux, react-redux 7, redux-thunk, redux-persist, moment, moment-timezone, lodash, i18n-react, crypto-js, spark-md5, sweetalert2, awesome-bootstrap-checkbox, final-form, react-final-form, idtoken-verifier). If these were dependencies of the root app, main-app code could inadvertently reach for them and inherit legacy patterns.
+The widget dep tree includes react-16-era peers (redux, react-redux 7, redux-thunk, redux-persist, moment, moment-timezone, lodash, i18n-react, crypto-js, spark-md5, sweetalert2, awesome-bootstrap-checkbox, final-form, react-final-form, idtoken-verifier). If these were dependencies of a host, host code could inadvertently reach for them and inherit legacy patterns.
 
 **Downstream:**
 
-- **G.1 — `packages/widgets/` subpackage (Modified E1 monorepo).** Widget deps live in a workspace subpackage isolated from the root. Root app depends on `@openeventkit/widgets` (workspace link) but not directly on any widget's legacy peer.
-- **G.2 — Domain types live in the app (`src/types/`).** The widget composers' interfaces need shared types (`Summit`, `SummitEvent`, `UserProfile`, etc.); they are app modules, so the app's `src/types/` is their home. This package needs none of them — its manifests type widget dists loosely (C.1) and everything host-shaped crosses through the widget-core ports.
-- **G.3 — Widget subpackage carries the entire legacy dep tree** (~15 packages that would otherwise pollute main).
-- **G.4 — `transpilePackages: ['@openeventkit/widgets', '@openeventkit/widget-core', '@openeventkit/widget-mount']` in `next.config.ts`.** The packages ship TypeScript source (no build step). Next needs the transpile hint to compile them.
+- **G.1 — `@openeventkit/widgets` is a dedicated package.** Widget deps live here, isolated from any host. A host depends on `@openeventkit/widgets` (plus the `@openeventkit/web-components` build tool) but not directly on any widget's legacy peer.
+- **G.2 — HOST: domain types live in the host (`src/types/` in the reference host).** The widget composers' interfaces need shared types (`Summit`, `SummitEvent`, `UserProfile`, etc.); the composers are host modules, so the host's `src/types/` is their home. This package needs none of them — its manifests type widget dists loosely (C.1) and everything host-shaped crosses through the widget-core ports.
+- **G.3 — This package carries the entire legacy dep tree** (~15 packages that would otherwise pollute a host).
+- **G.4 — HOST: `transpilePackages: ['@openeventkit/widgets', '@openeventkit/widget-core', '@openeventkit/widget-mount']` in the host's `next.config.ts`.** The packages ship raw TypeScript source (no build step); hosts transpile them, and Next needs the transpile hint to do so.
 
-**Why the widgets force it.** The dep tree is truly legacy; keeping it out of the main app's `package.json` prevents accidental inheritance and lets us give the main app a modern peer surface.
+**Why the widgets force it.** The dep tree is truly legacy; keeping it out of a host's `package.json` prevents accidental inheritance and leaves the host a modern peer surface.
 
 **What upstream fix would remove it.** Widgets ship with modern, minimal peer deps (no bundled Redux, no moment-timezone, etc.). Then G.1 and G.2 become optional.
 
@@ -233,7 +235,7 @@ The `my-orders-tickets-widget` renders receipts using `@react-pdf/renderer`. Rec
 
 **Downstream:**
 
-- **J.1 — Nunito Sans TTF vendored in `public/fonts/nunito-sans/NunitoSans-Variable.ttf`.** `@react-pdf/renderer` needs a URL for `Font.register()`. We host the TTF ourselves.
+- **J.1 — HOST: Nunito Sans TTF vendored in the host's `public/fonts/nunito-sans/NunitoSans-Variable.ttf`.** `@react-pdf/renderer` needs a URL for `Font.register()`, so the host serves the TTF itself.
 - **J.2 — Receipt PDF layout is inside the widget.** Un-restylable beyond `receiptSettings` (organizer info, colors, logo, font family).
 
 **Why the widgets force it.** Receipt rendering is embedded in the widget code path; the widget bundles `@react-pdf/renderer` and the layout template. We only supply configuration.
@@ -270,7 +272,7 @@ Every Gatsby Redux action the widget expects becomes a hand-ported async functio
 
 - **L.1 — 12 `regLite*` keys** (copy overrides for order-complete text, toggles for company input, promo code allow-flag, etc.) — pure widget prop pass-through. Consumer of these keys is the registration widget module alone.
 - **L.2 — 9 certificate keys** for future certificate section on `/a/profile` — widget-driven schema even though the section is deferred.
-- **L.3 — Marketing content model is Gatsby-widget-shaped.** Editors set values through the marketing admin app knowing they map to widget behavior.
+- **L.3 — Marketing content model is Gatsby-widget-shaped.** Editors set values through the marketing admin knowing they map to widget behavior.
 
 **Why the widgets force it.** Widgets read specific string-keyed marketing settings by convention. Renaming or restructuring breaks widget renders.
 
@@ -369,7 +371,7 @@ Shadow-DOM widget modules drop the outer Provider entirely — the reactComponen
 
 ### RC-S — Ambient module declarations for untyped dists
 
-`packages/widgets/src/kit/widget-modules.d.ts` declares every widget dist and referenced uicore component as a loosely-typed module (`ComponentType<Record<string, unknown>>` and friends) — TypeScript refuses to import an undeclared untyped module.
+This package's `src/kit/widget-modules.d.ts` declares every widget dist and referenced uicore component as a loosely-typed module (`ComponentType<Record<string, unknown>>` and friends) — TypeScript refuses to import an undeclared untyped module.
 
 **Why the widgets force it.** The dists ship no TypeScript declarations.
 
@@ -379,7 +381,7 @@ Shadow-DOM widget modules drop the outer Provider entirely — the reactComponen
 
 ### RC-T — Composer defaults masking widget defaults
 
-Several of the app's widget modules set default values for widget props (in their `derive.ts` / `index.tsx`) (`withThumbs = false`, `showSendEmail = false`, `title = ''`, `showAllEvents = true`, `eventCount = 10`, `showNav = true`) before spreading the rest of props. Chosen empirically — we didn't know the widget's own default, so we set one.
+Several of the host's widget modules set default values for widget props (in their `derive.ts` / `index.tsx`) (`withThumbs = false`, `showSendEmail = false`, `title = ''`, `showAllEvents = true`, `eventCount = 10`, `showNav = true`) before spreading the rest of props. Chosen empirically — we didn't know the widget's own default, so we set one.
 
 **Why the widgets force it.** Widgets fail loudly or silently misbehave on `undefined` for some props, but their internal defaults aren't documented.
 
@@ -389,7 +391,7 @@ Several of the app's widget modules set default values for widget props (in thei
 
 ### RC-U — Shadow-DOM widget hosting
 
-Widget modules under `packages/widgets/src/<name>/` mount their widget inside an open shadow root via `createWidgetShadow`. The containment gain — widget CSS scoped, per-widget root for Sentry + Redux, ambient host-app styles kept out — comes at the cost of a specific set of shadow-DOM/legacy-widget mismatches that we work around in `createWidgetShadow` (widget-core) and this package's `kit/bridges/`.
+Widget modules under this package's `src/<name>/` mount their widget inside an open shadow root via `createWidgetShadow`. The containment gain — widget CSS scoped, per-widget root for Sentry + Redux, ambient host-app styles kept out — comes at the cost of a specific set of shadow-DOM/legacy-widget mismatches that we work around in `createWidgetShadow` (widget-core) and this package's `kit/bridges/`.
 
 **Downstream:**
 
@@ -397,7 +399,7 @@ Widget modules under `packages/widgets/src/<name>/` mount their widget inside an
 
 - **U.3 — Adopted vendor CSS needs absolute `url()` references.** `adoptedStyleSheets` created via `new CSSStyleSheet()` have no base URL, so relative `url('../fonts/…')` references would resolve against the document URL — fonts 404. The generator resolves every relative url() against a virtual `/widget-css/<name>.css` base — the same layout the `assets/` binaries ship under — and emits it `__WIDGET_ASSETS__`-prefixed, so adopted sheets resolve their assets no matter where the host serves them from. `@font-face` is additionally split out and injected into `document.head` (adopted sheets silently ignore it; registration is document-global anyway). Hand-authored CSS (react-tooltip, our button shim) stays in `styles` (adopted, no url()s).
 
-- **U.4 — `scripts/generate-assets.mjs` (this package's own script, run via its `assets` npm script).** Vendor CSS is generated as typed TS modules under `src/kit/vendor-css/` (`export const sheet: VendorSheet`) — imports are type-checked (a wrong name fails the build instead of 404ing), the CSS ships fingerprinted inside widget chunks, and dependency bumps flow through on the next generation instead of drifting. Font/image binaries land in this package's `assets/` (committed); url() references carry the `__WIDGET_ASSETS__` placeholder that `createWidgetShadow` substitutes with `HostConfig.assetBaseUrl` (empty = site root). The host's `copy:widget-assets` runs the script and syncs `assets/` into its `public/`. Outputs are checked into git so fresh clones don't need to run the script before typecheck. A `?raw` webpack bypass was spiked and rejected: Next's CSS pipeline captures the import before a `resourceQuery` rule can, and the processed module — not source text — comes back.
+- **U.4 — `scripts/generate-assets.mjs` (this package's own script, run via its `assets` npm script).** Vendor CSS is generated as typed TS modules under `src/kit/vendor-css/` (`export const sheet: VendorSheet`) — imports are type-checked (a wrong name fails the build instead of 404ing), the CSS ships fingerprinted inside widget chunks, and dependency bumps flow through on the next generation instead of drifting. Font/image binaries land in this package's `assets/` (committed); url() references carry the `__WIDGET_ASSETS__` placeholder that `createWidgetShadow` substitutes with `HostConfig.assetBaseUrl` (empty = site root). Regeneration runs only here (`pnpm assets`); the host's `copy:widget-assets` only copies the committed `assets/` into its `public/`. Outputs are checked into git so fresh clones don't need to run the script before typecheck. A `?raw` webpack bypass was spiked and rejected: Next's CSS pipeline captures the import before a `resourceQuery` rule can, and the processed module — not source text — comes back.
 
 - **U.4.1 — The widget's documented CSS-dependency list is incomplete; the full set is discovered by broken UI.** `summit-registration-lite/README.md` lists only Bootstrap 3 + Font Awesome 4 as "required external stylesheets", but the widget also renders `.abc-radio` / `.abc-checkbox` markup that needs `awesome-bootstrap-checkbox` CSS (the "Ticket is for" radios + consent checkboxes render as unstyled native controls without it). It's a `devDependency` of the widget, not called out as a runtime style requirement. We found it by hitting the broken radios, not by reading docs. Expect the same for other widgets in later rounds — when a control renders as a bare native element, grep the widget's rendered class names for a `*-bootstrap-*` / vendor prefix and link that package's CSS. `awesome-bootstrap-checkbox@2.x` (which we resolve) targets the Bootstrap-4 `.form-check` structure the widget emits, even though Gatsby loaded `1.0.2` from a CDN.
 
@@ -407,7 +409,7 @@ Widget modules under `packages/widgets/src/<name>/` mount their widget inside an
 
 - **U.6 — Emotion `CacheProvider` per shadow (emotion 11 / MUI).** MUI (used inside `summit-registration-lite`'s Company Autocomplete) injects CSS via emotion 11 into `document.head` by default. Widgets rendering inside shadow can't see head styles. `kit/context/EmotionShadowProvider.tsx` creates an emotion cache with `container: shadowRoot`, WeakMap-cached per root. Widgets using MUI wrap their subtree via `manifest.wrapTree = (c) => <EmotionShadowProvider>...</EmotionShadowProvider>`.
 
-- **U.6.1 — Emotion mirror bridge (emotion 9 / react-select, and split emotion-11 instances).** uicore's form controls use `react-select@2.4.4`, which styles itself with **emotion 9** — a global singleton that appends `<style data-emotion>` to `document.head`. emotion 9 predates the `container` API, so the `CacheProvider` approach in U.6 can't redirect it. The same bridge also covers a second failure mode: **pnpm peer-graph instance splitting on emotion 11**. A widget whose peer set hashes differently (e.g. my-tickets resolving `@emotion/react@11.14.0(@types/react@19.2.15)` while the app uses `(@types/react@18.3.31)`) gets its *own* emotion singleton — our `CacheProvider` context is invisible to it, and its MUI styles land in `document.head` exactly like emotion 9. Diagnostic: shadow renders MUI markup (`css-*-Mui*` classes) but `style[data-emotion]` tags exist only in head. Fix: `bridges: [emotionMirrorBridge]` instead of (not in addition to) the `EmotionShadowProvider` wrap. Every uicore-react-select control (schedule day-picker, registration company field, extra-questions inputs, MOT filters) would otherwise render unstyled inside shadow. `kit/bridges/emotion-mirror.ts` mirrors every `[data-emotion]` tag's rules from `document.head` into a `<style>` at the top of the shadow root and keeps it synced via a MutationObserver — the emotion analog of the U.2 font-face extraction. Safe because emotion class names are content-hashed and globally unique, so the shadow copy can't collide. Declared as `manifest.bridges = [emotionMirrorBridge]`. Cost: mirroring ~38KB of head emotion CSS into each such widget's shadow (unused hashed selectors are harmless) plus a per-widget head observer.
+- **U.6.1 — Emotion mirror bridge (emotion 9 / react-select, and split emotion-11 instances).** uicore's form controls use `react-select@2.4.4`, which styles itself with **emotion 9** — a global singleton that appends `<style data-emotion>` to `document.head`. emotion 9 predates the `container` API, so the `CacheProvider` approach in U.6 can't redirect it. The same bridge also covers a second failure mode: **pnpm peer-graph instance splitting on emotion 11**. A widget whose peer set hashes differently (e.g. my-tickets resolving `@emotion/react@11.14.0(@types/react@19.2.15)` while the host uses `(@types/react@18.3.31)`) gets its *own* emotion singleton — our `CacheProvider` context is invisible to it, and its MUI styles land in `document.head` exactly like emotion 9. Diagnostic: shadow renders MUI markup (`css-*-Mui*` classes) but `style[data-emotion]` tags exist only in head. Fix: `bridges: [emotionMirrorBridge]` instead of (not in addition to) the `EmotionShadowProvider` wrap. Every uicore-react-select control (schedule day-picker, registration company field, extra-questions inputs, MOT filters) would otherwise render unstyled inside shadow. `kit/bridges/emotion-mirror.ts` mirrors every `[data-emotion]` tag's rules from `document.head` into a `<style>` at the top of the shadow root and keeps it synced via a MutationObserver — the emotion analog of the U.2 font-face extraction. Safe because emotion class names are content-hashed and globally unique, so the shadow copy can't collide. Declared as `manifest.bridges = [emotionMirrorBridge]`. Cost: mirroring ~38KB of head emotion CSS into each such widget's shadow (unused hashed selectors are harmless) plus a per-widget head observer.
 
 - **U.7 — Widget colors come from `:root`, not per-widget vars.** Widget CSS uses `var(--color_*)` extensively. CSS custom properties inherit *across* the shadow boundary (verified: setting a `--color_*` on `:root` repaints inside a widget shadow), so the design tokens published on `:root` (`theme/color-css-vars`, SSR'd in the root layout + re-applied by `CSSVariableBridge`) reach widget CSS directly — no per-widget color mechanism. `createWidgetShadow` takes no per-widget color input; the only host-level style it sets is `display: block` on custom-element hosts (unregistered custom elements default to `display: inline`, which would collapse widget layout).
 
@@ -429,7 +431,7 @@ The widget dists are React-16-era (`react-bootstrap@0.33.1`, `react-select@2.4.4
 
 - **V.1 — `findDOMNode` removed in React 19 → runtime shim.** `react-transition-group@1`'s `CSSTransitionGroupChild` calls `ReactDOM.findDOMNode(this)` on enter/leave; React 19 removed `findDOMNode`, so the `lite-schedule-widget` `EventList` threw `findDOMNode is not a function` and the whole schedule fell to the error boundary. `@openeventkit/widget-mount`'s `compat/find-dom-node.ts` re-attaches a `findDOMNode` implementation onto the react-dom module object (walks the class instance's `_reactInternals` fiber to its first host node) — imported for side-effect by the reactComponent renderer, so it runs before any `next/dynamic` widget loads. Affects **dev and prod**. Removing the react-dom-as-dependency experiment confirmed the alias wins over `node_modules` nesting — a package pin can't fix it.
 
-- **V.2 — StrictMode double-mount breaks `react-transition-group@1` → `reactStrictMode: false`.** The enter/appear fade adds `.items-enter` (opacity 0.01), then adds `.items-enter-active` (opacity 1) via a `requestAnimationFrame` guarded by `if (this.mounted)`. React StrictMode's dev-only mount→unmount→remount leaves `mounted` false when the rAF fires, so the `-active` class is never added and list items stay stuck at **opacity 0.01 — invisible** (schedule looks empty even when the user has events). This is dev-only (StrictMode is a no-op in prod) but constant in development. Root fix: **`reactStrictMode: false`** in the app's `next.config.ts` — these widgets predate concurrent mode and can never be StrictMode-clean, so StrictMode yields only this breakage plus doubled warnings. Note StrictMode double-mount is a React **18** feature too, so this is not fixed by downgrading React — only by disabling StrictMode.
+- **V.2 — StrictMode double-mount breaks `react-transition-group@1` → `reactStrictMode: false`.** The enter/appear fade adds `.items-enter` (opacity 0.01), then adds `.items-enter-active` (opacity 1) via a `requestAnimationFrame` guarded by `if (this.mounted)`. React StrictMode's dev-only mount→unmount→remount leaves `mounted` false when the rAF fires, so the `-active` class is never added and list items stay stuck at **opacity 0.01 — invisible** (schedule looks empty even when the user has events). This is dev-only (StrictMode is a no-op in prod) but constant in development. Root fix: **`reactStrictMode: false`** in the host's `next.config.ts` — these widgets predate concurrent mode and can never be StrictMode-clean, so StrictMode yields only this breakage plus doubled warnings. Note StrictMode double-mount is a React **18** feature too, so this is not fixed by downgrading React — only by disabling StrictMode.
 
 - **V.3 — Belt-and-suspenders CSS fade (`schedule-lite/transition-group.ts`).** Independent of V.2, the enter/appear fade is re-expressed as a CSS keyframe animation keyed to `.items-enter`/`.items-appear` alone (reaches opacity 1 without the JS `-active` step). Adopted via `manifest.inlineStyles` on the lite schedule. With StrictMode off the native transition works and this is redundant insurance; it also guards prod against any non-StrictMode timing hiccup. Scoped to `transitionName="items"`.
 
@@ -472,8 +474,8 @@ refreshes through `/api/auth/session` server-side). The my-orders dist instead i
 `getAccessToken` / `initLogOut` / `getIdToken` **directly from
 `openstack-uicore-foundation/lib/security/methods`**, whose default contract is a
 localStorage `authInfo` record with client-side refresh — a second token
-authority this app does not have (the session cookie is the only one; the
-app never writes tokens to localStorage).
+authority a cookie-authority host does not have (the session cookie is the only one; the
+host never writes tokens to localStorage).
 
 Every widget dist also requires `openstack-uicore-foundation/lib/utils/actions`
 for its request helpers, and uicore's `getAccessToken` is what those helpers
@@ -484,9 +486,9 @@ every widget request carries.
 **Fix — uicore's opt-in setters, fed from the host ports.** uicore exposes
 `setConfig` (`lib/utils/config`) and `setAccessTokenResolver` +
 `setAuthHandlers({ initLogOut, authErrorHandler })` (`lib/security/methods`).
-`packages/widgets/src/kit/uicore-host.ts` exports `configureUicore()`, which
+This package's `src/kit/uicore-host.ts` exports `configureUicore()`, which
 reads the `HostConfig` and `HostAuth` ports from widget-core and calls the
-three setters. It is app-agnostic (no `@/` import), so the same file runs in
+three setters. It is host-agnostic (no host import), so the same file runs in
 the Next graph and in the isolated React-17 island bundle. It keeps uicore's
 contract:
 
@@ -496,7 +498,7 @@ contract:
   placeholder and lets the proxied call decide — a network hiccup never logs a
   signed-in user out. The value is a placeholder; the proxy strips
   `?access_token=` and re-auths from the httpOnly cookie. `uicore-host.ts`
-  exports `SESSION_PRESENT`; the app's auth store (`src/lib/auth/auth-store.ts`)
+  exports `SESSION_PRESENT`; the host's auth store (`src/lib/auth/auth-store.ts`)
   imports it and returns the same value from `getAccessToken`.
 - `initLogOut` delegates to the port's `logout`. uicore's own `initLogOut`
   calls the handler when one is set, so a widget that invokes uicore's
@@ -504,21 +506,22 @@ contract:
 - `authErrorHandler` runs for 401/403 only (uicore calls it for those two
   statuses; other statuses take uicore's default path). It raises the
   `widget-auth-error` window event
-  (`packages/widget-core/src/widget-auth-error.ts`); it never redirects and
+  (`@openeventkit/widget-core`'s `src/widget-auth-error.ts`); it never redirects and
   never invokes the widget's notifier (some auto-invoke the callback they are
-  handed, others render SweetAlert into the light DOM). `<WidgetAuthErrorDialog>`,
-  mounted with the app providers, is the single auth-error surface: the
+  handed, others render SweetAlert into the light DOM). The host's `<WidgetAuthErrorDialog>`,
+  mounted with the host providers, is the single auth-error surface: the
   message always shows first, and only an explicit user choice acts — 401
   opens the host login modal (OTP included, no page-leave), 403 offers the
   host logout. Uniform across all nine dists regardless of notifier
   behavior; no auto-redirect exists, so no redirect loop is possible.
 - `getIdToken` / `getAuthInfo` / `storeAuthInfo` / `clearAuthInfo` are
   uicore's own localStorage functions. Nothing writes the record here, so
-  `getIdToken()` returns `null` and the others touch nothing the app reads.
+  `getIdToken()` returns `null` and the others touch nothing the host reads.
 
-Both ports are filled by `src/components/widget/register-host.ts` (base-theme
-shared, imported once in `Providers`, runs at module eval). It maps
-`@/lib/auth/session-token` presence onto the HostAuth port (`present` |
+Both ports are filled by the reference host's
+`src/components/widget/register-host.ts` (base-theme shared, imported once in
+`Providers`, runs at module eval). It maps the host's
+`lib/auth/session-token` presence onto the HostAuth port (`present` |
 `unknown` → signed in, only `absent` is a definite no) and redirects
 (`initiateLogout`) only for a confirmed `present` session. Host and widget
 share one session-token cache, so a host-initiated logout is seen here too.
@@ -529,18 +532,18 @@ The same module fills the HostConfig port and then calls `configureUicore()`
 so they reach only the uicore copy the widgets resolve. Each graph is kept on
 one copy:
 
-- Next (reactComponent path): `webpack-compat.ts` sets
+- Host (reactComponent path): `webpack-compat.ts` sets
   `resolve.alias['openstack-uicore-foundation']` to `UICORE_DIR`, the directory
   of the copy `@openeventkit/widgets` itself resolves, so a `link:`ed widget
   package with its own `node_modules`, or a nested peer variant, cannot bring a
   second unconfigured uicore into the graph. The same call adds the
   react-select `findDOMNode` rule (RC-V.1). The alias is webpack-only; a
   Turbopack move needs the equivalent `turbopack.resolveAlias` entry. The
-  module ships as `@openeventkit/widgets/webpack-compat`, so a base-theme
-  consumer can apply it with the same `applyWidgetCompat(config)` call in its
-  own `next.config`.
-- Island (webComponent path): `packages/web-components/scripts/build.mjs` applies
-  `uicorePinPlugin` to every build, resolving every
+  module ships as `@openeventkit/widgets/webpack-compat`, so any host — the
+  reference host and base-theme consumers alike — applies it with the same
+  `applyWidgetCompat(config)` call in its own `next.config`.
+- Island (webComponent path): `@openeventkit/web-components`' `scripts/build.mjs`
+  applies `uicorePinPlugin` to every build, resolving every
   `openstack-uicore-foundation/*` import from the web-components package's own
   `node_modules`. The shared runtime chunks serve `lib/utils/config` and
   `lib/security/methods` as import-map modules; the element's
@@ -550,11 +553,11 @@ one copy:
   registers the host impls into them before anything mounts — the DOM
   element is the only host↔island channel, nothing rides window.
 
-**Cache footgun (fixed in next.config.ts).** Webpack's persistent cache
-tracks `next.config.ts` as a build dependency but not its imports —
-without registering the widgets package's `webpack-compat.ts` in
-`cache.buildDependencies`, alias edits reuse cached resolution and
-silently don't apply until a clean build.
+**Cache footgun (host-side; the reference host's `next.config.ts` handles
+it).** Webpack's persistent cache tracks the host's `next.config.ts` as a
+build dependency but not its imports — unless the host registers this
+package's `webpack-compat.ts` in `cache.buildDependencies`, alias edits
+reuse cached resolution and silently don't apply until a clean build.
 
 **What upstream fix would remove it.** The setters are the uicore side of
 the fix (release status in UPSTREAM.md entries 4 and 5). What remains is the
@@ -568,19 +571,19 @@ as any widget dist externalizes uicore.
 
 ### RC-Y — web component hosting bundles its own React (≥17)
 
-An alternative to the RC-U/RC-V shadow model: package a legacy widget as a self-contained custom element (`<speakers-widget>`, `<schedule-lite>`) that bundles its OWN React and mounts the widget in a shadow root, isolated from the app's React 19. This deletes the RC-V version shims (`findDOMNode`, StrictMode, legacy-context warnings) by isolation — the widget runs on a React it was built against, not the app's — at the cost of shipping a second React per web component (mitigated by a shared-runtime build variant). The full design, POC, and size accounting are in [ISOLATION-STRATEGY.md](../web-components/ISOLATION-STRATEGY.md); this entry records the one trade-off that constrains which React a web component may bundle.
+An alternative to the RC-U/RC-V shadow model: package a legacy widget as a self-contained custom element (`<speakers-widget>`, `<schedule-lite>`) that bundles its OWN React and mounts the widget in a shadow root, isolated from the host's React 19. This deletes the RC-V version shims (`findDOMNode`, StrictMode, legacy-context warnings) by isolation — the widget runs on a React it was built against, not the host's — at the cost of shipping a second React per web component (mitigated by a shared-runtime build variant). The full design, POC, and size accounting are in [ISOLATION-STRATEGY.md](../web-components/ISOLATION-STRATEGY.md); this entry records the one trade-off that constrains which React a web component may bundle.
 
 **Downstream:**
 
 - **Y.1 — The bundled React must be ≥17; React ≤16 breaks every synthetic event inside shadow.** React ≤16 attaches all event listeners at `document`. An event that bubbles out of a shadow root is **retargeted to the shadow host** by the time it reaches `document`, so `nativeEvent.target` is the host — React can't map it to the in-shadow element's fiber and drops the event. Every `onClick` / `onMouseDown` / `onChange` inside the shadow silently no-ops. Symptom on the lite-schedule web component: the day tabs only scrolled to top (the native `href="#"` fired; the react-bootstrap `onSelect` did not) and the uicore day-picker never opened (react-select's `onMouseDown` did not fire). React **17** moved event delegation off `document` and onto the render root (the `<div>` we mount into, inside the shadow), which fixes this natively. The web components therefore bundle **React 17.0.2**, not the widgets' nominal React 16 — 17 stays API-compatible with the React-16-era widgets (legacy context, `findDOMNode`, class lifecycles all still supported), so the isolation win of RC-V survives while shadow events work. Same retargeting root cause as U.5.1, but one level lower: U.5.1 patches a *widget's* click-outside handler; this is *React's own* event system, which no bridge can reach — only a React that delegates at the render root resolves it.
 
-- **Y.2 — Shared code is served as import-map-resolved ES modules, not one bundle-per-widget.** To avoid shipping a second React (and MUI, and uicore) per web component, each widget's **`<name>.shared.js`** is an ES module whose shared imports (react, react-dom, jsx-runtime, the exposed uicore paths, the served MUI surface) stay bare; the host inlines an **import map** (`WidgetImportMap`, generated `import-map.json`) resolving each specifier to a generated **`runtime/` chunk**, and the browser walks the module graph — no load ordering, no runtime global for modules. esbuild code-splitting across the runtime entries guarantees ONE instance of every stateful internal (uicore config/methods, emotion). The default build (`scripts/build.mjs`) emits the runtime chunks + import map + `.shared.js` files, which is all the app loads; `--standalone` emits `.standalone.js` IIFEs that bundle everything, as a drop-in for a host that serves no runtime chunks. Non-MUI widgets never pull MUI chunks (the graph only fetches what a widget imports); the MUI widgets (`schedule-full`, `my-tickets`, `registration`) share one copy. Full model: [SHARED-MUI-RUNTIME.md](../web-components/SHARED-MUI-RUNTIME.md).
+- **Y.2 — Shared code is served as import-map-resolved ES modules, not one bundle-per-widget.** To avoid shipping a second React (and MUI, and uicore) per web component, each widget's **`<name>.shared.js`** is an ES module whose shared imports (react, react-dom, jsx-runtime, the exposed uicore paths, the served MUI surface) stay bare; the host inlines an **import map** (`WidgetImportMap`, generated `import-map.json`) resolving each specifier to a generated **`runtime/` chunk**, and the browser walks the module graph — no load ordering, no runtime global for modules. esbuild code-splitting across the runtime entries guarantees ONE instance of every stateful internal (uicore config/methods, emotion). The default build (`scripts/build.mjs`) emits the runtime chunks + import map + `.shared.js` files, which is all the host loads; `--standalone` emits `.standalone.js` IIFEs that bundle everything, as a drop-in for a host that serves no runtime chunks. Non-MUI widgets never pull MUI chunks (the graph only fetches what a widget imports); the MUI widgets (`schedule-full`, `my-tickets`, `registration`) share one copy. Full model: [SHARED-MUI-RUNTIME.md](../web-components/SHARED-MUI-RUNTIME.md).
 
 - **Y.3 — Build-time requirements are declared per widget, not applied globally.** Which layer/plugins a widget gets (the MUI-5 pin, Node stubs, the font patch) is declared in its manifest as `runtimeNeeds` (a fixed `RuntimeNeed` vocabulary in `@openeventkit/widget-core/manifest`); the wc build orchestrates via a `NEEDS_TO_PLUGINS` map; the module graph pulls MUI chunks only for widgets that import them. `analyze-widgets.mjs --check` verifies each declaration against the widget's real dependency footprint (and guards uicore/MUI-surface/barrel drift). So a widget that needs nothing special pays for nothing, and the wc build hardcodes no widget names. Full model: [RUNTIME-REQUIREMENTS.md](../web-components/RUNTIME-REQUIREMENTS.md).
 
 **Why the widgets force it.** Nothing in the widgets demands document-level delegation; it's React ≤16's own event architecture that assumes document scope. Because the web component's whole point is to run the widget on its own bundled React, that React's version is ours to choose — and it must be one whose event system survives the shadow boundary.
 
-**What upstream fix would remove it.** None needed — this is a host-side choice, resolved by pinning the web component's bundled React to ≥17. It only exists because the isolation model bundles a React at all; the RC-U/RC-V shadow model (widgets on the app's React 19) never hits it, since React 19 also delegates at the root.
+**What upstream fix would remove it.** None needed — this is a host-side choice, resolved by pinning the web component's bundled React to ≥17. It only exists because the isolation model bundles a React at all; the RC-U/RC-V shadow model (widgets on the host's React 19) never hits it, since React 19 also delegates at the root.
 
 ---
 
@@ -612,9 +615,9 @@ For future reference — approaches we tried or evaluated that do not actually r
 - **`transpilePackages` for widget packages under Turbopack.** Does not fix the CSS "module factory" bug — Turbopack still can't resolve CSS chains inside pre-bundled dist. Also blows compile time (multi-minute cold compile, 6GB RSS) when it tries to SWC-process widget dist trees.
 - **`transpilePackages: ['@react-pdf/renderer']` under webpack.** Same problem — massive compile time processing the entire `@react-pdf/renderer` tree (pdfkit + fonts + etc.).
 - **`turbopack.rules` or `turbopack.resolveAlias` for the CSS chain.** Turbopack docs are explicit: rules match source files, not internals of pre-bundled dist. `resolveAlias` maps package specifiers, not internal CSS paths.
-- **Isolating React 18 to only `packages/widgets/`.** React is a runtime singleton per document. Two React copies produce "Invalid Hook Call." Cannot scope React versions per subpackage without iframes or web components.
+- **Isolating React 18 to only this package.** React is a runtime singleton per document. Two React copies produce "Invalid Hook Call." Cannot scope React versions per package without iframes or web components.
 - **`esmExternals: 'loose'` under Turbopack.** Turbopack rejects the flag entirely. It exists to shim webpack's CJS→ESM resolution.
-- **Importing widget/vendor CSS as text with `?raw`.** Next's CSS pipeline is layered under a nested `oneOf` in webpack; a top-level `?raw` rule can't preempt it, and even `unshift` fails (vercel/next.js#82000). Static copy into `public/` + shadow-root `<link>` is the working route (RC-U.3, RC-U.4).
+- **Importing widget/vendor CSS as text with `?raw`.** Next's CSS pipeline is layered under a nested `oneOf` in webpack; a top-level `?raw` rule can't preempt it, and even `unshift` fails (vercel/next.js#82000). The generated vendor-css modules + the binaries in this package's `assets/` (served by the host) are the working route (RC-U.3, RC-U.4).
 - **Monkey-patching `document.querySelectorAll` / `document.addEventListener` to see through shadow.** Would let libraries that scan or delegate at document scope discover shadow-scoped triggers — but defeats shadow's own isolation semantics globally, adds hard-to-diagnose failure modes (patched-target confuses libraries that expect the retargeted host), and turns every library upgrade into an audit. Test-only tools like `query-selector-shadow-dom` explicitly disclaim production use.
 - **Re-dispatching composed events from shadow to `document.body` with a spoofed `target`.** `event.target` is set by the dispatch machinery when the event fires, and a `defineProperty` override placed before `dispatchEvent` doesn't reliably survive. Cannot lie about `event.target` to a `document.addEventListener` handler at the platform level. Per-library shadow-aware bridges (RC-U.5) are the working route.
 

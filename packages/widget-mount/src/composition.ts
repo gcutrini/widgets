@@ -6,8 +6,8 @@ export interface WidgetComposition {
 /**
  * Binds a widget's live state (realtime, auth, callbacks) onto its
  * server-derived props. A React hook — returns null until required data is
- * ready. Runs in the app's React for both renderers, since the web-component
- * can't call app hooks inside its own React.
+ * ready. Runs in the host's React for both renderers, since the web-component
+ * can't call host hooks inside its own React.
  */
 export type WidgetComposer<TServerProps = void> = (
   serverProps: TServerProps,

@@ -19,7 +19,7 @@ retire the React-19 compat layer the legacy widgets impose.
 ## The problem
 
 The legacy widgets are React-16/17-era bundles (uicore 4.x, react-select 2,
-react-bootstrap 0.x, slick, etc.). Today they run on the app's **shared React
+react-bootstrap 0.x, slick, etc.). Today they run on the host's **shared React
 19**, held together by version shims (`compat/find-dom-node`,
 `compat/react-element-symbol`) plus a shadow-DOM + vendor-CSS containment layer.
 Two mutually-exclusive ways to delete the version shims:
@@ -41,8 +41,8 @@ slick/FA CSS) — that tax is shared. The axis that differs is **React**.
 1. **Host must not create a stacking context.** A web component's shadow host (and its
    ancestors to root) must avoid `transform`/`opacity`/`filter`/`contain`/
    `will-change`/`position`+`z-index` — otherwise a redirected overlay's z-index
-   traps and paints behind app chrome (the schedule-popover bug class). If a host
-   must create one, give it a z-index that clears app chrome.
+   traps and paints behind host chrome (the schedule-popover bug class). If a host
+   must create one, give it a z-index that clears host chrome.
 2. **Portals redirect into the shadow.** Pass a shadow-internal container:
    MUI `container`/`disablePortal`, react-select `menuPortalTarget`, react-laag
    container. Content then gets the adopted CSS and click-outside works.
@@ -55,7 +55,7 @@ slick/FA CSS) — that tax is shared. The axis that differs is **React**.
    binaries ship in this package's `assets/` behind the `__WIDGET_ASSETS__`
    placeholder (CONSTRAINTS U.2-U.4).
 4. **Body-escape inventory**: the static analyzer
-   (`../web-components/scripts/analyze-widgets.mjs`) derives each widget's
+   (`./scripts/analyze-widgets.mjs`, the `widgets-analyze` bin) derives each widget's
    dependency footprint; portal/overlay escapes are handled per class by the
    `kit/bridges/` fix-ups (tooltip, click-outside, scoped portal CSS).
 5. **Light-DOM carve-out** for any lib that refuses the shadow (**Stripe**): mount
@@ -85,7 +85,7 @@ Two cross-cutting notes:
   separate runtime tier.
 - **schedule-filters ⇄ schedule-full share a React context** (`ScheduleStateProvider`).
   Two separate web components can't share context → that filter/view state must be
-  **hoisted into the React-19 app** and fed to both as props/events.
+  **hoisted into the React-19 host** and fed to both as props/events.
 
 ---
 
@@ -139,22 +139,22 @@ debt-paydown, and shipping a widget as a web component doesn't preclude
 modernizing it later.
 
 **The standard "web component kit"** that makes each widget cheap to wrap:
-our own custom element (`../web-components/src/element/define-web-component.js`)
+our own custom element (`./src/element/define-web-component.js`)
 on a shared React-17 runtime layer, the head-injected font pipeline, the
 `kit/bridges/` portal/overlay fix-ups, and the light-DOM carve-out (Stripe
 slot). The widget repos ideally own the custom-element entry + its CSS
-(self-contained, per the shadow-CSS research); the app owns only data wiring +
+(self-contained, per the shadow-CSS research); the host owns only data wiring +
 theme CSS custom properties (which pierce the shadow).
 
 **State** — all nine widgets build as island bundles
-(`../web-components/scripts/policy.mjs` WIDGETS), the gallery mounts
+(`./scripts/policy.mjs` WIDGETS), the reference host's dev-only gallery mounts
 every one in web-component mode, and registration ships as a web component in
 production (Stripe in the light-DOM slot; sweetalert2 through the host notify
 shim; the MUI widgets share the served MUI chunks). The remaining widgets mount
-in-app on the shadow-react renderer by default — flipping one to its island is
-a `renderAs` change once its interaction surface is proven under exercise
-(open/tab/dismiss every overlay), which is the bar my-tickets still has to
-pass before the in-app mounts can be retired.
+in the host's tree on the shadow-react renderer by default — flipping one to
+its island is a `renderAs` change once its interaction surface is proven under
+exercise (open/tab/dismiss every overlay), which is the bar my-tickets still
+has to pass before the in-tree mounts can be retired.
 
 ---
 
@@ -168,13 +168,12 @@ variants** built from the same source:
   `react-dom`, `react/jsx-runtime`, the served uicore + MUI surfaces) stay
   bare and resolve through an import map the host inlines to the generated
   `runtime/` chunks. Small (widget code only). The default `scripts/build.mjs`
-  run emits this variant plus the chunks + `import-map.json`; it is the only
-  variant the app loads.
+  (`widgets-build`) run emits this variant plus the chunks + `import-map.json`;
+  it is the only variant the reference host loads.
 - **`<widget>.standalone.js`** — React 17 bundled in. Drop-in, works anywhere,
   larger (~2.5 MB). For any integrator who just wants it to work. An opt-in
-  build: `build.mjs --standalone` (`pnpm build:standalone` in
-  `packages/web-components`, `pnpm build:wc:standalone` at the root) emits
-  only these files.
+  build: `build.mjs --standalone` (`pnpm build:standalone` in this package,
+  `pnpm build:wc:standalone` at this repo's root) emits only these files.
 
 **Shared runtime + contract.** The interop surface is the import map: one
 generated ES-module chunk per served bare specifier, single-instance stateful
@@ -186,13 +185,13 @@ element defers shadow setup + uicore configuration until both it and DOM
 connection have happened. Nothing rides window.
 
 **Who picks what:**
-- **This app** (opts in): inline the import map once + load each widget's
-  `<widget>.shared.js` module → one React 17 for all web components, small
-  per-widget bytes, the browser fetches shared chunks on demand.
+- **The reference host** (opts in): inline the import map once + load each
+  widget's `<widget>.shared.js` module → one React 17 for all web components,
+  small per-widget bytes, the browser fetches shared chunks on demand.
 - **A third-party integrator**: load `<widget>.standalone.js` → no runtime, no
   coordination.
 
-Neither variant enters the app's React-19 module graph — isolation holds both
+Neither variant enters the host's React-19 module graph — isolation holds both
 ways. The only fleet-level commitment is that both variants can be built from
 the same source + the import-map contract.
 
@@ -205,5 +204,6 @@ the same source + the import-map contract.
 - Accepting the autofill residual on the login/registration forms.
 
 Resolved (see Packaging): shared-runtime vs. per-widget is a per-consumer
-choice — the widget ships both variants and the implementor picks; this app
-opts into the shared runtime. All nine widgets build as web components.
+choice — the widget ships both variants and the implementor picks; the
+reference host opts into the shared runtime. All nine widgets build as web
+components.

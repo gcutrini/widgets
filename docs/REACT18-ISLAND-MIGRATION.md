@@ -2,7 +2,7 @@
 
 Assessment for moving the web-component island runtime
 (`packages/web-components`, pinned react/react-dom 17.0.2 + MUI 5.18) to React
-18. The app itself runs React 19 and is not involved.
+18. The host itself runs React 19 and is not involved.
 
 ## Verdict
 
@@ -59,7 +59,7 @@ API references.
 
 Per-widget: no widget gets riskier on 18; schedule-full and my-tickets net
 improve. `shim:elementSymbol` and the webpack findDOMNode alias belong to the
-app-lane React-19 renderer and are untouched.
+host-lane React-19 renderer and are untouched.
 
 ## Phase 1 — bump to 18.3.1 on legacy `ReactDOM.render` (~half a day incl. verification)
 
@@ -71,8 +71,8 @@ is dev-build-only; shipped bundles are silent. `setProps` stays synchronous.
    exact (18.3 adds the deprecation warnings that inventory the eventual 19
    rebuild — dev-only).
 2. `pnpm-workspace.yaml`: `'react-star-ratings>react'` override → `18.3.1`;
-   update the catalog header comment. Mirror in the local-only and deploy-overlay
-   override blocks (overrides shadow, they don't merge).
+   update the header comment. Mirror in any host-side override blocks (e.g. the
+   reference host's deploy overlay) — overrides shadow, they don't merge.
 3. `scripts/runtime-entries.mjs`: delete the react-entry back-fill block
    (`useSyncExternalStore` shim import + `useId` counter). `probeModules`
    enumerates the installed React's exports, so the runtime chunks pick up 18's
@@ -84,8 +84,8 @@ is dev-build-only; shipped bundles are silent. `setProps` stays synchronous.
    mechanics are React-version-agnostic; only the name goes stale.
 5. Docs sweep: the "React 17" statements across the four web-components md
    docs, `packages/widgets` CONSTRAINTS/WIDGET-MOUNTING/README/UPSTREAM (mark
-   entry 18's back-fill containment retired), widget-mount, the app's
-   widget-test page, root README.
+   entry 18's back-fill containment retired), widget-mount, and the reference
+   host's widget-test page and README.
 6. Update the runtime-entries tests (assert no back-fill; react entry is plain).
 
 pnpm notes: install re-materializes the MUI 5 set peered against react@18

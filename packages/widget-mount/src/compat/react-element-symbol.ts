@@ -15,7 +15,7 @@
  * this redirects. React itself (vendored by Next) evaluates long before
  * widget bundles and caches its own constants, so it is unaffected.
  *
- * Must be imported before any widget bundle evaluates. The app's
+ * Must be imported before any widget bundle evaluates. The host's
  * reactComponent renderer imports it alongside the other compat shims,
  * ahead of every next/dynamic widget load.
  */

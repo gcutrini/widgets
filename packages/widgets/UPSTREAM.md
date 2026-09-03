@@ -1,19 +1,20 @@
 # UPSTREAM — widget & uicore maintenance registry
 
 Companion to [CONSTRAINTS.md](./CONSTRAINTS.md). That document maps the
-constraints the legacy widget stack imposes and how this repo contains
-them; **this one is the actionable backlog of changes in the widget and
-uicore repos themselves** — fixes and refactors that resolve bugs without
-altering other consumers' behavior, and in several cases let this repo
-delete or simplify containment code. When a trade-off gets pushed to its
-edge, its resolution lands here.
+constraints the legacy widget stack imposes and how they are contained —
+in these packages and in the hosts that mount them; **this one is the
+actionable backlog of changes in the widget and uicore repos themselves**
+— fixes and refactors that resolve bugs without altering other consumers'
+behavior, and in several cases let containment code here or in a host be
+deleted or simplified. When a trade-off gets pushed to its edge, its
+resolution lands here. Host file paths below are the reference host's.
 
 The widget repos live in the `fntechgit` GitHub org and uicore in
 `OpenStackweb` — the same orgs that publish the packages — so these are
 ordinary upstream contributions, not fork maintenance.
 
 Entry format: **what changes / where / what it resolves / why it's safe
-for other consumers / what this repo deletes once shipped / status**.
+for other consumers / what containment gets deleted once shipped / status**.
 
 ---
 
@@ -23,8 +24,8 @@ for other consumers / what this repo deletes once shipped / status**.
   currently `4.2.34`, React peer ^16.6). Every widget's declared uicore
   range is 4.x (my-orders `4.2.8`, reg-lite `4.2.34`, full-schedule
   `^4.0.6` in deps / `^4.1.23` peer, lite `^4.0.7` deps / `^4.0.12`
-  peer, feedback `^4.0.7`). The app itself imports **zero** uicore —
-  the compiler-enforced boundary keeps it inside `packages/widgets`.
+  peer, feedback `^4.0.7`). The host itself imports **zero** uicore —
+  it stays inside `@openeventkit/widgets`.
 - uicore **5.x** is `main` (npm `latest`, `5.0.47`, React peer ^17) and
   is where active development happens. Widget dists *externalize* uicore,
   so installing 5.x would feed restructured 5.x modules into bundles
@@ -106,7 +107,7 @@ resurfacing as "unexplained."
 - **Resolves**: crash on logout (`null` profile dereferenced) and
   silently-stuck-anonymous after in-place login (`schedule_summit_events`
   is optional in consumer profiles; `.map` on `undefined` kills the
-  dispatch, store keeps `loggedUser: null`). App task #179.
+  dispatch, store keeps `loggedUser: null`). Host task #179.
 - **Change**: `userProfile ? { ...userProfile, schedule_summit_events:
   (userProfile.schedule_summit_events || []).map((ev) => ev.id) } : null`.
   The widget's only null-guarded user derivation is `LOAD_INITIAL_VARS`
@@ -130,8 +131,8 @@ resurfacing as "unexplained."
   the earlier parked `fix/update-logged-user-null-safe` branch (which
   covered only `UPDATE_LOGGED_USER`). Awaiting merge → publish → pin 3.1.4.
 
-- **Host shim removal condition (spans entries 1–3)**:
-  `src/widgets/composition/widget-safe-profile.ts` defaults
+- **Host shim removal condition (spans entries 1–3)**: the reference
+  host's `src/widgets/composition/widget-safe-profile.ts` defaults
   `schedule_summit_events` / `rsvp` to `[]` before the profile crosses into
   full / lite / upcoming — the same `missing field → []` guard these three
   PRs add in the reducer. Its **array-defaulting is removable only once all
@@ -168,7 +169,7 @@ resurfacing as "unexplained."
   fold into the React-19 release: `ADDED_TO_SCHEDULE` /
   `REMOVED_FROM_SCHEDULE` (181–191) spread a possibly-null user.
 - **We delete**: `schedule-lite/transition-group.ts` neutralization
-  CSS; closes app tasks #168/#170 residue; last React-19 incompatibility
+  CSS; closes host tasks #168/#170 residue; last React-19 incompatibility
   in the fleet.
 - **Status**: branch parked at user direction; builds under Node 16
   (node-sass).
@@ -177,8 +178,9 @@ resurfacing as "unexplained."
 - Same SweetAlert dead-end as lite-schedule (`event.js:42`, no
   callback); anonymous adds currently terminate in a Swal alert. An
   optional prop defaulting to the Swal path is genuinely non-breaking.
-  Low priority — the widget is not mounted in the app today (dev-only
-  gallery composes it); matters for base-theme consumers.
+  Low priority — the reference host doesn't mount the widget on any
+  production page (its dev-only gallery composes it); matters for
+  base-theme consumers.
 - **Same-class reducer guards**: the `LOAD_INITIAL_VARS` (`reducer.js:96`)
   unguarded `schedule_summit_events.map` is now shipped separately as
   [**PR #23**](https://github.com/fntechgit/upcoming-events-widget/pull/23)
@@ -187,7 +189,8 @@ resurfacing as "unexplained."
   null-user spread.
 - **Host workaround today**: that unguarded read crashes the widget on a
   `null → profile` transition (a user logging in while it's already
-  mounted). `src/widgets/upcoming-events/Client.tsx` passes a `getKey` to
+  mounted). The reference host's `src/widgets/upcoming-events/Client.tsx`
+  passes a `getKey` to
   `createWidgetClient` deriving `userProfile.id ?? 'anon'`, so that
   transition becomes a clean remount instead of an in-place compare. The
   `getKey` comes out once **PR #23** ships and is pinned.
@@ -213,11 +216,11 @@ resurfacing as "unexplained."
   set through `setAuthHandlers` (see the uicore seam below). Adopt the
   notify-handler design from entry 5 in the same major anyway, so the widget
   does not depend on a host-level handler.
-- **We delete**: nothing host-side. The token resolver serves uicore's
+- **We delete**: nothing on our side. The token resolver serves uicore's
   internal callers (`query-actions`, the request helpers in `utils/actions`)
   for every widget dist, so `kit/uicore-host.ts`, the widget-core `HostAuth`
-  port and `src/components/widget/register-host.ts` stay as long as any dist externalizes uicore
-  (CONSTRAINTS RC-X). This entry removes my-orders' direct
+  port and the host's `register-host.ts` wiring stay as long as any dist
+  externalizes uicore (CONSTRAINTS RC-X). This entry removes my-orders' direct
   `security/methods` imports from its footprint and makes its token source
   explicit, like every other widget.
 - **uicore seam (what the host relies on)**: uicore ships opt-in setters:
@@ -226,17 +229,18 @@ resurfacing as "unexplained."
   `lib/security/methods`. `getAccessToken` returns the resolver's answer for
   every caller (`query-actions` included) before touching localStorage;
   `initLogOut` and the 401/403 branch of `utils/actions` `authErrorHandler`
-  call the injected handlers when set. The host calls all three from
-  `configureUicore()` (`packages/widgets/src/kit/uicore-host.ts`), reading the
-  `HostConfig` and `HostAuth` ports, in the Next graph and in the
-  web-component shared runtime. The catalog pins uicore npm 4.2.34, which does
-  not have the setters; `main` carries no override. The app runs on the fork
-  build only through the `deploy` overlay, whose override is
-  `github:gcutrini/openstack-uicore-foundation#deploy`, until uicore 4.2.35
-  ships the setters on npm. `src/__tests__/config/uicore-install.test.ts`
+  call the injected handlers when set. `configureUicore()` (this package's
+  `src/kit/uicore-host.ts`) calls all three, reading the `HostConfig` and
+  `HostAuth` ports, in the host graph and in the web-component shared
+  runtime. This package pins uicore npm 4.2.34, which does not have the
+  setters; hosts that need them override the dependency to the fork build
+  (the reference host's `deploy` overlay uses
+  `github:gcutrini/openstack-uicore-foundation#deploy`) until uicore 4.2.35
+  ships the setters on npm. The reference host's
+  `src/__tests__/config/uicore-install.test.ts`
   fails on an installed uicore without them. Direct `getIdToken` / `storeAuthInfo`
   imports are not covered by the setters; they are uicore's own localStorage
-  functions and read nothing this app writes.
+  functions and read nothing a cookie-authority host writes.
 
 ### 5. reg-lite: injectable auth error handling (403 path)
 - **Repo**: `fntechgit/summit-registration-lite`. Its dist externalizes
@@ -262,7 +266,7 @@ resurfacing as "unexplained."
   — also localStorage/redirect-based, same rule. Optional prop
   defaulting to current behavior → non-breaking.
 - **Containment (implemented)**: `configureUicore()`
-  (`packages/widgets/src/kit/uicore-host.ts`) registers an `authErrorHandler`
+  (this package's `src/kit/uicore-host.ts`) registers an `authErrorHandler`
   through uicore's `setAuthHandlers` (fork branch, see entry 4). uicore's
   `utils/actions` calls it for 401/403 instead of its own `doLogin` /
   `initLogOut` flows; the handler raises the host's widget-auth-error event
@@ -303,13 +307,14 @@ resurfacing as "unexplained."
   variant renders no submit button; the host owns it.) The uicore
   release must precede the my-orders consumption change; batch the
   my-orders half with entry 4's major release.
-- **We gain**: the widgets-package `extra-questions` subpath can offer
-  consumers the MUI variant instead of the bootstrap-era form. The app's
-  own light-DOM port (`src/components/extra-questions/`) stays — it
-  exists for theme/no-formik/boundary reasons the widget lane can't meet.
+- **We gain**: this package's `extra-questions` subpath can offer
+  consumers the MUI variant instead of the bootstrap-era form. The
+  reference host's own light-DOM port (`src/components/extra-questions/`)
+  stays — it exists for theme/no-formik/boundary reasons the widget lane
+  can't meet.
 
 ### 7. uicore: `buildAPIBaseUrl` SSR bug + stale docs
-- App task #176. Verified in both `v4.x` and `main`
+- Host task #176. Verified in both `v4.x` and `main`
   (`src/utils/methods.js:126`): the no-`window` branch follows
   `return null` with a template literal — a tagged-template *invocation
   of null* — so any SSR call throws a TypeError instead of returning
@@ -345,7 +350,7 @@ resurfacing as "unexplained."
   `<CardHeader>` whose `title` is Typography `variant="h5"` — ~1.6rem /
   25.6px in MUI's default scale. That is heading-sized, not label-sized,
   so the dropdown reads oversized. Not a shadow-DOM artifact: the sizes
-  are the same in a plain page (measured in-app: 25.6px vs the widget's
+  are the same in a plain page (measured in the host: 25.6px vs the widget's
   own 16px `titleWrapper`).
 - **Change**: use a smaller variant (e.g. `subtitle1` / `h6`) or a fixed
   ~1rem size for the filter `CardHeader` titles. Cosmetic, non-breaking —
@@ -355,35 +360,36 @@ resurfacing as "unexplained."
   `.filterListContainer___*` to 1rem. Delete once the upstream release
   ships.
 
-### 10. reg-lite + uicore: MUI v5 components run under the app's MUI 9
+### 10. reg-lite + uicore: MUI v5 components run under the host's MUI 9
 - **Repos**: `fntechgit/summit-registration-lite` and
   `openstack-uicore-foundation` (`CompanyInputV2`). Both peer
-  `@mui/material ^5.15` and ship v5-era code, but resolved against the app's
+  `@mui/material ^5.15` and ship v5-era code, but resolved against the host's
   **MUI 9** (React-18+), where `TextField`/`Autocomplete` moved
   `InputLabelProps` / `ListboxProps` into `slotProps` — the old props spread
   onto DOM nodes (`React does not recognize the InputLabelProps prop…`), and a
   v9-on-React-17 mismatch lurks beyond the warnings.
-- **Contained host-side (implemented)**: the web-component build pins MUI to the
+- **Contained (implemented)**: the web-component build pins MUI to the
   installed **React-17 build of MUI 5** — `muiReact17Plugin` in
-  `packages/web-components/scripts/build.mjs` redirects every top-level `@mui/*` /
-  `@emotion/*` import to that tree via esbuild's ESM-aware `build.resolve`. MUI 5
-  now lives in **shared import-map MUI chunks**, fetched only by the widgets
+  `@openeventkit/web-components`' `scripts/build.mjs` redirects every top-level
+  `@mui/*` / `@emotion/*` import to that tree via esbuild's ESM-aware
+  `build.resolve`. MUI 5
+  lives in **shared import-map MUI chunks**, fetched only by the widgets
   whose module graphs import them; each MUI widget's
   `.shared.js` externalizes `@mui/*`/`@emotion/*` to it rather than bundling its
-  own. So uicore + all MUI widgets share one coherent React-17 MUI 5, the app's
+  own. So uicore + all MUI widgets share one coherent React-17 MUI 5, the host's
   MUI 9 never enters, and the prop warnings are gone. (Same pin is the vehicle for
   widget font via `--font_family` — see CONSTRAINTS RC-H.2. Full design in
   [SHARED-MUI-RUNTIME.md](../web-components/SHARED-MUI-RUNTIME.md).)
 - **Change (retires the pin)**: uicore `company-input-v2.js:250`
   `InputLabelProps` → `slotProps.inputLabel`; reg-lite
   `personal-information/index.js:269` `ListboxProps` → `slotProps.listbox` (or
-  both align their MUI major with the app). Non-breaking on 5.x (slotProps
+  both align their MUI major with the host). Non-breaking on 5.x (slotProps
   since 5.15).
 - **We delete**: `muiReact17Plugin` (the React-17 MUI-5 pin) once uicore/widgets
   align MUI majors — an instance of the per-widget-runtime-requirements
   direction (a pin belongs to the widgets that need MUI 5, not the build
   globally).
-- **Status**: contained host-side by the pin; the prop/major migration remains
+- **Status**: contained by the pin; the prop/major migration remains
   the resolution.
 
 ### 11. reg-lite: Stripe Payment Element must escape the shadow (slot)
@@ -398,7 +404,7 @@ resurfacing as "unexplained."
   `<slot>` + `createPortal` to the shadow host; render inline otherwise. Verified:
   a light-DOM-slotted element tokenizes; in-shadow does not.
 - **Safe because**: no-shadow consumers keep the inline path unchanged.
-- **We delete**: nothing host-side (the slot lives in the widget). Registration
+- **We delete**: nothing on our side (the slot lives in the widget). Registration
   is in the web-component `WIDGETS` list on the strength of it.
 - **Status**: [PR #159](https://github.com/fntechgit/summit-registration-lite/pull/159)
   (open, changes requested). The deploy overlay builds registration from the
@@ -420,7 +426,7 @@ resurfacing as "unexplained."
   `inputs/radio-list`; `inputs/dropdown` already exposed) — a large drop off the
   once-loaded shared runtime.
 - **Status**: [PR #156](https://github.com/fntechgit/summit-registration-lite/pull/156)
-  merged; awaiting a widget release + catalog pin here. The served runtime
+  merged; awaiting a widget release + version pin here. The served runtime
   surface already carries the `inputs/dropdown` and `inputs/radio-list`
   subpaths and no `lib/components` barrel.
 
@@ -435,7 +441,7 @@ resurfacing as "unexplained."
 - **Contained (implemented)**: `myTicketsFontPlugin` in `build.mjs` patches the
   dist's inlined createTheme at load to inject that fontFamily. Delete the patch
   once upstream ships. Sibling of entry 9 (both cosmetic my-orders theme fixes).
-- **Status**: contained host-side; the upstream one-liner is the resolution.
+- **Status**: contained in the web-component build; the upstream one-liner is the resolution.
 
 ### 14. Barrel → subpath imports (MUI + lodash) — 3 PRs
 The barrel anti-pattern (importing a library's root pulls the whole library into
@@ -467,20 +473,20 @@ the shared runtime:
 - **Contained today**: the `.pnpm` copies / `link:` overlays carry the fixed dists
   until the PRs publish; the widgets consume the published versions after.
 
-### 15. reg-lite (and any widget): app-styled AjaxLoader via the runtime
+### 15. reg-lite (and any widget): host-styled AjaxLoader via the runtime
 - **Resolves**: uicore's `AjaxLoader` renders a plain overlay spinner that clashes
-  with the app's loaders.
-- **Change (contained host-side, implemented)**: the shared runtime serves
+  with the host's loaders.
+- **Change (contained in the shared runtime, implemented)**: the shared runtime serves
   `kit/compat/uicore-ajaxloader` under the
   `openstack-uicore-foundation/lib/components/ajaxloader` specifier, so every widget
-  that imports `AjaxLoader` gets it. It renders the app's sign-out overlay markup
+  that imports `AjaxLoader` gets it. It renders the host's sign-out overlay markup
   (MUI `Backdrop` + `CircularProgress color="inherit"`), reading both from the
   served MUI chunks so no MUI is duplicated into the uicore chunks.
 - **Future**: the spinner is fixed (MUI `CircularProgress`). If a widget ever needs
   a different loader, the shim could take the loader component as a prop/port
   rather than hardcoding it.
-- **Status**: contained host-side; no upstream change needed — this is deliberate
-  app styling of a uicore component, not a uicore bug.
+- **Status**: contained in the shared runtime; no upstream change needed — this is deliberate
+  host styling of a uicore component, not a uicore bug.
 
 ### 16. upcoming-events: propTypes disagree with the widget's own store
 - **Repo**: `fntechgit/upcoming-events-widget`, `src/reducer.js`,
@@ -537,7 +543,7 @@ the shared runtime:
 - **Safe because**: the back-fill only fills a missing property; on React 18+
   the native hook wins.
 - **We delete**: the `useId` back-fill lines in
-  `packages/web-components/scripts/runtime-entries.mjs` when the runtime
+  `@openeventkit/web-components`' `scripts/runtime-entries.mjs` when the runtime
   moves past React 17 or reg-lite drops v7.
 - **Status**: contained by the back-fill; needs a reg-lite dep pin or the 5.x
   port to retire.
@@ -589,5 +595,5 @@ Ranked by readiness, blast radius, and the release-batching noted above:
 
 Branch in the upstream repo (target `v4.x`; port to `main` when the code
 exists there) → build the dist under that repo's Node version → verify
-against this app via `link:` → publish → pin here → delete the
+against a host via `link:` → publish → pin here → delete the
 containment code the entry unlocks → update CONSTRAINTS.md + this file.

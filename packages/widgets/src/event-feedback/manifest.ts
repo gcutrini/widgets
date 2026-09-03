@@ -11,5 +11,5 @@ export const eventFeedbackManifest: WidgetManifest = {
 };
 
 // Uniform alias so the web-component entry codegen can import `{ manifest }`
-// (packages/web-components/scripts/build.mjs) regardless of widget.
+// (@openeventkit/web-components' scripts/build.mjs) regardless of widget.
 export { eventFeedbackManifest as manifest };

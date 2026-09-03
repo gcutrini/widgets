@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Framework-free foundation for mounting legacy widgets: the WidgetManifest contract (including the WidgetBridge shape), the createWidgetShadow primitive, the neutral host ports, and the widget-to-host DOM event contracts (auth-error, notify). Imported by both the Next app (reactComponent renderer) and the esbuild web-component build (webComponent renderer).",
+  "description": "Framework-free foundation for mounting legacy widgets: the WidgetManifest contract (including the WidgetBridge shape), the createWidgetShadow primitive, the neutral host ports, and the widget-to-host DOM event contracts (auth-error, notify). Imported by both the host (reactComponent renderer) and the esbuild web-component build (webComponent renderer).",
   "exports": {
     ".": "./src/index.ts",
     "./manifest": "./src/manifest.ts",

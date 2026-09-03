@@ -4,13 +4,14 @@
  * Every widget request goes through uicore's `security/methods` for its token.
  * `configureUicore()` in the widgets package (`kit/uicore-host.ts`) hands
  * uicore a token resolver and auth handlers that read the session through THIS
- * port, so the widgets package stays app-agnostic and works in both builds: the
- * Next app (reactComponent renderer) and the isolated esbuild bundle
+ * port, so the widgets package stays host-agnostic and works in both builds:
+ * the host graph (reactComponent renderer) and the isolated esbuild bundle
  * (webComponent renderer). The host fills the port; uicore-host reads it.
- * Neither side of the port names uicore or the app's session internals.
+ * Neither side of the port names uicore or the host's session internals.
  *
  * Resolution differs by module graph:
- *  - App / reactComponent: `src/components/widget/register-host.ts` calls
+ *  - Host / reactComponent: the host's register-host module
+ *    (`src/components/widget/register-host.ts` in the reference host) calls
  *    `registerHostAuth`, setting the module `singleton`; uicore-host is in the
  *    same graph and reads it.
  *  - Bundle / webComponent: the bundle has its own copy of this module; the

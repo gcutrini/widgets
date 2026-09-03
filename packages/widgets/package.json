@@ -2,7 +2,7 @@
   "name": "@openeventkit/widgets",
   "version": "0.1.0",
   "private": true,
-  "description": "Bridge layer for legacy React 16 / Redux / uicore-4 widget packages consumed by @openeventkit/event-site-next. Isolates the legacy dep tree from the main app.",
+  "description": "Bridge layer for legacy React 16 / Redux / uicore-4 widget packages consumed by a host event site. Isolates the legacy dep tree from the host, and re-exports the mount/core surfaces as ./mount and ./core subpaths so a host needs only this one widget dependency.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

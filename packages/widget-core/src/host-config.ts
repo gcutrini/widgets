@@ -1,10 +1,10 @@
 /**
  * Neutral host-config port. The host fills it; the widgets package reads it and
  * hands the values to uicore (see widgets' uicore-host) — so the mount layer
- * never imports the app's env / proxy modules. Values point at the host's
+ * never imports the host's env / proxy modules. Values point at the host's
  * same-origin proxy so uicore's calls ride the session cookie.
  *
- * Resolution differs by module graph, as for HostAuth: the app registers the
+ * Resolution differs by module graph, as for HostAuth: the host registers the
  * module singleton; a web-component bundle has its own copy of this module,
  * filled by the element's `configureHost()` before anything mounts.
  */
@@ -25,7 +25,7 @@ export interface HostConfig {
    * Base URL the widget asset binaries (fonts, images) are served under.
    * Vendor sheets reference them through the __WIDGET_ASSETS__ placeholder,
    * which createWidgetShadow substitutes with this value. Empty (the default)
-   * means the host serves packages/widgets/assets at the site root, e.g.
+   * means the host serves @openeventkit/widgets' assets/ at the site root, e.g.
    * /fonts/... and /widget-css/....
    */
   assetBaseUrl?: string;

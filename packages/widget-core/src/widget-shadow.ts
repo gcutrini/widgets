@@ -87,7 +87,7 @@ const CUSTOM_ELEMENT_HOST_CSS = ':host { display: block; }';
  * A widget's own CSS belongs last in `vendorSheets` so it beats vendor styles.
  *
  * The one shadow-DOM primitive both renderers share — the reactComponent
- * renderer portals the widget into `container` on the app's React; the
+ * renderer portals the widget into `container` on the host's React; the
  * webComponent renderer ReactDOM.renders into it on its own React.
  */
 export function createWidgetShadow(

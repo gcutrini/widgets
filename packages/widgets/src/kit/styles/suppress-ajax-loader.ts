@@ -1,7 +1,7 @@
 /**
  * Hide the widget's busy loader for widgets that opt out.
  *
- * Every widget's `<AjaxLoader show/>` renders the app's `.wc-ajax-loader`
+ * Every widget's `<AjaxLoader show/>` renders the host-styled `.wc-ajax-loader`
  * backdrop (kit/compat/uicore-ajaxloader). The schedule widgets show it while
  * an RSVP (add/remove-to-schedule) request is in flight, but there the button's
  * own add → ✓ state is the feedback, so a full backdrop over the whole schedule

@@ -1,6 +1,6 @@
 /**
- * A vendor stylesheet emitted by `packages/widgets/scripts/generate-assets.mjs`
- * as a TypeScript module (`packages/widgets/src/kit/vendor-css/*`). The `css`
+ * A vendor stylesheet emitted by `@openeventkit/widgets`' `scripts/generate-assets.mjs`
+ * as a TypeScript module (its `src/kit/vendor-css/*`). The `css`
  * text is adopted into widget shadow roots via constructable
  * stylesheets; `fontFaces` holds the extracted `@font-face` blocks
  * (adopted sheets silently ignore them) which `createWidgetShadow` injects into

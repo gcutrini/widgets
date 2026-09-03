@@ -1,7 +1,7 @@
 /**
  * Build-time re-export shim for react-dom, adding the `findDOMNode` React 19
- * dropped. The rule in `packages/widgets/src/kit/webpack-compat.ts` (applied
- * by `applyWidgetCompat` from `next.config.ts`) aliases `react-dom` to this
+ * dropped. The rule in `@openeventkit/widgets/webpack-compat` (applied
+ * by `applyWidgetCompat` from the host's `next.config.ts`) aliases `react-dom` to this
  * file **only inside react-select@2**, so react-select's static `import { findDOMNode } from
  * 'react-dom'` resolves at build time instead of emitting a "not exported"
  * warning. Everything else keeps the real react-dom.

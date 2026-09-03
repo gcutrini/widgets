@@ -26,7 +26,7 @@ analyzer verifies the declaration matches reality.**
 1. **Declare** — each widget's manifest carries `runtimeNeeds`, a small fixed
    vocabulary (`RuntimeNeed` in `@openeventkit/widget-core/manifest`). Only the
    widgets that need something declare anything; the other six declare nothing.
-2. **Orchestrate** — `packages/web-components/scripts/build.mjs` maps each token to an
+2. **Orchestrate** — `scripts/build.mjs` (the `widgets-build` bin) maps each token to an
    esbuild plugin via `NEEDS_TO_PLUGINS` and selects per widget with `selectPlugins(needs)`.
    The build never hardcodes widget names.
 3. **Verify** — `analyze-widgets.mjs --check` derives what each widget *actually*

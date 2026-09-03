@@ -74,8 +74,8 @@ console.log(`MUI pinned to @mui/material@${JSON.parse(await fs.readFile(require.
 const sharedExternalsPlugin = sharedExternals(SHARED_SPECIFIERS);
 
 // Dev build (unminified + development React) when NODE_ENV=development;
-// default is the minified production build. The app's predev hook sets
-// development; prebuild sets production.
+// default is the minified production build. A host's dev wiring (e.g. a
+// predev hook) sets development; production builds leave it unset.
 const DEV = process.env.NODE_ENV === 'development';
 
 const base = {

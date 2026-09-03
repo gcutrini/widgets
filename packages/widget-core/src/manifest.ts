@@ -1,7 +1,7 @@
 /**
  * A `WidgetManifest` is the static, renderer-independent declaration of one
  * legacy widget: what it is, what styles it needs, how it behaves inside a
- * shadow root. Both renderers read the same manifest — the app's React 19
+ * shadow root. Both renderers read the same manifest — the host's React 19
  * (`reactComponent`) and the widget's own React 17 web component
  * (`webComponent`).
  *
@@ -82,7 +82,7 @@ export interface WidgetManifest {
 /**
  * Custom-element names must contain a hyphen. A widget name that already has
  * one is used as-is; a single-word name (e.g. `speakers`) gets a `-widget`
- * suffix so it forms a valid tag. Both the app-side web-component renderer and
+ * suffix so it forms a valid tag. Both the host-side web-component renderer and
  * the esbuild-bundled `defineWebComponent` derive the tag through this one
  * helper, so the tag one registers and the tag the other awaits can never
  * drift. Framework-free — safe for the React-17 bundle to import.

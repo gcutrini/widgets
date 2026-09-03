@@ -4,11 +4,11 @@ import { createRequire } from 'node:module';
 /**
  * Webpack build-time compatibility the widget package needs from its host.
  *
- * Two things only the root Next webpack can do for the legacy widget bundles
- * (the widgets package is transpiled by it and has no build of its own):
- * resolve every `openstack-uicore-foundation` import to THIS package's copy,
- * and give react-select@2 a `findDOMNode` (dropped in React 19). The host
- * wires both in one call from `next.config.ts`:
+ * Two things only the host's Next webpack can do for the legacy widget bundles
+ * (this package ships raw TypeScript the host transpiles; it has no build of
+ * its own): resolve every `openstack-uicore-foundation` import to THIS
+ * package's copy, and give react-select@2 a `findDOMNode` (dropped in React
+ * 19). The host wires both in one call from its `next.config.ts`:
  *
  *   import { applyWidgetCompat } from '@openeventkit/widgets/webpack-compat';
  *   webpack: (config) => { applyWidgetCompat(config); ... }
@@ -43,7 +43,7 @@ export const UICORE_DIR = path.dirname(
  * module-graph probe). Ownership differs from uicore: MUI/emotion/scheduler
  * are the HOST's UI stack, so each family is pinned to the copy the host
  * resolves (uicore stays kit-owned — it is this package's domain). Anchoring
- * host-side also keeps the app's own MUI untouched when this package is
+ * host-side also keeps the host's own MUI untouched when this package is
  * linked from a repo whose store materialized different peer variants.
  * Deliberately absent: the
  * low-level @emotion helpers (hash/memoize/unitless/…) — react-select@2's

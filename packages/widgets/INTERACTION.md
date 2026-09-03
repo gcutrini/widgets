@@ -1,11 +1,13 @@
-# How widgets interact with the app
+# How widgets interact with the host
 
 The widgets are legacy React-16 / Redux bundles (`full-schedule-widget`,
 `summit-registration-lite`, …). They treat props as **owned, mutable state**
 and **re-derive their entire internal store whenever a prop changes identity**.
-The host is a React-19 app. This doc is the contract that keeps the two seams
-seamless — most importantly, the rule that stops a legacy bundle re-initializing
-on every host render.
+The host is a React-19 app. This doc is the contract a host implements to keep
+the two seams seamless — most importantly, the rule that stops a legacy bundle
+re-initializing on every host render. The hooks and file paths named here
+(`useAuth`, `use*Callbacks`, `src/components/widget/…`) are the reference
+host's.
 
 ## The one boundary
 
@@ -71,7 +73,7 @@ legacy subtree on any unrelated host re-render. It is enforced at three points:
 | **Token** | `getAccessToken` (prop) + the resolver `kit/uicore-host` hands uicore, reading the `HostAuth` port | No real bearer on the client — a presence placeholder (`SESSION_PRESENT`); the proxy re-auths from the httpOnly cookie. |
 | **Realtime** | `useRealTimeEvents` / `useRealTimeSummit` | External store; the worker holds no token. |
 | **Callbacks** | `use*Callbacks` hooks | Memoized bundle of `useCallback`'d members (see contract §2). |
-| **uicore config** | `configureUicore()` in `kit/uicore-host`, called by `src/components/widget/register-host.ts` at startup | `apiBaseUrl`, `idpBaseUrl`, `oauth2ClientId`, `timeApiUrl` from the `HostConfig` port, handed to uicore's `setConfig` before any widget mounts. |
+| **uicore config** | `configureUicore()` in `kit/uicore-host`, called by the reference host's `src/components/widget/register-host.ts` at startup | `apiBaseUrl`, `idpBaseUrl`, `oauth2ClientId`, `timeApiUrl` from the `HostConfig` port, handed to uicore's `setConfig` before any widget mounts. |
 
 ## Adding or changing a widget
 

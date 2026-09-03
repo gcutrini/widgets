@@ -4,8 +4,8 @@
  * footprint.mjs (dependency footprint → RULES → requirements, plus the
  * uicore-path drift check against the served runtime surface).
  *
- *   node packages/web-components/scripts/analyze-widgets.mjs                    # human report
- *   node packages/web-components/scripts/analyze-widgets.mjs --check            # CI guard (exit 1 on drift)
+ *   node scripts/analyze-widgets.mjs (or the widgets-analyze bin)   # human report
+ *   node scripts/analyze-widgets.mjs --check   # CI guard (exit 1 on drift; root pnpm analyze:check)
  *   widgets-analyze --update-baseline  # accept the current unknowns (workspace only)
  *
  * Step 2 of RUNTIME-REQUIREMENTS.md. No build side effects.

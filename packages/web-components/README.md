@@ -1,12 +1,13 @@
 # @openeventkit/web-components
 
 Legacy widgets packaged as self-contained **React-17 web components**, built by
-esbuild into static assets under `public/web-components/`. This is a **separate
-build** from the app's Next/React-19 compile (own React 17; a pnpm workspace
-member with its own `package.json`, built with `pnpm --filter`), so the
-widgets' React 17 never enters the app's module graph.
+esbuild into static assets. The build is a **separate compile** from any host's
+(own React 17, own dependency tree), so the widgets' React 17 never enters a
+host's module graph. The package ships two bins — `widgets-build` and
+`widgets-analyze` — that hosts run from their own installs; `esbuild` is a
+regular dependency for that reason.
 
-See `packages/web-components/ISOLATION-STRATEGY.md` for the full strategy, POC evidence, and the
+See [ISOLATION-STRATEGY.md](./ISOLATION-STRATEGY.md) for the full strategy, POC evidence, and the
 per-widget plan.
 
 ## Structure — and where each part ultimately lives
@@ -42,12 +43,12 @@ uicore paths, the MUI surface, the i18n seed) into `runtime/`, with esbuild
 code-splitting guaranteeing a single instance of every stateful internal, and
 writes `import-map.json` mapping each specifier to its chunk. The HOST inlines
 that map in its document before any widget module loads
-(`src/components/widget/WidgetImportMap.tsx` in the app).
+(`src/components/widget/WidgetImportMap.tsx` in the reference host).
 
 The bundled `src/` imports `@openeventkit/widgets` (manifests, `uicore-host`,
 the `compat/uicore-*` modules) and `@openeventkit/widget-core`
-(`createWidgetShadow`, the manifest type) as `workspace:*` dependencies by bare
-specifier.
+(`createWidgetShadow`, the manifest type) by bare specifier — declared as
+`0.1.0` pins, which hosts override to git refs until npm publishing.
 
 **Target topology (three homes):**
 
@@ -55,7 +56,7 @@ specifier.
 |---|---|
 | `src/*` (element/shims) | **a published shared kit package** — extracted from this `@openeventkit/web-components` package |
 | each widget's entry (generated in `scripts/build.mjs`) + its CSS | **each widget's own repo** (it owns its dep graph + export shape, so `resolve-component` isn't even needed there) |
-| the app-side host + per-widget data composition | **the consuming app** (`src/components/widget/renderers/`, `src/widgets/<widget>/`) |
+| the host-side renderers + per-widget data composition | **the host** (`src/components/widget/renderers/`, `src/widgets/<widget>/` in the reference host) |
 
 Today all build-side roles live here while we prototype; the `src/` vs
 entry split makes those moves mechanical.
@@ -66,13 +67,13 @@ entry split makes those moves mechanical.
   react-dom, jsx-runtime, the exposed uicore paths, the served MUI surface)
   stay bare and resolve through the host-inlined import map to the `runtime/`
   chunks — the browser walks the module graph; there is no load ordering.
-  This is the variant the app loads.
+  This is the variant the reference host loads.
 - **standalone** — `‹name›.standalone.js`, React 17 bundled in. Drop-in for a
   host that loads no runtime chunks. Opt-in build.
 
 ## Build
 
-From the repo root (`pnpm install` at the root installs this package too):
+From this repo's root (`pnpm install` at the root installs this package too):
 
 ```
 pnpm build:wc               # default: runtime/ chunks + import-map.json + *.shared.js
@@ -80,13 +81,19 @@ pnpm build:wc:standalone    # *.standalone.js only
 ```
 
 Or inside the package: `pnpm build` / `pnpm build:standalone`
-(`node scripts/build.mjs` / `node scripts/build.mjs --standalone`). The root `prebuild`
-script runs the default build.
+(`node scripts/build.mjs` / `node scripts/build.mjs --standalone`).
 
-Output goes wherever `--out` says (the root scripts pass `public/web-components/`, gitignored; the package default is its own `dist/`) — rebuilt on demand.
-`--public-path` sets the URL path the import map bakes into its chunk URLs
-(default `/web-components/` → chunks at `/web-components/runtime/…`) — a host
-serving the output from a different path passes its own.
+Output goes wherever `--out` says (default: the package's own `dist/`,
+gitignored) — rebuilt on demand. `--public-path` sets the URL path the import
+map bakes into its chunk URLs (default `/web-components/` → chunks at
+`/web-components/runtime/…`) — a host serving the output from a different path
+passes its own.
+
+**For hosts:** the build and analyzer ship as bins — `widgets-build` and
+`widgets-analyze` — so a host runs them from its own install (e.g. a prebuild
+hook running `widgets-build --out public/web-components/`), passing `--out`
+for where it serves bundles from and `--public-path` for the matching URL
+path. Nothing here assumes a host directory layout.
 
 ## Dependencies — why each is declared
 
@@ -107,7 +114,8 @@ serves:
    `validator`, `react-select`, …): uicore's dist files resolve these from this
    package, whether or not a widget bundles the module that uses them.
 4. **Build helpers** — `use-sync-external-store` (the react runtime entry's
-   back-fill), `esbuild` (dev).
+   back-fill), `esbuild` + `esbuild-plugin-polyfill-node` (runtime deps, not
+   dev: the `widgets-build` / `widgets-analyze` bins run inside host installs).
 
 ## Analyzer
 
@@ -115,5 +123,5 @@ serves:
 footprint against its manifest `runtimeNeeds`; `pnpm analyze:check` fails on
 drift. Accepted exceptions live in `analyze-widgets.baseline.json`:
 `acceptedUnknown`, `acceptedBarrels`, and `acceptedMuiMissing` (MUI barrels a
-widget dist still imports and bundles itself; see `packages/widgets/UPSTREAM.md`
+widget dist still imports and bundles itself; see `../widgets/UPSTREAM.md`
 entry 14).

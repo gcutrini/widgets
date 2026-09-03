@@ -10,9 +10,9 @@ const pkgRoot = path.resolve(dir, '../..');
 const require = createRequire(import.meta.url);
 
 // uicore peers this package deliberately does NOT declare, with the reason.
-// Everything else must be declared here: outside the app monorepo there is no
-// root install to anchor pnpm's peer materialization, and an auto-installed
-// peer can resolve to an incompatible copy (found in the extraction rehearsal).
+// Everything else must be declared here: in a host install there is no
+// workspace root install to anchor pnpm's peer materialization, and an auto-installed
+// peer can resolve to an incompatible copy.
 const EXCLUDED = new Map([
   // (none today)
 ]);

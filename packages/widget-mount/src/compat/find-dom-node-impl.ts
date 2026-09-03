@@ -10,7 +10,7 @@
  *   - `./react-dom-with-find-dom-node` — re-exports it as a named export so a
  *     static `import { findDOMNode } from 'react-dom'` resolves at build time
  *     (react-select@2), via the scoped alias rule in
- *     `packages/widgets/src/kit/webpack-compat.ts`.
+ *     `@openeventkit/widgets/webpack-compat`.
  */
 
 type HostNode = Element | Text;

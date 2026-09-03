@@ -5,8 +5,8 @@
  * The widget dists (and uicore) call `Swal.fire(...)` for error/warning/success
  * popups — a ~78 KB library that also can't render usefully from an isolated
  * shadow-mounted bundle. The web-component build aliases `sweetalert2` to a tiny
- * shim (packages/widgets/src/kit/compat/uicore-swal.ts) that raises this window
- * event instead; <WidgetNotifyDialog>, mounted with the app providers, listens
+ * shim (@openeventkit/widgets' src/kit/compat/uicore-swal.ts) that raises this window
+ * event instead; the host's <WidgetNotifyDialog>, mounted with its providers, listens
  * and owns the user-facing treatment. Same producer-outside-React pattern as
  * widget-auth-error (401/403 keep going through that port; everything else —
  * generic errors, validation, success — comes here).

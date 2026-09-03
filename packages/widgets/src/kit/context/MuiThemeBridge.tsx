@@ -4,13 +4,12 @@ import { type ReactNode } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 /**
- * Gives a widget's MUI the event font — a direct port of the reference site's
- * theme (event-site/src/styles/theme.js):
+ * Gives a widget's MUI the event font:
  *
  *     createTheme({ typography: { fontFamily: 'var(--font_family)' } })
  *
  * Why it's needed: a web-component widget runs on its OWN React + MUI instance,
- * so it can't read the app's MUI `ThemeProvider` — MUI-rendered text falls back
+ * so it can't read the host's MUI `ThemeProvider` — MUI-rendered text falls back
  * to its default (Roboto). Pointing `fontFamily` at the `--font_family` CSS var
  * (published on `:root`, inherited across the shadow boundary) fixes that; `var()`
  * is a plain string MUI passes through to emotion, so it resolves in the shadow.

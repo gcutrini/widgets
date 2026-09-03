@@ -5,7 +5,7 @@
  *
  * The shadow itself (attach + adopt sheets + font-faces + portal
  * sheets + bridges) is set up by `createWidgetShadow` — the SAME primitive the
- * app's reactComponent renderer uses — so the two renderers can't drift on any
+ * host's reactComponent renderer uses — so the two renderers can't drift on any
  * of that. The kit adds only what's web-component-specific: the React-17
  * ReactDOM.render, the `setProps` prop channel, the error boundary, `wrapTree`,
  * and `elementAttrs`. There's no prop name list — the host hands over the whole
@@ -36,7 +36,7 @@ function configureUicoreOnce() {
 
 /**
  * Register a widget as a web component from its shared WidgetManifest — the SAME
- * manifest the app's reactComponent renderer reads. The manifest is the single
+ * manifest the host's reactComponent renderer reads. The manifest is the single
  * source of a widget's dist, sheets, inline styles, bridges, and props; the
  * entry supplies only the injected React/ReactDOM.
  *
@@ -76,7 +76,7 @@ export function defineWidgetWebComponent({ React, ReactDOM, manifest }) {
  * @param {import('@openeventkit/widget-core/manifest').WidgetManifest} o.manifest
  */
 function defineWebComponent({ React, ReactDOM, Component, manifest }) {
-  // Shared with the app-side renderer so the tag we register and the tag it
+  // Shared with the host-side renderer so the tag we register and the tag it
   // awaits can never drift.
   const tag = webComponentTag(manifest.name);
   if (typeof customElements === 'undefined' || customElements.get(tag)) return;
@@ -84,10 +84,10 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
   const wrapTree = manifest.wrapTree;
   const elementAttrs = manifest.elementAttrs ?? {};
 
-  // A React-17 error boundary around the widget's OWN tree — the app's React-19
+  // A React-17 error boundary around the widget's OWN tree — the host's React-19
   // boundary can't see across the shadow into a different React instance. On a
   // widget render/lifecycle throw it renders nothing and reports the error out
-  // through the host (`onError`), so the app can show its own fallback.
+  // through the host (`onError`), so the host can show its own fallback.
   class WidgetErrorBoundary extends React.Component {
     constructor(props) {
       super(props);

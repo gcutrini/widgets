@@ -5,8 +5,8 @@
  * The auth-error handler the widgets package hands uicore (uicore-host)
  * receives every 401/403 from every widget dist, but it is a plain function
  * with no access to React context — it cannot open the login modal or a
- * dialog itself. It raises this window event instead; <WidgetAuthErrorDialog>,
- * mounted with the app providers, listens and owns the entire user-facing
+ * dialog itself. It raises this window event instead; the host's <WidgetAuthErrorDialog>,
+ * mounted with its providers, listens and owns the entire user-facing
  * treatment. Same producer-outside-React pattern as the widget needsLogin
  * bridge.
  */

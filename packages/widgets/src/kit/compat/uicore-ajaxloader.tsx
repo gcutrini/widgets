@@ -1,12 +1,12 @@
 /**
- * App-styled replacement for uicore's `AjaxLoader` in the web-component build.
+ * Host-styled replacement for uicore's `AjaxLoader` in the web-component build.
  *
  * The shared runtime serves this module under the
  * `openstack-uicore-foundation/lib/components/ajaxloader` specifier, so every
  * widget dist that imports AjaxLoader gets this instead of uicore's default.
- * It renders the app's sign-out overlay markup (AuthTransitionOverlay): a MUI
+ * It renders the host's sign-out overlay markup (AuthTransitionOverlay): a MUI
  * `<Backdrop>` with a `<CircularProgress color="inherit" />`, so the
- * in-widget loader matches the app's overlays.
+ * in-widget loader matches the host's overlays.
  *
  * Backdrop and CircularProgress are bare imports from the pinned MUI-5 tree —
  * they bundle into this module's runtime chunk (esbuild splitting dedupes them
@@ -15,7 +15,7 @@
  *
  * The spinner is fixed (MUI CircularProgress) for now. If a widget ever needs
  * a different loader, this could take the component as a prop/port instead —
- * see packages/widgets/UPSTREAM.md.
+ * see this package's UPSTREAM.md.
  */
 import React from 'react';
 import Backdrop from '@mui/material/Backdrop';

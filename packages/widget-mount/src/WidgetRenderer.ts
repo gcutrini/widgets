@@ -11,8 +11,8 @@ export interface WidgetMountProps {
 }
 
 /**
- * A strategy for mounting a widget. Two exist (registered by the app):
- * `reactComponent` runs the widget on the app's React 19 as a component in the
+ * A strategy for mounting a widget. Two exist (registered by the host):
+ * `reactComponent` runs the widget on the host's React 19 as a component in the
  * page's tree; `webComponent` runs it on its own React 17 as a self-contained
  * custom element. Both mount into a shadow root and take the same manifest +
  * composition.

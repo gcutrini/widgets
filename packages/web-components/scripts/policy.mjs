@@ -130,7 +130,7 @@ export const BARREL_LIBS = new Set([
 // analyzer cross-checks each manifest's declaration against its real footprint.
 // DECLARED_ONLY tokens are behavioral (not derivable), accepted as declared.
 // Together they must partition the RuntimeNeed union in
-// packages/widget-core/src/manifest.ts — a token added to the type needs an
+// @openeventkit/widget-core's src/manifest.ts — a token added to the type needs an
 // entry here (and vice versa).
 export const BUILD_ACTIONABLE = new Set(['pin:mui5-react17', 'stub:node']);
 export const DECLARED_ONLY = new Set(['quirk:myTicketsFont']);
