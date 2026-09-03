@@ -1,7 +1,7 @@
-import { sheet as bootstrap } from '../kit/vendor-css/bootstrap.min';
-import { sheet as slick } from '../kit/vendor-css/slick';
-import { sheet as slickTheme } from '../kit/vendor-css/slick-theme';
-import { sheet as speakers } from '../kit/vendor-css/speakers-widget';
+import { sheet as bootstrap } from '../lib/vendor-css/bootstrap.min';
+import { sheet as slick } from '../lib/vendor-css/slick';
+import { sheet as slickTheme } from '../lib/vendor-css/slick-theme';
+import { sheet as speakers } from '../lib/vendor-css/speakers-widget';
 
 /**
  * Style dependencies for the Speakers widget.

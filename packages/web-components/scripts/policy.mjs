@@ -101,7 +101,7 @@ export const RULES = [
   { id: 'pin:mui5-react17',      prefix: ['@mui/', '@emotion/'],                     note: 'v5-era MUI/emotion (dist or kit wrapTree) → pin bundle to React-17 MUI 5 (muiReact17Plugin)' },
   { id: 'legacy:react-bootstrap', pkg: ['react-bootstrap'],                          note: 'legacy childContext (removed in React 19) + Bootstrap vendor CSS' },
   { id: 'stub:node',             pkg: ['@react-pdf/renderer'],                       note: 'pulls Node built-ins (fs/zlib/…) → needs the browser polyfills (nodePolyfills) in the wc build' },
-  { id: 'quirk:swalDeadEnd',     pkg: ['sweetalert2'],                               note: 'sweetalert2 aliased to the widget-notify host shim (kit/compat/uicore-swal) — the ~78 KB lib is not bundled' },
+  { id: 'quirk:swalDeadEnd',     pkg: ['sweetalert2'],                               note: 'sweetalert2 aliased to the widget-notify host shim (lib/compat/uicore-swal) — the ~78 KB lib is not bundled' },
 ];
 
 // Deps that need no requirement — they just bundle. Kept small + explicit so a
@@ -130,7 +130,7 @@ export const BARREL_LIBS = new Set([
 // analyzer cross-checks each manifest's declaration against its real footprint.
 // DECLARED_ONLY tokens are behavioral (not derivable), accepted as declared.
 // Together they must partition the RuntimeNeed union in
-// @openeventkit/widget-core's src/manifest.ts — a token added to the type needs an
+// @openeventkit/widgets' src/core/manifest.ts — a token added to the type needs an
 // entry here (and vice versa).
 export const BUILD_ACTIONABLE = new Set(['pin:mui5-react17', 'stub:node']);
 export const DECLARED_ONLY = new Set(['quirk:myTicketsFont']);

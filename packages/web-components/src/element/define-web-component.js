@@ -15,10 +15,11 @@
  * variants: `shared` (the default build) reads them from the runtime global;
  * `standalone` (`build.mjs --standalone`) bundles React 17.
  */
-import { createWidgetShadow } from '@openeventkit/widget-core/widget-shadow';
-import { webComponentTag } from '@openeventkit/widget-core/manifest';
-import { registerHostAuth } from '@openeventkit/widget-core/host-auth';
-import { registerHostConfig } from '@openeventkit/widget-core/host-config';
+import { createWidgetShadow } from '@openeventkit/widgets/core/widget-shadow';
+import { webComponentTag } from '@openeventkit/widgets/core/manifest';
+import { registerHostAuth } from '@openeventkit/widgets/core/host-auth';
+import { registerHostConfig } from '@openeventkit/widgets/core/host-config';
+import { WIDGET_ERROR_EVENT } from '@openeventkit/widgets/core/widget-error';
 import { resolveWidgetComponent } from './resolve-component.js';
 import { ShadowRootContext } from '@openeventkit/widgets/shadow-root-context';
 import { configureUicore } from '@openeventkit/widgets/uicore-host';
@@ -48,7 +49,7 @@ function configureUicoreOnce() {
  * @param {object} o
  * @param {any} o.React
  * @param {any} o.ReactDOM
- * @param {import('@openeventkit/widget-core/manifest').WidgetManifest} o.manifest
+ * @param {import('@openeventkit/widgets/core/manifest').WidgetManifest} o.manifest
  * @returns {Promise<void>}
  */
 export function defineWidgetWebComponent({ React, ReactDOM, manifest }) {
@@ -73,7 +74,7 @@ export function defineWidgetWebComponent({ React, ReactDOM, manifest }) {
  * @param {any} o.React
  * @param {any} o.ReactDOM
  * @param {Function} o.Component   the widget component (resolved from its dist)
- * @param {import('@openeventkit/widget-core/manifest').WidgetManifest} o.manifest
+ * @param {import('@openeventkit/widgets/core/manifest').WidgetManifest} o.manifest
  */
 function defineWebComponent({ React, ReactDOM, Component, manifest }) {
   // Shared with the host-side renderer so the tag we register and the tag it
@@ -115,7 +116,7 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
       // Report a widget render error out through the host as a DOM event; the
       // app-side renderer listens and raises it into its React-19 boundary.
       this._reportError = (error) => {
-        this.dispatchEvent(new CustomEvent('widget-error', { detail: { error } }));
+        this.dispatchEvent(new CustomEvent(WIDGET_ERROR_EVENT, { detail: { error } }));
       };
     }
 

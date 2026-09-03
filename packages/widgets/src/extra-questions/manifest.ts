@@ -1,7 +1,7 @@
-/// <reference path="../kit/widget-modules.d.ts" />
+/// <reference path="../lib/widget-modules.d.ts" />
 import type { ComponentType } from 'react';
-import type { WidgetManifest } from '@openeventkit/widget-core/manifest';
-import { emotionMirrorBridge } from '../kit/bridges/emotion-mirror';
+import type { WidgetManifest } from '../core/manifest';
+import { emotionMirrorBridge } from '../lib/bridges/emotion-mirror';
 import { extraQuestionsSheets } from './vendor-styles';
 
 export const extraQuestionsManifest: WidgetManifest = {

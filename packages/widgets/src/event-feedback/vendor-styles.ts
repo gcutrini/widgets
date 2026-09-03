@@ -1,6 +1,6 @@
-import { sheet as bootstrap } from '../kit/vendor-css/bootstrap.min';
-import { sheet as fontAwesome } from '../kit/vendor-css/font-awesome.min';
-import { sheet as eventFeedback } from '../kit/vendor-css/event-feedback-widget';
+import { sheet as bootstrap } from '../lib/vendor-css/bootstrap.min';
+import { sheet as fontAwesome } from '../lib/vendor-css/font-awesome.min';
+import { sheet as eventFeedback } from '../lib/vendor-css/event-feedback-widget';
 
 /**
  * Style dependencies for the Event Feedback widget — Bootstrap for its

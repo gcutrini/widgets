@@ -1,6 +1,6 @@
-/// <reference path="../kit/widget-modules.d.ts" />
-import type { WidgetManifest } from '@openeventkit/widget-core/manifest';
-import { emotionMirrorBridge } from '../kit/bridges/emotion-mirror';
+/// <reference path="../lib/widget-modules.d.ts" />
+import type { WidgetManifest } from '../core/manifest';
+import { emotionMirrorBridge } from '../lib/bridges/emotion-mirror';
 import { scheduleFiltersSheets } from './vendor-styles';
 
 export const scheduleFiltersManifest: WidgetManifest = {

@@ -46,7 +46,7 @@ they're built from).
   the `@openeventkit/widget-mount` and `@openeventkit/widget-core` surfaces
   published through this package, so a host needs only this one widget
   dependency.
-- `src/kit/` — everything not tied to one widget (by coupling, not consumer count: a generic module stays here even while only one widget uses it):
+- `src/lib/` — everything not tied to one widget (by coupling, not consumer count: a generic module stays here even while only one widget uses it):
   - `uicore-host.ts` — `configureUicore()`: reads the HostConfig and HostAuth ports
     and calls uicore's `setConfig`, `setAccessTokenResolver` and `setAuthHandlers`.
     The resolver returns the `SESSION_PRESENT` placeholder while a session exists
@@ -83,7 +83,7 @@ binaries they reference:
 - `scripts/generate-assets.mjs` (this package's `assets` npm script; `pnpm
   assets` at the workspace root) reads each vendor stylesheet from the
   installed dists, splits out `@font-face`, and emits
-  `src/kit/vendor-css/<name>.ts` (`export const sheet: VendorSheet`). Outputs
+  `src/lib/vendor-css/<name>.ts` (`export const sheet: VendorSheet`). Outputs
   are committed, so a fresh clone typechecks without running it. Regeneration
   happens only here — hosts never run this script.
 - Font and image binaries land in `assets/` (committed). Generated url()

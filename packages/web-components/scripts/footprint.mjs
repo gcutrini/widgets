@@ -144,7 +144,7 @@ async function signatureFor(name) {
   const uicore = new Set(); // full uicore lib paths actually imported
   const node = new Set(); // node builtins reached anywhere in the graph
   const dist = new Set(); // external deps imported by the widget's own package
-  const kit = new Set(); // external deps imported by workspace kit/entry code
+  const kit = new Set(); // external deps imported by workspace lib/entry code
   const mui = new Set(); // @mui/* + @emotion/* specifiers from non-internal importers
   const barrels = new Set(); // bare-root imports of subpath-capable libs
 

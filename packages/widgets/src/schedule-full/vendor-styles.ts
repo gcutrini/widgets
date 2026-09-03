@@ -1,12 +1,12 @@
-import { css as widgetButtonsCss } from '../kit/styles/widget-buttons';
-import { css as suppressAjaxLoaderCss } from '../kit/styles/suppress-ajax-loader';
+import { css as widgetButtonsCss } from '../lib/styles/widget-buttons';
+import { css as suppressAjaxLoaderCss } from '../lib/styles/suppress-ajax-loader';
 import { css as hideWidgetToolbarCss } from './hide-widget-toolbar';
-import { sheet as bootstrap } from '../kit/vendor-css/bootstrap.min';
-import { sheet as fontAwesome } from '../kit/vendor-css/font-awesome.min';
-import { sheet as reactToastify } from '../kit/vendor-css/react-toastify';
-import { sheet as fullSchedule } from '../kit/vendor-css/full-schedule-widget';
-import { sheet as circleButton } from '../kit/vendor-css/uicore-circle-button';
-import { sheet as buttonCursorSheet } from '../kit/styles/button-cursor';
+import { sheet as bootstrap } from '../lib/vendor-css/bootstrap.min';
+import { sheet as fontAwesome } from '../lib/vendor-css/font-awesome.min';
+import { sheet as reactToastify } from '../lib/vendor-css/react-toastify';
+import { sheet as fullSchedule } from '../lib/vendor-css/full-schedule-widget';
+import { sheet as circleButton } from '../lib/vendor-css/uicore-circle-button';
+import { sheet as buttonCursorSheet } from '../lib/styles/button-cursor';
 
 /**
  * Style dependencies for the Full Schedule widget.

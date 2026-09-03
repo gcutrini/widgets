@@ -14,8 +14,6 @@
   },
   "devDependencies": {
     "@openeventkit/web-components": "0.1.0",
-    "@openeventkit/widget-core": "0.1.0",
-    "@openeventkit/widget-mount": "0.1.0",
     "@openeventkit/widgets": "0.1.0",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.1.0",

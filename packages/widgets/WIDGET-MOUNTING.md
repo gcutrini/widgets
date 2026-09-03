@@ -74,7 +74,7 @@ requires, and the ports the host fills.
   widget-auth-error.ts   the 401/403 DOM event the injected uicore auth handler raises and the host dialog handles
   widget-notify.ts   the notification DOM event the sweetalert2 shim raises and the host dialog handles
 
-@openeventkit/widgets/src/kit/bridges/   (implementations of the WidgetBridge contract)
+@openeventkit/widgets/src/lib/bridges/   (implementations of the WidgetBridge contract)
   emotion-mirror.ts · click-outside-retarget.ts · tooltip.ts · scoped-portal-css.ts
   Each is a (root: ShadowRoot) => cleanup fix-up for a LEGACY-STACK behavior
   (emotion 11, react-tooltip@3, document-level click-outside, portaled vendor

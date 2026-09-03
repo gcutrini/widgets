@@ -230,7 +230,7 @@ resurfacing as "unexplained."
   every caller (`query-actions` included) before touching localStorage;
   `initLogOut` and the 401/403 branch of `utils/actions` `authErrorHandler`
   call the injected handlers when set. `configureUicore()` (this package's
-  `src/kit/uicore-host.ts`) calls all three, reading the `HostConfig` and
+  `src/lib/uicore-host.ts`) calls all three, reading the `HostConfig` and
   `HostAuth` ports, in the host graph and in the web-component shared
   runtime. This package pins uicore npm 4.2.34, which does not have the
   setters; hosts that need them override the dependency to the fork build
@@ -266,7 +266,7 @@ resurfacing as "unexplained."
   — also localStorage/redirect-based, same rule. Optional prop
   defaulting to current behavior → non-breaking.
 - **Containment (implemented)**: `configureUicore()`
-  (this package's `src/kit/uicore-host.ts`) registers an `authErrorHandler`
+  (this package's `src/lib/uicore-host.ts`) registers an `authErrorHandler`
   through uicore's `setAuthHandlers` (fork branch, see entry 4). uicore's
   `utils/actions` calls it for 401/403 instead of its own `doLogin` /
   `initLogOut` flows; the handler raises the host's widget-auth-error event

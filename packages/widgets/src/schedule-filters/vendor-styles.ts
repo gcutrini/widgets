@@ -1,6 +1,6 @@
-import { sheet as bootstrap } from '../kit/vendor-css/bootstrap.min';
-import { sheet as fontAwesome } from '../kit/vendor-css/font-awesome.min';
-import { sheet as filterWidget } from '../kit/vendor-css/schedule-filter-widget';
+import { sheet as bootstrap } from '../lib/vendor-css/bootstrap.min';
+import { sheet as fontAwesome } from '../lib/vendor-css/font-awesome.min';
+import { sheet as filterWidget } from '../lib/vendor-css/schedule-filter-widget';
 
 /**
  * Style dependencies for the Schedule Filters widget — Bootstrap for

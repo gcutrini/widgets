@@ -119,7 +119,7 @@ No `.d.ts` files. No JSDoc types. No documented prop tables.
 
 **Downstream:**
 
-- **C.1 — `src/kit/widget-modules.d.ts` (this package).** Ten ambient `declare module '<widget>/dist' { ... }` blocks — every widget declares its default export as `ComponentType<Record<string, unknown>>`. Loose. Any typo in a prop name silently succeeds at compile time.
+- **C.1 — `src/lib/widget-modules.d.ts` (this package).** Ten ambient `declare module '<widget>/dist' { ... }` blocks — every widget declares its default export as `ComponentType<Record<string, unknown>>`. Loose. Any typo in a prop name silently succeeds at compile time.
 - **C.2 — Widget prop interfaces widen with `[key: string]: unknown`.** Where a widget's server-props interface ends with an index signature (registration's `types.ts`), callers can pass undocumented props the widget accepts — TypeScript cannot catch prop-name typos there.
 - **C.3 — Widget code never renders server-side.** Widgets access `window` at module scope, so the shadow-react renderer loads them with `next/dynamic({ ssr: false })` (injected by the host in `src/components/widget/renderers/react-component.tsx`) and the web-component path is client-only by nature. Costs us initial HTML for widget content and SEO signal on widget-heavy routes.
 
@@ -371,7 +371,7 @@ Shadow-DOM widget modules drop the outer Provider entirely — the reactComponen
 
 ### RC-S — Ambient module declarations for untyped dists
 
-This package's `src/kit/widget-modules.d.ts` declares every widget dist and referenced uicore component as a loosely-typed module (`ComponentType<Record<string, unknown>>` and friends) — TypeScript refuses to import an undeclared untyped module.
+This package's `src/lib/widget-modules.d.ts` declares every widget dist and referenced uicore component as a loosely-typed module (`ComponentType<Record<string, unknown>>` and friends) — TypeScript refuses to import an undeclared untyped module.
 
 **Why the widgets force it.** The dists ship no TypeScript declarations.
 
@@ -399,7 +399,7 @@ Widget modules under this package's `src/<name>/` mount their widget inside an o
 
 - **U.3 — Adopted vendor CSS needs absolute `url()` references.** `adoptedStyleSheets` created via `new CSSStyleSheet()` have no base URL, so relative `url('../fonts/…')` references would resolve against the document URL — fonts 404. The generator resolves every relative url() against a virtual `/widget-css/<name>.css` base — the same layout the `assets/` binaries ship under — and emits it `__WIDGET_ASSETS__`-prefixed, so adopted sheets resolve their assets no matter where the host serves them from. `@font-face` is additionally split out and injected into `document.head` (adopted sheets silently ignore it; registration is document-global anyway). Hand-authored CSS (react-tooltip, our button shim) stays in `styles` (adopted, no url()s).
 
-- **U.4 — `scripts/generate-assets.mjs` (this package's own script, run via its `assets` npm script).** Vendor CSS is generated as typed TS modules under `src/kit/vendor-css/` (`export const sheet: VendorSheet`) — imports are type-checked (a wrong name fails the build instead of 404ing), the CSS ships fingerprinted inside widget chunks, and dependency bumps flow through on the next generation instead of drifting. Font/image binaries land in this package's `assets/` (committed); url() references carry the `__WIDGET_ASSETS__` placeholder that `createWidgetShadow` substitutes with `HostConfig.assetBaseUrl` (empty = site root). Regeneration runs only here (`pnpm assets`); the host's `copy:widget-assets` only copies the committed `assets/` into its `public/`. Outputs are checked into git so fresh clones don't need to run the script before typecheck. A `?raw` webpack bypass was spiked and rejected: Next's CSS pipeline captures the import before a `resourceQuery` rule can, and the processed module — not source text — comes back.
+- **U.4 — `scripts/generate-assets.mjs` (this package's own script, run via its `assets` npm script).** Vendor CSS is generated as typed TS modules under `src/lib/vendor-css/` (`export const sheet: VendorSheet`) — imports are type-checked (a wrong name fails the build instead of 404ing), the CSS ships fingerprinted inside widget chunks, and dependency bumps flow through on the next generation instead of drifting. Font/image binaries land in this package's `assets/` (committed); url() references carry the `__WIDGET_ASSETS__` placeholder that `createWidgetShadow` substitutes with `HostConfig.assetBaseUrl` (empty = site root). Regeneration runs only here (`pnpm assets`); the host's `copy:widget-assets` only copies the committed `assets/` into its `public/`. Outputs are checked into git so fresh clones don't need to run the script before typecheck. A `?raw` webpack bypass was spiked and rejected: Next's CSS pipeline captures the import before a `resourceQuery` rule can, and the processed module — not source text — comes back.
 
 - **U.4.1 — The widget's documented CSS-dependency list is incomplete; the full set is discovered by broken UI.** `summit-registration-lite/README.md` lists only Bootstrap 3 + Font Awesome 4 as "required external stylesheets", but the widget also renders `.abc-radio` / `.abc-checkbox` markup that needs `awesome-bootstrap-checkbox` CSS (the "Ticket is for" radios + consent checkboxes render as unstyled native controls without it). It's a `devDependency` of the widget, not called out as a runtime style requirement. We found it by hitting the broken radios, not by reading docs. Expect the same for other widgets in later rounds — when a control renders as a bare native element, grep the widget's rendered class names for a `*-bootstrap-*` / vendor prefix and link that package's CSS. `awesome-bootstrap-checkbox@2.x` (which we resolve) targets the Bootstrap-4 `.form-check` structure the widget emits, even though Gatsby loaded `1.0.2` from a CDN.
 
@@ -486,7 +486,7 @@ every widget request carries.
 **Fix — uicore's opt-in setters, fed from the host ports.** uicore exposes
 `setConfig` (`lib/utils/config`) and `setAccessTokenResolver` +
 `setAuthHandlers({ initLogOut, authErrorHandler })` (`lib/security/methods`).
-This package's `src/kit/uicore-host.ts` exports `configureUicore()`, which
+This package's `src/lib/uicore-host.ts` exports `configureUicore()`, which
 reads the `HostConfig` and `HostAuth` ports from widget-core and calls the
 three setters. It is host-agnostic (no host import), so the same file runs in
 the Next graph and in the isolated React-17 island bundle. It keeps uicore's

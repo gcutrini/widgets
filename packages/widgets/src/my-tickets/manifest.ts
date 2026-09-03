@@ -1,7 +1,7 @@
-/// <reference path="../kit/widget-modules.d.ts" />
-import type { WidgetManifest } from '@openeventkit/widget-core/manifest';
-import { emotionMirrorBridge } from '../kit/bridges/emotion-mirror';
-import { clickOutsideRetargetBridge } from '../kit/bridges/click-outside-retarget';
+/// <reference path="../lib/widget-modules.d.ts" />
+import type { WidgetManifest } from '../core/manifest';
+import { emotionMirrorBridge } from '../lib/bridges/emotion-mirror';
+import { clickOutsideRetargetBridge } from '../lib/bridges/click-outside-retarget';
 import { myTicketsSheets, myTicketsStyles } from './vendor-styles';
 // Side-effect: seed the widget's i18n dictionary before it mounts.
 import 'my-orders-tickets-widget/dist/i18n';

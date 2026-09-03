@@ -1,10 +1,10 @@
-import { sheet as bootstrap } from '../kit/vendor-css/bootstrap.min';
-import { sheet as fontAwesome } from '../kit/vendor-css/font-awesome.min';
-import { sheet as freeTextSearch } from '../kit/vendor-css/uicore-free-text-search';
-import { sheet as liteSchedule } from '../kit/vendor-css/lite-schedule-widget';
-import { sheet as circleButton } from '../kit/vendor-css/uicore-circle-button';
+import { sheet as bootstrap } from '../lib/vendor-css/bootstrap.min';
+import { sheet as fontAwesome } from '../lib/vendor-css/font-awesome.min';
+import { sheet as freeTextSearch } from '../lib/vendor-css/uicore-free-text-search';
+import { sheet as liteSchedule } from '../lib/vendor-css/lite-schedule-widget';
+import { sheet as circleButton } from '../lib/vendor-css/uicore-circle-button';
 import { transitionGroupFadeFix } from './transition-group';
-import { css as suppressAjaxLoaderCss } from '../kit/styles/suppress-ajax-loader';
+import { css as suppressAjaxLoaderCss } from '../lib/styles/suppress-ajax-loader';
 
 /**
  * Style dependencies for the Lite Schedule widget.

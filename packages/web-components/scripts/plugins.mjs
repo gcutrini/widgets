@@ -39,7 +39,7 @@ export const nodePolyfills = polyfillNode({
 // uicore pulls moment-timezone, whose default build carries the full 1900-2100
 // tz-transition dataset (~715 KB); redirect to the 10-year-range dataset.
 // sweetalert2 (~78 KB) is aliased to the widget-notify shim so the real library
-// never bundles. See kit/compat/uicore-swal.
+// never bundles. See lib/compat/uicore-swal.
 export // @openeventkit/widgets must be installed next to this package (its 0.1.0 is
 // not on a registry — hosts override it to a git ref until it publishes).
 const resolveWidgetsCompat = (name) => {
@@ -232,7 +232,7 @@ defineWidgetWebComponent({ React, ReactDOM, manifest });
 });
 
 // runtimeNeeds token → the plugin that acts on it, in registration order.
-// Tokens are the manifest vocabulary (see widget-core's RuntimeNeed type).
+// Tokens are the manifest vocabulary (see the core manifest's RuntimeNeed type).
 export const NEEDS_TO_PLUGINS = new Map([
   ['pin:mui5-react17', muiReact17Plugin],
   ['quirk:myTicketsFont', myTicketsFontPlugin],
