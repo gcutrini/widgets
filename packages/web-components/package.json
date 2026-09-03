@@ -41,7 +41,7 @@
     "lodash": "^4.18.1",
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.48",
-    "openstack-uicore-foundation": "github:gcutrini/openstack-uicore-foundation#deploy",
+    "openstack-uicore-foundation": "4.2.34",
     "prop-types": "^15.8.1",
     "react": "17.0.2",
     "react-bootstrap": "^0.33.1",
