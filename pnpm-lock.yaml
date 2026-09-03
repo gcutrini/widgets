@@ -106,6 +106,12 @@ importers:
       dropzone:
         specifier: ^5.7.2
         version: 5.9.3
+      esbuild:
+        specifier: ^0.23.0
+        version: 0.23.1
+      esbuild-plugin-polyfill-node:
+        specifier: ^0.3.0
+        version: 0.3.0(esbuild@0.23.1)
       extend:
         specifier: ^3.0.1
         version: 3.0.2
@@ -226,13 +232,6 @@ importers:
       video.js:
         specifier: ^7.8.2
         version: 7.21.7
-    devDependencies:
-      esbuild:
-        specifier: ^0.23.0
-        version: 0.23.1
-      esbuild-plugin-polyfill-node:
-        specifier: ^0.3.0
-        version: 0.3.0(esbuild@0.23.1)
 
   packages/widget-core: {}
 
