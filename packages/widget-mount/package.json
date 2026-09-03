@@ -1,7 +1,7 @@
 {
   "name": "@openeventkit/widget-mount",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "React mount layer for legacy widgets: the Widget dispatcher, the WidgetRenderer interface + registry, the WidgetComposition/WidgetComposer contract, the generic shadow-react and web-component renderer factories (hosts inject lazy-loading, error boundary, shadow context, bundle base path), prop mutation-safety, and the React-19 compat shims. App-side only \u2014 the esbuild web-component build never imports it. The app registers concrete renderers; widget Clients resolve them by id.",
   "exports": {
@@ -11,7 +11,7 @@
     "./compat/*": "./src/compat/*.ts"
   },
   "dependencies": {
-    "@openeventkit/widget-core": "workspace:*"
+    "@openeventkit/widget-core": "0.1.0"
   },
   "peerDependencies": {
     "react": "*",
