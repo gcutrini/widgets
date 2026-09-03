@@ -1,0 +1,40 @@
+/**
+ * Style dependencies for the Registration widget.
+ *
+ * `sheets` — generated vendor-css modules adopted into the shadow root.
+ * Order matters: the widget's own CSS comes last so it wins cascade ties.
+ *
+ * `styles` — hand-authored CSS strings adopted into the shadow root.
+ * Used for CSS that has no generated module:
+ *   - `react-tooltip@3` inlines its CSS in its JS bundle
+ *   - `widget-buttons` is our own supplemental `.button` baseline
+ *
+ * Rationale for each sheet:
+ *   Bootstrap 3 + Font Awesome 4 — documented as required externals in
+ *     summit-registration-lite/README.md
+ *   awesome-bootstrap-checkbox — styles the `.abc-radio` / `.abc-checkbox`
+ *     structure the widget renders for the "Ticket is for" radios and the
+ *     consent checkboxes (hides the native control, draws a custom one)
+ *   react-tooltip — widget uses <ReactTooltip>; its runtime CSS injects
+ *     into document.head, which shadow scope doesn't inherit
+ *   widget-buttons — the plain `.button` class the widget renders (e.g.
+ *     the cookie-consent Accept button) has no styling of its own
+ *
+ * Deliberately NOT included: Bulma. reg-lite's dist carries Bulma classes
+ * (`modal is-active`, `modal-background`) but only in its
+ * registration-modal entry — the popup-overlay flavor of the widget. We
+ * mount `dist/components/registration-form` (the inline flavor), whose
+ * bundle contains none of them, so the Bulma path is unreachable here.
+ */
+
+import { css as reactTooltipCss } from '../kit/styles/react-tooltip';
+import { css as widgetButtonsCss } from '../kit/styles/widget-buttons';
+import { css as skeletonCss } from '../kit/styles/skeleton';
+import { sheet as bootstrap } from '../kit/vendor-css/bootstrap.min';
+import { sheet as fontAwesome } from '../kit/vendor-css/font-awesome.min';
+import { sheet as abcCheckbox } from '../kit/vendor-css/awesome-bootstrap-checkbox';
+import { sheet as regLite } from '../kit/vendor-css/summit-registration-lite';
+
+export const registrationSheets = [bootstrap, fontAwesome, abcCheckbox, regLite] as const;
+
+export const registrationStyles = [reactTooltipCss, widgetButtonsCss, skeletonCss] as const;

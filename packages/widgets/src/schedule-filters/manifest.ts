@@ -1,0 +1,18 @@
+import type { WidgetManifest } from '@openeventkit/widget-core/manifest';
+import { emotionMirrorBridge } from '../kit/bridges/emotion-mirror';
+import { scheduleFiltersSheets } from './vendor-styles';
+
+export const scheduleFiltersManifest: WidgetManifest = {
+  name: 'schedule-filters',
+  load: () => import('schedule-filter-widget/dist'),
+  vendorSheets: scheduleFiltersSheets,
+  // The filter dropdowns are uicore react-selects styled by emotion@9 into
+  // document.head; mirror those rules into the shadow.
+  bridges: [emotionMirrorBridge],
+  elementTag: 'aside',
+  elementAttrs: { 'aria-label': 'Schedule filters' },
+};
+
+// Uniform alias so the web-component entry codegen can import `{ manifest }`
+// (packages/web-components/scripts/build.mjs) regardless of widget.
+export { scheduleFiltersManifest as manifest };

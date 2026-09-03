@@ -1,0 +1,45 @@
+{
+  "acceptedUnknown": [
+    "@reduxjs/toolkit",
+    "@sentry/react",
+    "chain-function",
+    "dom-helpers",
+    "formik",
+    "i18next",
+    "i18next-browser-languagedetector",
+    "idtoken-verifier",
+    "p-limit",
+    "react-content-loader",
+    "react-helmet",
+    "react-hook-form",
+    "react-i18next",
+    "react-infinite-scroll-component",
+    "react-laag",
+    "react-otp-input",
+    "react-qr-code",
+    "react-scroll",
+    "react-slick",
+    "react-spring",
+    "react-stars",
+    "react-toastify",
+    "react-use",
+    "redux-persist",
+    "slick-carousel",
+    "urijs",
+    "use-debounce",
+    "use-fit-text",
+    "warning",
+    "yup"
+  ],
+  "acceptedBarrels": [
+    "live-event:react-bootstrap",
+    "schedule-filters:lodash",
+    "schedule-full:react-bootstrap",
+    "schedule-lite:react-bootstrap",
+    "speakers:react-bootstrap"
+  ],
+  "acceptedMuiMissing": [
+    "@mui/base",
+    "@mui/material"
+  ]
+}

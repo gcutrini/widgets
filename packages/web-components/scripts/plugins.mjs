@@ -1,0 +1,209 @@
+/**
+ * The esbuild resolution policy for the island builds — every plugin and alias
+ * table build.mjs wires into its passes. No side effects on import (the MUI
+ * version log lives in build.mjs).
+ */
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { promises as fs } from 'node:fs';
+import { createRequire } from 'node:module';
+import { polyfillNode } from 'esbuild-plugin-polyfill-node';
+import { STUBBED_NODE_BUILTINS, POLYFILLED_NODE_BUILTINS } from './policy.mjs';
+
+const dir = path.dirname(fileURLToPath(import.meta.url));
+const pkgRoot = path.resolve(dir, '..');
+const require = createRequire(import.meta.url);
+
+// Node-built-in compat for the browser bundle, via esbuild-plugin-polyfill-node
+// (@jspm/core implementations). Real polyfills for the built-ins whose exports
+// code extends or calls at load (POLYFILLED_NODE_BUILTINS), empty modules for
+// the rest (STUBBED_NODE_BUILTINS), whose code paths never run in the browser.
+// The process global is injected for the env checks scattered through the
+// legacy deps; no other globals — parity with what the bundles always had.
+export const nodePolyfills = polyfillNode({
+  globals: {
+    process: true,
+    global: false,
+    __dirname: false,
+    __filename: false,
+    buffer: false,
+    navigator: false,
+  },
+  polyfills: {
+    ...Object.fromEntries(STUBBED_NODE_BUILTINS.map((m) => [m, 'empty'])),
+    ...Object.fromEntries(POLYFILLED_NODE_BUILTINS.map((m) => [m, true])),
+    process: true,
+  },
+});
+
+// uicore pulls moment-timezone, whose default build carries the full 1900-2100
+// tz-transition dataset (~715 KB); redirect to the 10-year-range dataset.
+// sweetalert2 (~78 KB) is aliased to the widget-notify shim so the real library
+// never bundles. See kit/compat/uicore-swal.
+export const vendorAlias = {
+  'moment-timezone': require.resolve('moment-timezone/builds/moment-timezone-with-data-10-year-range'),
+  sweetalert2: require.resolve('@openeventkit/widgets/compat/uicore-swal'),
+};
+
+// ─── Pin every @mui/* + @emotion/* to the React-17 build of MUI 5 ─────────────
+// uicore declares @mui/material as a peer (^5) but ships v5-era code. With no
+// pin, esbuild resolves that peer to whatever MUI the surrounding installation
+// holds. package.json declares EVERY top-level @mui/* the bundles import at v5
+// while react is 17, so pnpm materializes the coherent React-17-peered v5 set
+// in this package's own node_modules — the only place versions are declared and
+// therefore deterministic. Imports from INSIDE the MUI/emotion trees resolve
+// naturally (each package keeps its nested v5 copies; no cross-version mixing).
+const isMuiInternal = (importer) => /[\\/]\.pnpm[\\/]@(mui|emotion)\+/.test(importer || '');
+
+export const muiReact17Plugin = {
+  name: 'mui-react17',
+  setup(build) {
+    build.onResolve({ filter: /^@(mui|emotion)\// }, async (args) => {
+      if (args.pluginData?.mui5) return null; // recursion guard for our re-resolve
+      if (isMuiInternal(args.importer)) return null;
+      const r = await build.resolve(args.path, {
+        kind: args.kind,
+        resolveDir: pkgRoot,
+        pluginData: { mui5: true },
+      });
+      if (r.errors.length) return null; // unknown subpath → let esbuild fall back
+      return { path: r.path, external: r.external };
+    });
+  },
+};
+
+// my-tickets ships its own MUI theme (CustomTheme) that sets no fontFamily, so
+// its MUI text falls back to Roboto — and, being the inner ThemeProvider, it
+// overrides the host-side MuiThemeBridge. Patch its inlined createTheme at
+// load. A dist where the marker no longer matches fails the build — a silent
+// skip would ship the widget rendering Roboto.
+export const myTicketsFontPlugin = {
+  name: 'my-tickets-theme-font',
+  setup(build) {
+    build.onLoad({ filter: /my-orders-tickets-widget[\\/]dist[\\/]index\.js$/ }, async (args) => {
+      const code = await fs.readFile(args.path, 'utf8');
+      const patched = code.replace(
+        /(createTheme\)\(\{[\s\S]*?typography:\s*\{)/,
+        '$1 fontFamily: "var(--font_family)",',
+      );
+      if (patched === code) {
+        throw new Error(
+          'my-tickets: CustomTheme typography marker not found — the dist changed and the quirk:myTicketsFont patch no longer applies',
+        );
+      }
+      return { contents: patched, loader: 'js' };
+    });
+  },
+};
+
+// Shared variant: leave every runtime-served specifier as a bare import the
+// browser resolves through the host's import map. uicore css imports become
+// empty modules (vendor CSS is adopted into the shadow separately); uicore
+// paths the runtime doesn't serve (single-consumer modules) fall through and
+// bundle locally, as do @mui specifiers outside the served surface.
+export const sharedExternals = (sharedSpecifiers) => ({
+  name: 'shared-externals',
+  setup(build) {
+    const exact = new Set(sharedSpecifiers);
+    build.onResolve({ filter: /^[^./]/ }, (args) => {
+      if (args.path.startsWith('openstack-uicore-foundation/lib/') && args.path.includes('/css/')) {
+        return { path: args.path, namespace: 'uicore-css-empty' };
+      }
+      if (!exact.has(args.path)) return null;
+      // ESM import statements pass through as true externals — the browser
+      // resolves them via the import map. CJS require() calls (the webpack-UMD
+      // widget dists) cannot dynamically require an ESM external, so they go
+      // through a tiny bridge module that imports the external and hands its
+      // runtime shape (`default ?? namespace`) back as module.exports.
+      if (args.kind === 'require-call') {
+        return { path: args.path, namespace: 'ext-require-bridge' };
+      }
+      return { path: args.path, external: true };
+    });
+    build.onLoad({ filter: /.*/, namespace: 'ext-require-bridge' }, (args) => ({
+      // require() callers expect the CJS shape. Three cases:
+      // - default only (CJS whole-exports): hand over the default.
+      // - default + named (browser-ESM component modules): a merged
+      //   { __esModule, default, ...named } object, so BOTH
+      //   _interopRequireDefault(require(s)).default and require(s).namedThing
+      //   work — the shape the deleted to-module-exports produced.
+      // - no default: the namespace itself.
+      contents:
+        `import * as __ns from ${JSON.stringify(args.path)};\n` +
+        'const __keys = Object.keys(__ns);\n' +
+        'let __out;\n' +
+        'if (__ns.default !== undefined && __keys.length > 1) {\n' +
+        '  __out = { __esModule: true, default: __ns.default };\n' +
+        '  for (const k of __keys) if (k !== "default") __out[k] = __ns[k];\n' +
+        '} else {\n' +
+        '  __out = __ns.default !== undefined ? __ns.default : __ns;\n' +
+        '}\n' +
+        'module.exports = __out;\n',
+      loader: 'js',
+      resolveDir: pkgRoot,
+    }));
+    build.onLoad({ filter: /.*/, namespace: 'uicore-css-empty' }, () => ({
+      contents: 'export {};',
+      loader: 'js',
+    }));
+  },
+});
+
+// Every build: resolve uicore from THIS package's node_modules, whoever imports
+// it, so a bundle can never hold two uicore instances. Registered last so the
+// external/shared resolvers win first.
+export const uicorePinPlugin = {
+  name: 'uicore-pin',
+  setup(build) {
+    build.onResolve({ filter: /^openstack-uicore-foundation\// }, (args) => ({
+      path: require.resolve(args.path),
+    }));
+  },
+};
+
+/**
+ * The esbuild options every island pass shares (the per-pass bits — minify,
+ * define, format, entry — stay with the caller). One definition so the real
+ * builds and the analyzer's metafile discovery resolve the graph identically.
+ */
+export const baseOptions = () => ({
+  bundle: true,
+  platform: 'browser',
+  loader: {
+    '.css': 'empty', '.scss': 'empty',
+    '.png': 'dataurl', '.jpg': 'dataurl', '.jpeg': 'dataurl',
+    '.gif': 'dataurl', '.svg': 'dataurl',
+    '.woff': 'dataurl', '.woff2': 'dataurl', '.ttf': 'dataurl', '.eot': 'dataurl',
+  },
+  alias: { ...vendorAlias },
+  inject: [],
+  logLevel: 'warning',
+});
+
+// The per-widget entry is pure boilerplate — inject React/ReactDOM and register
+// the custom element from the widget's shared `manifest` export. The i18n seed
+// import is external in the shared variant (runs once in the shared graph) and
+// bundles in standalone.
+export const widgetEntry = (name) => ({
+  contents: `
+import '@openeventkit/widgets/compat/uicore-i18n';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { manifest } from '@openeventkit/widgets/${name}/manifest';
+import { defineWidgetWebComponent } from './src/element/define-web-component.js';
+defineWidgetWebComponent({ React, ReactDOM, manifest });
+`,
+  resolveDir: pkgRoot,
+  sourcefile: `${name}.wc.js`,
+  loader: 'js',
+});
+
+// runtimeNeeds token → the plugin that acts on it, in registration order.
+// Tokens are the manifest vocabulary (see widget-core's RuntimeNeed type).
+export const NEEDS_TO_PLUGINS = new Map([
+  ['pin:mui5-react17', muiReact17Plugin],
+  ['quirk:myTicketsFont', myTicketsFontPlugin],
+  ['stub:node', nodePolyfills],
+]);
+export const selectPlugins = (needs) =>
+  [...NEEDS_TO_PLUGINS].filter(([token]) => needs.has(token)).map(([, plugin]) => plugin);

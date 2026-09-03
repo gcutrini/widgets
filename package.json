@@ -1,0 +1,26 @@
+{
+  "name": "@openeventkit/widgets-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.1",
+  "scripts": {
+    "build:wc": "pnpm --filter @openeventkit/web-components build",
+    "build:wc:standalone": "pnpm --filter @openeventkit/web-components build:standalone",
+    "analyze:check": "pnpm --filter @openeventkit/web-components analyze:check",
+    "test": "vitest run && pnpm --filter @openeventkit/web-components test"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "jsdom": "^30.0.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "typescript": "^5.8.0",
+    "vitest": "^4.1.11",
+    "@openeventkit/widgets": "workspace:*",
+    "@openeventkit/widget-core": "workspace:*",
+    "@openeventkit/web-components": "workspace:*"
+  }
+}
