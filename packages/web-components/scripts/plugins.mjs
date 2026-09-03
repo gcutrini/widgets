@@ -184,6 +184,11 @@ export const uicorePinPlugin = {
 export const baseOptions = () => ({
   bundle: true,
   platform: 'browser',
+  // Explicit: esbuild ignores tsconfig.json inside node_modules, so a host
+  // running the bins would otherwise compile the widgets package's JSX with
+  // the classic transform (React.createElement with no React in scope) while
+  // the workspace compiles it with the automatic runtime.
+  jsx: 'automatic',
   loader: {
     '.css': 'empty', '.scss': 'empty',
     '.png': 'dataurl', '.jpg': 'dataurl', '.jpeg': 'dataurl',
