@@ -7,6 +7,16 @@ export default defineConfig({
     environment: 'jsdom',
     globals: false,
     setupFiles: ['./vitest.setup.ts'],
-    include: ['packages/*/src/**/*.{test,spec}.{ts,tsx}', 'test/**/*.test.ts'],
+    include: ['packages/*/src/**/*.{test,spec}.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      include: ['packages/*/src/**'],
+      exclude: [
+        'packages/*/src/**/*.{test,spec}.{ts,tsx}',
+        'packages/*/src/**/__tests__/**',
+        'packages/widgets/src/kit/vendor-css/**',
+      ],
+      reporter: ['text', 'html'],
+    },
   },
 });

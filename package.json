@@ -8,6 +8,7 @@
     "build:wc:standalone": "pnpm --filter @openeventkit/web-components build:standalone",
     "analyze:check": "pnpm --filter @openeventkit/web-components analyze:check",
     "test": "vitest run && pnpm --filter @openeventkit/web-components test && pnpm run typecheck",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "assets": "pnpm --filter @openeventkit/widgets run assets"
   },
@@ -22,6 +23,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "@vitest/coverage-v8": "^4.1.11",
     "jsdom": "^30.0.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

@@ -5,8 +5,8 @@ import { describe, it, expect } from 'vitest';
 // node — it cannot import the TS manifests. A manifest reformat could make
 // that scrape silently misparse. This tripwire imports every manifest for
 // real and asserts the scrape agrees with the live module.
-import { readDeclaredNeeds } from '../packages/web-components/scripts/footprint.mjs';
-import { WIDGETS } from '../packages/web-components/scripts/policy.mjs';
+import { readDeclaredNeeds } from '../../scripts/footprint.mjs';
+import { WIDGETS } from '../../scripts/policy.mjs';
 
 describe('web-components manifest scrape', () => {
   it.each(WIDGETS as string[])(
