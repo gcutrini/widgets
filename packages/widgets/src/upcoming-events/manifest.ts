@@ -1,3 +1,4 @@
+/// <reference path="../kit/widget-modules.d.ts" />
 import type { WidgetManifest } from '@openeventkit/widget-core/manifest';
 import { upcomingEventsSheets, upcomingEventsStyles } from './vendor-styles';
 

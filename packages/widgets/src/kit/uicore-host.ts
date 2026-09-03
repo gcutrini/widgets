@@ -1,3 +1,4 @@
+/// <reference path="widget-modules.d.ts" />
 import { setConfig } from 'openstack-uicore-foundation/lib/utils/config';
 import {
   setAccessTokenResolver,
@@ -57,7 +58,7 @@ export function configureUicore(): void {
     // uicore only calls this for 401 and 403. The handler runs outside React,
     // so it raises the widget auth-error event and the host's dialog owns the
     // user-facing treatment.
-    authErrorHandler: ({ status }) => {
+    authErrorHandler: ({ status }: { status?: number }) => {
       if (status === 401 || status === 403) emitWidgetAuthError({ status });
     },
   });

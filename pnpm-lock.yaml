@@ -27,13 +27,19 @@ importers:
         version: 6.10.0(@testing-library/dom@10.4.1)
       '@testing-library/react':
         specifier: ^16.1.0
-        version: 16.3.3(@testing-library/dom@10.4.1)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.3(@testing-library/dom@10.4.1)(@types/react-dom@19.2.7(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@types/node':
+        specifier: ^22.20.1
+        version: 22.20.1
       '@types/react':
         specifier: ^19.2.0
         version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.2.0
+        version: 19.2.7(@types/react@19.2.18)
       '@vitejs/plugin-react':
         specifier: ^5.0.0
-        version: 5.2.0(vite@8.2.2(@types/node@26.4.1)(terser@5.51.2))
+        version: 5.2.0(vite@8.2.2(@types/node@22.20.1)(terser@5.51.2))
       jsdom:
         specifier: ^30.0.1
         version: 30.0.1(@noble/hashes@1.8.0)
@@ -48,7 +54,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.1.11
-        version: 4.1.11(@types/node@26.4.1)(jsdom@30.0.1(@noble/hashes@1.8.0))(vite@8.2.2(@types/node@26.4.1)(terser@5.51.2))
+        version: 4.1.11(@types/node@22.20.1)(jsdom@30.0.1(@noble/hashes@1.8.0))(vite@8.2.2(@types/node@22.20.1)(terser@5.51.2))
 
   packages/web-components:
     dependencies:
@@ -273,7 +279,7 @@ importers:
         version: 3.4.0
       event-feedback-widget:
         specifier: 2.0.1
-        version: 2.0.1(f1e02b33c5fe14f8ebaac3212cff1852)
+        version: 2.0.1(2e37427de11f94b460fd381a526ee03c)
       final-form:
         specifier: ^4.20.10
         version: 4.20.10
@@ -282,7 +288,7 @@ importers:
         version: 4.7.0
       full-schedule-widget:
         specifier: 3.1.3
-        version: 3.1.3(35e72c6e57ebc9a824b627bddf683c60)
+        version: 3.1.3(ed400783b5457727b2705a868fbd42d1)
       i18n-react:
         specifier: ^0.7.0
         version: 0.7.0(react@19.2.8)
@@ -291,10 +297,10 @@ importers:
         version: 2.2.4
       lite-schedule-widget:
         specifier: 3.0.3
-        version: 3.0.3(245523799056b240d64f9f08b2cde48e)
+        version: 3.0.3(15c744ddec6b3634381c162237d468fb)
       live-event-widget:
         specifier: 4.0.4
-        version: 4.0.4(df7ed43dc469f4fcfecca1f39a41c430)
+        version: 4.0.4(48ae7bccee9fec1d96be886b69eafdc9)
       lodash:
         specifier: ^4.18.1
         version: 4.18.1
@@ -306,10 +312,10 @@ importers:
         version: 0.5.48
       my-orders-tickets-widget:
         specifier: 1.0.16
-        version: 1.0.16(@mui/system@9.4.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(crypto-js@4.2.0)(i18n-react@0.7.0(react@19.2.8))(idtoken-verifier@2.2.4)(moment@2.30.1)(openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f))(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react-redux@7.2.9(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8))(react@19.2.8)(redux-persist@5.10.0(react@19.2.8)(redux@4.2.1))(redux-thunk@2.4.2(redux@4.2.1))(redux@4.2.1)(sweetalert2@11.26.25)
+        version: 1.0.16(@mui/system@9.4.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(crypto-js@4.2.0)(i18n-react@0.7.0(react@19.2.8))(idtoken-verifier@2.2.4)(moment@2.30.1)(openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae))(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react-redux@7.2.9(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8))(react@19.2.8)(redux-persist@5.10.0(react@19.2.8)(redux@4.2.1))(redux-thunk@2.4.2(redux@4.2.1))(redux@4.2.1)(sweetalert2@11.26.25)
       openstack-uicore-foundation:
         specifier: github:gcutrini/openstack-uicore-foundation#deploy
-        version: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f)
+        version: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae)
       pdfmake:
         specifier: ^0.3.11
         version: 0.3.11
@@ -336,16 +342,16 @@ importers:
         version: 2.4.2(redux@4.2.1)
       schedule-filter-widget:
         specifier: 3.0.8
-        version: 3.0.8(1165e9e9e8f88c1ed7af74aabaa0bc3e)
+        version: 3.0.8(4e47062ba5dedbd9ebd0eede0182e009)
       spark-md5:
         specifier: ^3.0.2
         version: 3.0.2
       speakers-widget:
         specifier: 4.0.2
-        version: 4.0.2(9a487fbb223a5f3ac5956114bd4d137c)
+        version: 4.0.2(df6fa93237487112484d1b3b3a94aad5)
       summit-registration-lite:
         specifier: github:gcutrini/summit-registration-lite#deploy/wc-registration
-        version: https://codeload.github.com/gcutrini/summit-registration-lite/tar.gz/b50bd612f4fbc08034893cea475326a1d28d161e(e3d3e76110d27ee147b4b034103fce1f)
+        version: https://codeload.github.com/gcutrini/summit-registration-lite/tar.gz/b50bd612f4fbc08034893cea475326a1d28d161e(9bb1480a56c2229000bc8d80691e052d)
       superagent:
         specifier: ^3.8.3
         version: 3.8.3
@@ -354,7 +360,7 @@ importers:
         version: 11.26.25
       upcoming-events-widget:
         specifier: 3.0.7
-        version: 3.0.7(8387a4c2c46f3c6dbe8599ebfe7372ba)
+        version: 3.0.7(297399e697f63210fcd6a48d7b40d387)
     devDependencies:
       '@mui/icons-material':
         specifier: ^9.4.0
@@ -1494,6 +1500,9 @@ packages:
   '@types/markerclustererplus@2.1.33':
     resolution: {integrity: sha512-ZDxsLUp8BmK9MVZZeQVDDzVrEXgRL0021AQcfXqfreFhdfZ9+PS0P6o4nZBvoIVYTmGSBemdCdI6mL6hf9yWvg==}
 
+  '@types/node@22.20.1':
+    resolution: {integrity: sha512-EANqOCF9QFyra+4pfxUcX9STKJpCLjMbObVzljIJomAWSnuSIEAvyzEU53GaajbXJEgdh0iEcPL+DGvpUd4k1Q==}
+
   '@types/node@26.4.1':
     resolution: {integrity: sha512-k97ENvZWtvA6yqz5/FS6a7duDgOPEeOQOc2iKS/nY6mX6qJUKtLnWzQS+Xj6tXweyj6ZcTAK2Qecetnvi9nCLA==}
 
@@ -1502,6 +1511,11 @@ packages:
 
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
+
+  '@types/react-dom@19.2.7':
+    resolution: {integrity: sha512-I8bPpDLcHBv1qiIiXDCy71Rt8eQDKJP0sMSWJphDdAcdqiJ1sGpZamavoEIRZmYzjia9LuEb2HlYdDpmoENpvQ==}
+    peerDependencies:
+      '@types/react': ^19.2.0
 
   '@types/react-reconciler@0.28.9':
     resolution: {integrity: sha512-HHM3nxyUZ3zAylX8ZEyrDNd2XZOnQ0D5XfunJF5FLQnZbHHYq4UWvW1QfelQNXv1ICNkwYhfxjwfnqivYB6bFg==}
@@ -4268,6 +4282,9 @@ packages:
     peerDependencies:
       react: '>=15.0.0'
 
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
   undici-types@8.3.0:
     resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
 
@@ -5011,7 +5028,7 @@ snapshots:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 26.4.1
+      '@types/node': 22.20.1
       '@types/yargs': 17.0.35
       chalk: 4.1.2
 
@@ -5578,7 +5595,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@react-pdf/renderer@3.4.5(encoding@0.1.13)(react@19.2.8)':
+  '@react-pdf/renderer@3.4.5(react@19.2.8)':
     dependencies:
       '@babel/runtime': 7.29.7
       '@react-pdf/font': 2.5.2(encoding@0.1.13)
@@ -5886,7 +5903,7 @@ snapshots:
       picocolors: 1.1.1
       redent: 3.0.0
 
-  '@testing-library/react@16.3.3(@testing-library/dom@10.4.1)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@testing-library/react@16.3.3(@testing-library/dom@10.4.1)(@types/react-dom@19.2.7(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@babel/runtime': 7.29.7
       '@testing-library/dom': 10.4.1
@@ -5894,6 +5911,7 @@ snapshots:
       react-dom: 19.2.8(react@19.2.8)
     optionalDependencies:
       '@types/react': 19.2.18
+      '@types/react-dom': 19.2.7(@types/react@19.2.18)
 
   '@types/aria-query@5.0.4': {}
 
@@ -5956,13 +5974,22 @@ snapshots:
     dependencies:
       '@types/google-maps': 4.0.0
 
+  '@types/node@22.20.1':
+    dependencies:
+      undici-types: 6.21.0
+
   '@types/node@26.4.1':
     dependencies:
       undici-types: 8.3.0
+    optional: true
 
   '@types/parse-json@4.0.2': {}
 
   '@types/prop-types@15.7.15': {}
+
+  '@types/react-dom@19.2.7(@types/react@19.2.18)':
+    dependencies:
+      '@types/react': 19.2.18
 
   '@types/react-reconciler@0.28.9(@types/react@19.2.18)':
     dependencies:
@@ -6014,7 +6041,7 @@ snapshots:
       global: 4.4.0
       is-function: 1.0.2
 
-  '@vitejs/plugin-react@5.2.0(vite@8.2.2(@types/node@26.4.1)(terser@5.51.2))':
+  '@vitejs/plugin-react@5.2.0(vite@8.2.2(@types/node@22.20.1)(terser@5.51.2))':
     dependencies:
       '@babel/core': 7.29.7
       '@babel/plugin-transform-react-jsx-self': 7.29.7(@babel/core@7.29.7)
@@ -6022,7 +6049,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-rc.3
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
-      vite: 8.2.2(@types/node@26.4.1)(terser@5.51.2)
+      vite: 8.2.2(@types/node@22.20.1)(terser@5.51.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -6035,13 +6062,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.1
 
-  '@vitest/mocker@4.1.11(vite@8.2.2(@types/node@26.4.1)(terser@5.51.2))':
+  '@vitest/mocker@4.1.11(vite@8.2.2(@types/node@22.20.1)(terser@5.51.2))':
     dependencies:
       '@vitest/spy': 4.1.11
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.2.2(@types/node@26.4.1)(terser@5.51.2)
+      vite: 8.2.2(@types/node@22.20.1)(terser@5.51.2)
 
   '@vitest/pretty-format@4.1.11':
     dependencies:
@@ -6352,7 +6379,7 @@ snapshots:
 
   chrome-launcher@0.15.2:
     dependencies:
-      '@types/node': 26.4.1
+      '@types/node': 22.20.1
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 1.4.2
@@ -6363,7 +6390,7 @@ snapshots:
 
   chromium-edge-launcher@0.3.0:
     dependencies:
-      '@types/node': 26.4.1
+      '@types/node': 22.20.1
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 1.4.2
@@ -6578,10 +6605,10 @@ snapshots:
       draft-js-utils: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(immutable@3.8.4)
       immutable: 3.8.4
 
-  draft-js-export-html@1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4):
+  draft-js-export-html@1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4):
     dependencies:
-      draft-js: 0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      draft-js-utils: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js: 0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      draft-js-utils: 1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
       immutable: 3.8.4
 
   draft-js-export-markdown@1.4.0(draft-js@0.11.7(encoding@0.1.13)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(immutable@3.8.4):
@@ -6590,10 +6617,10 @@ snapshots:
       draft-js-utils: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(immutable@3.8.4)
       immutable: 3.8.4
 
-  draft-js-export-markdown@1.4.0(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4):
+  draft-js-export-markdown@1.4.0(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4):
     dependencies:
-      draft-js: 0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      draft-js-utils: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js: 0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      draft-js-utils: 1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
       immutable: 3.8.4
 
   draft-js-import-element@1.4.0(draft-js@0.11.7(encoding@0.1.13)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(immutable@3.8.4):
@@ -6603,10 +6630,10 @@ snapshots:
       immutable: 3.8.4
       synthetic-dom: 1.4.0
 
-  draft-js-import-element@1.4.0(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4):
+  draft-js-import-element@1.4.0(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4):
     dependencies:
-      draft-js: 0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      draft-js-utils: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js: 0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      draft-js-utils: 1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
       immutable: 3.8.4
       synthetic-dom: 1.4.0
 
@@ -6616,10 +6643,10 @@ snapshots:
       draft-js-import-element: 1.4.0(draft-js@0.11.7(encoding@0.1.13)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(immutable@3.8.4)
       immutable: 3.8.4
 
-  draft-js-import-html@1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4):
+  draft-js-import-html@1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4):
     dependencies:
-      draft-js: 0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      draft-js-import-element: 1.4.0(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js: 0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      draft-js-import-element: 1.4.0(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
       immutable: 3.8.4
 
   draft-js-import-markdown@1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(immutable@3.8.4):
@@ -6629,10 +6656,10 @@ snapshots:
       immutable: 3.8.4
       synthetic-dom: 1.4.0
 
-  draft-js-import-markdown@1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4):
+  draft-js-import-markdown@1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4):
     dependencies:
-      draft-js: 0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      draft-js-import-element: 1.4.0(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js: 0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      draft-js-import-element: 1.4.0(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
       immutable: 3.8.4
       synthetic-dom: 1.4.0
 
@@ -6641,9 +6668,9 @@ snapshots:
       draft-js: 0.11.7(encoding@0.1.13)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       immutable: 3.8.4
 
-  draft-js-utils@1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4):
+  draft-js-utils@1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4):
     dependencies:
-      draft-js: 0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      draft-js: 0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       immutable: 3.8.4
 
   draft-js@0.11.7(encoding@0.1.13)(react-dom@17.0.2(react@17.0.2))(react@17.0.2):
@@ -6656,7 +6683,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       fbjs: 2.0.0(encoding@0.1.13)
       immutable: 3.7.6
@@ -6786,7 +6813,7 @@ snapshots:
 
   etag@1.8.1: {}
 
-  event-feedback-widget@2.0.1(f1e02b33c5fe14f8ebaac3212cff1852):
+  event-feedback-widget@2.0.1(2e37427de11f94b460fd381a526ee03c):
     dependencies:
       awesome-bootstrap-checkbox: 2.0.1
       font-awesome: 4.7.0
@@ -6797,7 +6824,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-datetime: 2.16.3(moment@2.30.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -6951,10 +6978,10 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  full-schedule-widget@3.1.3(35e72c6e57ebc9a824b627bddf683c60):
+  full-schedule-widget@3.1.3(ed400783b5457727b2705a868fbd42d1):
     dependencies:
       '@mui/base': 5.0.0-alpha.127(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@react-pdf/renderer': 3.4.5(encoding@0.1.13)(react@19.2.8)
+      '@react-pdf/renderer': 3.4.5(react@19.2.8)
       awesome-bootstrap-checkbox: 2.0.1
       bootstrap: 5.1.3(@popperjs/core@2.11.8)
       browser-tabs-lock: 1.3.0
@@ -6967,7 +6994,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae)
       pure-react-carousel: 1.35.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -7237,7 +7264,7 @@ snapshots:
   jest-util@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 26.4.1
+      '@types/node': 22.20.1
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -7254,13 +7281,13 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 26.4.1
+      '@types/node': 22.20.1
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
   jest-worker@29.7.0:
     dependencies:
-      '@types/node': 26.4.1
+      '@types/node': 22.20.1
       jest-util: 29.7.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
@@ -7402,7 +7429,7 @@ snapshots:
 
   lines-and-columns@1.2.4: {}
 
-  lite-schedule-widget@3.0.3(245523799056b240d64f9f08b2cde48e):
+  lite-schedule-widget@3.0.3(15c744ddec6b3634381c162237d468fb):
     dependencies:
       awesome-bootstrap-checkbox: 2.0.1
       font-awesome: 4.7.0
@@ -7413,7 +7440,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae)
       pure-react-carousel: 1.35.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -7432,7 +7459,7 @@ snapshots:
       use-fit-text: 2.4.0(react@19.2.8)
       validator: 9.4.1
 
-  live-event-widget@4.0.4(df7ed43dc469f4fcfecca1f39a41c430):
+  live-event-widget@4.0.4(48ae7bccee9fec1d96be886b69eafdc9):
     dependencies:
       awesome-bootstrap-checkbox: 2.0.1
       font-awesome: 4.7.0
@@ -7443,7 +7470,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-datetime: 2.16.3(moment@2.30.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -7763,7 +7790,7 @@ snapshots:
       '@babel/runtime': 7.29.7
       global: 4.4.0
 
-  my-orders-tickets-widget@1.0.16(@mui/system@9.4.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(crypto-js@4.2.0)(i18n-react@0.7.0(react@19.2.8))(idtoken-verifier@2.2.4)(moment@2.30.1)(openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f))(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react-redux@7.2.9(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8))(react@19.2.8)(redux-persist@5.10.0(react@19.2.8)(redux@4.2.1))(redux-thunk@2.4.2(redux@4.2.1))(redux@4.2.1)(sweetalert2@11.26.25):
+  my-orders-tickets-widget@1.0.16(@mui/system@9.4.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(crypto-js@4.2.0)(i18n-react@0.7.0(react@19.2.8))(idtoken-verifier@2.2.4)(moment@2.30.1)(openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae))(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react-redux@7.2.9(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8))(react@19.2.8)(redux-persist@5.10.0(react@19.2.8)(redux@4.2.1))(redux-thunk@2.4.2(redux@4.2.1))(redux@4.2.1)(sweetalert2@11.26.25):
     dependencies:
       '@emotion/react': 11.14.0(@types/react@19.2.18)(react@19.2.8)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
@@ -7784,7 +7811,7 @@ snapshots:
       i18next-browser-languagedetector: 8.2.1
       idtoken-verifier: 2.2.4
       js-cookie: 3.0.8
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae)
       p-limit: 3.0.0
       prop-types: 15.8.1
       react: 19.2.8
@@ -7931,7 +7958,7 @@ snapshots:
       validator: 9.4.1
       video.js: 7.21.7
 
-  openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f):
+  openstack-uicore-foundation@https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae):
     dependencies:
       '@emotion/react': 11.14.0(@types/react@19.2.18)(react@19.2.8)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
@@ -7963,7 +7990,7 @@ snapshots:
       react-dropzone: 4.3.0(react@19.2.8)
       react-final-form: 6.5.9(final-form@4.20.10)(react@19.2.8)
       react-google-maps: 9.4.5(@types/googlemaps@3.43.3)(@types/markerclustererplus@2.1.33)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      react-rte: 0.16.5(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react-rte: 0.16.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-select: 2.4.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-star-ratings: 2.3.0
       react-tooltip: 3.11.6(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -8522,17 +8549,17 @@ snapshots:
 
   react-refresh@0.18.0: {}
 
-  react-rte-ref-fix@0.16.2(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  react-rte-ref-fix@0.16.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       babel-runtime: 6.26.0
       class-autobind: 0.1.4
       classnames: 2.5.1
-      draft-js: 0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      draft-js-export-html: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
-      draft-js-export-markdown: 1.4.0(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
-      draft-js-import-html: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
-      draft-js-import-markdown: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
-      draft-js-utils: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js: 0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      draft-js-export-html: 1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js-export-markdown: 1.4.0(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js-import-html: 1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js-import-markdown: 1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js-utils: 1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
       immutable: 3.8.4
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
@@ -8556,17 +8583,17 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  react-rte@0.16.5(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  react-rte@0.16.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       babel-runtime: 6.26.0
       class-autobind: 0.1.4
       classnames: 2.5.1
-      draft-js: 0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      draft-js-export-html: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
-      draft-js-export-markdown: 1.4.0(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
-      draft-js-import-html: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
-      draft-js-import-markdown: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
-      draft-js-utils: 1.4.1(draft-js@0.11.7(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js: 0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      draft-js-export-html: 1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js-export-markdown: 1.4.0(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js-import-html: 1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js-import-markdown: 1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
+      draft-js-utils: 1.4.1(draft-js@0.11.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(immutable@3.8.4)
       immutable: 3.8.4
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
@@ -8889,7 +8916,7 @@ snapshots:
     dependencies:
       xmlchars: 2.2.0
 
-  schedule-filter-widget@3.0.8(1165e9e9e8f88c1ed7af74aabaa0bc3e):
+  schedule-filter-widget@3.0.8(4e47062ba5dedbd9ebd0eede0182e009):
     dependencies:
       awesome-bootstrap-checkbox: 2.0.1
       browser-tabs-lock: 1.3.0
@@ -8902,7 +8929,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae)
       react: 19.2.8
       react-datetime: 2.16.3(moment@2.30.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-dom: 19.2.8(react@19.2.8)
@@ -9067,7 +9094,7 @@ snapshots:
 
   spark-md5@3.0.2: {}
 
-  speakers-widget@4.0.2(9a487fbb223a5f3ac5956114bd4d137c):
+  speakers-widget@4.0.2(df6fa93237487112484d1b3b3a94aad5):
     dependencies:
       awesome-bootstrap-checkbox: 2.0.1
       browser-tabs-lock: 1.3.0
@@ -9079,7 +9106,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-datetime: 2.16.3(moment@2.30.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -9161,14 +9188,14 @@ snapshots:
 
   stylis@4.4.0: {}
 
-  summit-registration-lite@https://codeload.github.com/gcutrini/summit-registration-lite/tar.gz/b50bd612f4fbc08034893cea475326a1d28d161e(e3d3e76110d27ee147b4b034103fce1f):
+  summit-registration-lite@https://codeload.github.com/gcutrini/summit-registration-lite/tar.gz/b50bd612f4fbc08034893cea475326a1d28d161e(9bb1480a56c2229000bc8d80691e052d):
     dependencies:
       '@emotion/react': 11.14.0(@types/react@19.2.18)(react@19.2.8)
       '@emotion/styled': 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
       '@mui/icons-material': 5.18.0(@mui/material@5.18.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
       '@mui/material': 5.18.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@mui/utils': 5.17.1(@types/react@19.2.18)(react@19.2.8)
-      '@react-pdf/renderer': 3.4.5(encoding@0.1.13)(react@19.2.8)
+      '@react-pdf/renderer': 3.4.5(react@19.2.8)
       '@sentry/react': 8.55.2(react@19.2.8)
       '@stripe/react-stripe-js': 3.10.0(@stripe/stripe-js@7.9.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@stripe/stripe-js': 7.9.0
@@ -9183,7 +9210,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-content-loader: 7.1.2(react@19.2.8)
@@ -9362,7 +9389,10 @@ snapshots:
       react: 19.2.8
       react-lifecycles-compat: 3.0.4
 
-  undici-types@8.3.0: {}
+  undici-types@6.21.0: {}
+
+  undici-types@8.3.0:
+    optional: true
 
   undici@8.10.1: {}
 
@@ -9380,7 +9410,7 @@ snapshots:
 
   unpipe@1.0.0: {}
 
-  upcoming-events-widget@3.0.7(8387a4c2c46f3c6dbe8599ebfe7372ba):
+  upcoming-events-widget@3.0.7(297399e697f63210fcd6a48d7b40d387):
     dependencies:
       awesome-bootstrap-checkbox: 2.0.1
       browser-tabs-lock: 1.3.0
@@ -9392,7 +9422,7 @@ snapshots:
       lodash: 4.18.1
       moment: 2.30.1
       moment-timezone: 0.5.48
-      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(7ea8c60f34a7b1f5f0a1fe3eea7dfe3f)
+      openstack-uicore-foundation: https://codeload.github.com/gcutrini/openstack-uicore-foundation/tar.gz/10c19003c9914fe7dd3814413e9e0fd7d0840401(ce7bd95558527d185c46b93c6ad83eae)
       pure-react-carousel: 1.35.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-bootstrap: 0.33.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -9401,7 +9431,7 @@ snapshots:
       react-dropzone: 4.3.0(react@19.2.8)
       react-google-maps: 9.4.5(@types/googlemaps@3.43.3)(@types/markerclustererplus@2.1.33)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-redux: 7.2.9(react-dom@19.2.8(react@19.2.8))(react-native@0.87.1(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8)
-      react-rte-ref-fix: 0.16.2(encoding@0.1.13)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react-rte-ref-fix: 0.16.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-select: 2.4.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-star-ratings: 2.3.0
       react-tooltip: 3.11.6(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -9482,7 +9512,7 @@ snapshots:
       string_decoder: 1.3.0
       util-deprecate: 1.0.2
 
-  vite@8.2.2(@types/node@26.4.1)(terser@5.51.2):
+  vite@8.2.2(@types/node@22.20.1)(terser@5.51.2):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -9490,14 +9520,14 @@ snapshots:
       rolldown: 1.2.7
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@types/node': 26.4.1
+      '@types/node': 22.20.1
       fsevents: 2.3.3
       terser: 5.51.2
 
-  vitest@4.1.11(@types/node@26.4.1)(jsdom@30.0.1(@noble/hashes@1.8.0))(vite@8.2.2(@types/node@26.4.1)(terser@5.51.2)):
+  vitest@4.1.11(@types/node@22.20.1)(jsdom@30.0.1(@noble/hashes@1.8.0))(vite@8.2.2(@types/node@22.20.1)(terser@5.51.2)):
     dependencies:
       '@vitest/expect': 4.1.11
-      '@vitest/mocker': 4.1.11(vite@8.2.2(@types/node@26.4.1)(terser@5.51.2))
+      '@vitest/mocker': 4.1.11(vite@8.2.2(@types/node@22.20.1)(terser@5.51.2))
       '@vitest/pretty-format': 4.1.11
       '@vitest/runner': 4.1.11
       '@vitest/snapshot': 4.1.11
@@ -9514,10 +9544,10 @@ snapshots:
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.1
-      vite: 8.2.2(@types/node@26.4.1)(terser@5.51.2)
+      vite: 8.2.2(@types/node@22.20.1)(terser@5.51.2)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 26.4.1
+      '@types/node': 22.20.1
       jsdom: 30.0.1(@noble/hashes@1.8.0)
     transitivePeerDependencies:
       - msw

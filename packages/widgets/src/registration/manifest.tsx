@@ -1,3 +1,4 @@
+/// <reference path="../kit/widget-modules.d.ts" />
 import type { WidgetManifest } from '@openeventkit/widget-core/manifest';
 import { tooltipBridge } from '../kit/bridges/tooltip';
 import { emotionMirrorBridge } from '../kit/bridges/emotion-mirror';

@@ -10,17 +10,19 @@
     "test": "vitest run && pnpm --filter @openeventkit/web-components test"
   },
   "devDependencies": {
+    "@openeventkit/web-components": "0.1.0",
+    "@openeventkit/widget-core": "0.1.0",
+    "@openeventkit/widgets": "0.1.0",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.1.0",
+    "@types/node": "^22.20.1",
     "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.0",
     "jsdom": "^30.0.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "typescript": "^5.8.0",
-    "vitest": "^4.1.11",
-    "@openeventkit/widgets": "0.1.0",
-    "@openeventkit/widget-core": "0.1.0",
-    "@openeventkit/web-components": "0.1.0"
+    "vitest": "^4.1.11"
   }
 }

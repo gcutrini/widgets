@@ -1,3 +1,4 @@
+/// <reference path="widget-modules.d.ts" />
 'use client';
 
 /**
