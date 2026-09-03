@@ -40,9 +40,21 @@ export const nodePolyfills = polyfillNode({
 // tz-transition dataset (~715 KB); redirect to the 10-year-range dataset.
 // sweetalert2 (~78 KB) is aliased to the widget-notify shim so the real library
 // never bundles. See kit/compat/uicore-swal.
-export const vendorAlias = {
+export // @openeventkit/widgets must be installed next to this package (its 0.1.0 is
+// not on a registry — hosts override it to a git ref until it publishes).
+const resolveWidgetsCompat = (name) => {
+  try {
+    return require.resolve(`@openeventkit/widgets/compat/${name}`);
+  } catch {
+    throw new Error(
+      `@openeventkit/web-components requires @openeventkit/widgets to be installed alongside it (resolving compat/${name} failed)`,
+    );
+  }
+};
+
+const vendorAlias = {
   'moment-timezone': require.resolve('moment-timezone/builds/moment-timezone-with-data-10-year-range'),
-  sweetalert2: require.resolve('@openeventkit/widgets/compat/uicore-swal'),
+  get sweetalert2() { return resolveWidgetsCompat('uicore-swal'); },
 };
 
 // ─── Pin every @mui/* + @emotion/* to the React-17 build of MUI 5 ─────────────
@@ -184,6 +196,7 @@ export const uicorePinPlugin = {
 export const baseOptions = () => ({
   bundle: true,
   platform: 'browser',
+  absWorkingDir: pkgRoot,
   // Explicit: esbuild ignores tsconfig.json inside node_modules, so a host
   // running the bins would otherwise compile the widgets package's JSX with
   // the classic transform (React.createElement with no React in scope) while

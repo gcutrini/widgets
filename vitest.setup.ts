@@ -1,21 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
-
-// React's `cache` is a Server Components-only export — undefined in the
-// jsdom (client) module resolution vitest uses. Any test that transitively
-// imports server-only code (e.g. src/lib/auth/service.ts wraps its token
-// fetcher with cache() to dedupe per-request) crashes at module load with
-// "cache is not a function". Shim it to identity here — tests don't need
-// the deduplication, and prod (server) still gets the real thing.
-vi.mock('react', async () => {
-  const actual = await vi.importActual<typeof import('react')>('react');
-  return {
-    ...actual,
-    cache: <T>(fn: T): T => fn,
-  };
-});
-
+import { afterEach } from 'vitest';
 
 // @testing-library/react auto-cleans only when Vitest globals are enabled;
 // we run with globals: false, so wire cleanup explicitly here.

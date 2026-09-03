@@ -17,12 +17,16 @@ const EXCLUDED = new Map([
   // (none today)
 ]);
 
-test('every uicore peerDependency is declared by this package (or excluded with a reason)', () => {
-  const uicorePkg = require('openstack-uicore-foundation/package.json');
-  const wc = JSON.parse(readFileSync(path.join(pkgRoot, 'package.json'), 'utf8'));
-  const declared = { ...wc.dependencies, ...wc.devDependencies };
-  const missing = Object.keys(uicorePkg.peerDependencies ?? {}).filter(
-    (name) => !declared[name] && !EXCLUDED.has(name),
-  );
-  assert.deepEqual(missing, [], `undeclared uicore peers: ${missing.join(', ')}`);
-});
+// Both uicore consumers must declare the full peer set: this package for the
+// island bundles, the widgets package for the host's webpack graph.
+for (const pkgDir of [pkgRoot, path.resolve(pkgRoot, '../widgets')]) {
+  test(`every uicore peerDependency is declared by ${path.basename(pkgDir)} (or excluded with a reason)`, () => {
+    const uicorePkg = require('openstack-uicore-foundation/package.json');
+    const pkg = JSON.parse(readFileSync(path.join(pkgDir, 'package.json'), 'utf8'));
+    const declared = { ...pkg.dependencies, ...pkg.devDependencies, ...pkg.peerDependencies };
+    const missing = Object.keys(uicorePkg.peerDependencies ?? {}).filter(
+      (name) => !declared[name] && !EXCLUDED.has(name),
+    );
+    assert.deepEqual(missing, [], `undeclared uicore peers: ${missing.join(', ')}`);
+  });
+}

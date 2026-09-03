@@ -6,7 +6,7 @@
  *
  *   node packages/web-components/scripts/analyze-widgets.mjs                    # human report
  *   node packages/web-components/scripts/analyze-widgets.mjs --check            # CI guard (exit 1 on drift)
- *   node packages/web-components/scripts/analyze-widgets.mjs --update-baseline  # accept the current unknowns
+ *   widgets-analyze --update-baseline  # accept the current unknowns (workspace only)
  *
  * Step 2 of RUNTIME-REQUIREMENTS.md. No build side effects.
  *
@@ -23,6 +23,12 @@ import { analyzeFleet } from './footprint.mjs';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const BASELINE_FILE = path.join(dir, 'analyze-widgets.baseline.json');
+// --update-baseline writes next to this script — running the installed bin
+// would write into a host's node_modules, silently lost on reinstall.
+if (process.argv.includes('--update-baseline') && dir.includes(`${path.sep}node_modules${path.sep}`)) {
+  console.error('--update-baseline must run from the widgets workspace, not an installed copy');
+  process.exit(1);
+}
 const rel = (p) => path.relative(process.cwd(), p);
 const self = rel(fileURLToPath(import.meta.url));
 

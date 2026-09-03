@@ -7,11 +7,14 @@
     "build:wc": "pnpm --filter @openeventkit/web-components build",
     "build:wc:standalone": "pnpm --filter @openeventkit/web-components build:standalone",
     "analyze:check": "pnpm --filter @openeventkit/web-components analyze:check",
-    "test": "vitest run && pnpm --filter @openeventkit/web-components test"
+    "test": "vitest run && pnpm --filter @openeventkit/web-components test && pnpm run typecheck",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "assets": "pnpm --filter @openeventkit/widgets run assets"
   },
   "devDependencies": {
     "@openeventkit/web-components": "0.1.0",
     "@openeventkit/widget-core": "0.1.0",
+    "@openeventkit/widget-mount": "0.1.0",
     "@openeventkit/widgets": "0.1.0",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.1.0",

@@ -14,5 +14,7 @@
     "./widget-auth-error": "./src/widget-auth-error.ts",
     "./widget-notify": "./src/widget-notify.ts",
     "./package.json": "./package.json"
-  }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts"
 }
