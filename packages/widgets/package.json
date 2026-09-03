@@ -34,7 +34,8 @@
     "./shadow-root-context": "./src/kit/context/shadow-root-context.ts",
     "./compat/uicore-ajaxloader": "./src/kit/compat/uicore-ajaxloader.tsx",
     "./compat/uicore-i18n": "./src/kit/compat/uicore-i18n.ts",
-    "./compat/uicore-swal": "./src/kit/compat/uicore-swal.ts"
+    "./compat/uicore-swal": "./src/kit/compat/uicore-swal.ts",
+    "./package.json": "./package.json"
   },
   "peerDependencies": {
     "@mui/material": ">=9",

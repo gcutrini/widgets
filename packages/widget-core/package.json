@@ -12,6 +12,7 @@
     "./host-auth": "./src/host-auth.ts",
     "./host-config": "./src/host-config.ts",
     "./widget-auth-error": "./src/widget-auth-error.ts",
-    "./widget-notify": "./src/widget-notify.ts"
+    "./widget-notify": "./src/widget-notify.ts",
+    "./package.json": "./package.json"
   }
 }

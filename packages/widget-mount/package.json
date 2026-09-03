@@ -8,7 +8,8 @@
     ".": "./src/index.ts",
     "./renderers/shadow-react": "./src/renderers/shadow-react.tsx",
     "./renderers/web-component": "./src/renderers/web-component.tsx",
-    "./compat/*": "./src/compat/*.ts"
+    "./compat/*": "./src/compat/*.ts",
+    "./package.json": "./package.json"
   },
   "dependencies": {
     "@openeventkit/widget-core": "0.1.0"
