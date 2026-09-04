@@ -1,4 +1,4 @@
-import type { RendererId, WidgetRenderer } from './WidgetRenderer';
+import type { RendererId, WidgetRenderer } from './widget-renderer';
 
 /**
  * The host registers its concrete renderers here at startup; widget Clients

@@ -223,7 +223,7 @@ import '@openeventkit/widgets/compat/uicore-i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { manifest } from '@openeventkit/widgets/${name}/manifest';
-import { defineWidgetWebComponent } from './src/element/define-web-component.js';
+import { defineWidgetWebComponent } from './src/element/defineWidgetWebComponent.js';
 defineWidgetWebComponent({ React, ReactDOM, manifest });
 `,
   resolveDir: pkgRoot,

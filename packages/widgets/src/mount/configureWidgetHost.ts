@@ -1,7 +1,7 @@
 'use client';
 
 import { registerRenderer } from './registry';
-import type { WidgetRenderer } from './WidgetRenderer';
+import type { WidgetRenderer } from './widget-renderer';
 import { registerHostConfig, type HostConfig } from '../core/host-config';
 import { registerHostAuth, type HostAuth } from '../core/host-auth';
 import { configureUicore } from '../lib/uicore-host';

@@ -21,7 +21,7 @@ vi.mock('../registry', () => ({
   registerRenderer: vi.fn(() => calls.push('renderer')),
 }));
 
-import { configureWidgetHost } from '../configure-widget-host';
+import { configureWidgetHost } from '../configureWidgetHost';
 
 describe('configureWidgetHost', () => {
   beforeEach(() => { calls.length = 0; });

@@ -24,7 +24,7 @@ import {
   type WidgetShadow,
 } from '../../core';
 import { useMutationSafeProps } from '../mutation-safe-props';
-import type { WidgetRenderer, WidgetMountProps } from '../WidgetRenderer';
+import type { WidgetRenderer, WidgetMountProps } from '../widget-renderer';
 import { ShadowRootContext } from '../../lib/context/shadow-root-context';
 
 // Attach the shadow before paint so the raw host element never flashes; fall

@@ -16,7 +16,7 @@ import { getHostAuth, type HostAuth } from '../../core/host-auth';
 import { getHostConfig, type HostConfig } from '../../core/host-config';
 import { useMutationSafeProps } from '../mutation-safe-props';
 import { WIDGET_ERROR_EVENT } from '../../core/widget-error';
-import type { WidgetRenderer, WidgetMountProps } from '../WidgetRenderer';
+import type { WidgetRenderer, WidgetMountProps } from '../widget-renderer';
 
 /**
  * Load a module <script> once per src, shared across every mount. The bundle

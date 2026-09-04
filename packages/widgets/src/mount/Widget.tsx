@@ -3,7 +3,7 @@
 import type { WidgetManifest } from '../core';
 import type { WidgetComposition } from './composition';
 import { getRenderer } from './registry';
-import type { RendererId } from './WidgetRenderer';
+import type { RendererId } from './widget-renderer';
 
 /**
  * Mounts a widget by handing its manifest + live composition to the renderer

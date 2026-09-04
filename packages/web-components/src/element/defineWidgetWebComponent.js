@@ -20,7 +20,7 @@ import { webComponentTag } from '@openeventkit/widgets/core/manifest';
 import { registerHostAuth } from '@openeventkit/widgets/core/host-auth';
 import { registerHostConfig } from '@openeventkit/widgets/core/host-config';
 import { WIDGET_ERROR_EVENT } from '@openeventkit/widgets/core/widget-error';
-import { resolveWidgetComponent } from './resolve-component.js';
+import { resolveWidgetComponent } from './resolveWidgetComponent.js';
 import { ShadowRootContext } from '@openeventkit/widgets/shadow-root-context';
 import { configureUicore } from '@openeventkit/widgets/uicore-host';
 
