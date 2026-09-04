@@ -6,7 +6,7 @@
  *
  * Resolution differs by module graph, as for HostAuth: the host registers the
  * module singleton; a web-component bundle has its own copy of this module,
- * filled by the element's `configureHost()` before anything mounts.
+ * filled by the element's `mount()` before anything renders.
  */
 
 export interface HostConfig {

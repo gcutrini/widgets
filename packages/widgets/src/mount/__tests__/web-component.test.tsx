@@ -15,17 +15,22 @@ const config: HostConfig = {
 const manifest = { name: 'demo', load: async () => ({ default: () => null }) } as unknown as WidgetManifest;
 
 // The element the bundle would define — records the host handshake.
-const calls: string[] = [];
-let receivedPorts: { hostAuth?: HostAuth | null; hostConfig?: HostConfig | null } | null = null;
-let receivedProps: Record<string, unknown> | null = null;
+const mountCalls: Array<{
+  hostAuth?: HostAuth | null;
+  hostConfig?: HostConfig | null;
+  props?: Record<string, unknown>;
+}> = [];
+const setPropsCalls: Array<Record<string, unknown>> = [];
 class FakeWidget extends HTMLElement {
-  configureHost(ports: { hostAuth?: HostAuth | null; hostConfig?: HostConfig | null }) {
-    calls.push('configureHost');
-    receivedPorts = ports;
+  mount(args: {
+    hostAuth?: HostAuth | null;
+    hostConfig?: HostConfig | null;
+    props?: Record<string, unknown>;
+  }) {
+    mountCalls.push(args);
   }
   setProps(props: Record<string, unknown>) {
-    calls.push('setProps');
-    receivedProps = props;
+    setPropsCalls.push(props);
   }
 }
 customElements.define(webComponentTag('demo'), FakeWidget);
@@ -34,9 +39,8 @@ describe('web-component renderer', () => {
   const realAppend = document.head.appendChild.bind(document.head);
 
   beforeEach(() => {
-    calls.length = 0;
-    receivedPorts = null;
-    receivedProps = null;
+    mountCalls.length = 0;
+    setPropsCalls.length = 0;
     registerHostAuth(auth);
     registerHostConfig(config);
     // Let the module <script> "load" immediately — jsdom never fetches it.
@@ -53,13 +57,27 @@ describe('web-component renderer', () => {
     registerHostConfig(null);
   });
 
-  it('hands the host ports to the element before the props', async () => {
+  it('hands the host ports and the initial props in one mount call', async () => {
     const webComponent = createWebComponentRenderer({ bundleBasePath: '/web-components' });
     render(<webComponent.Mount manifest={manifest} composition={{ props: { a: 1 } }} />);
-    await waitFor(() => expect(calls).toContain('setProps'));
-    expect(calls.indexOf('configureHost')).toBeLessThan(calls.indexOf('setProps'));
-    expect(receivedPorts?.hostAuth).toBe(auth);
-    expect(receivedPorts?.hostConfig).toBe(config);
-    expect(receivedProps).toMatchObject({ a: 1 });
+    await waitFor(() => expect(mountCalls).toHaveLength(1));
+    expect(mountCalls[0].hostAuth).toBe(auth);
+    expect(mountCalls[0].hostConfig).toBe(config);
+    expect(mountCalls[0].props).toMatchObject({ a: 1 });
+    expect(setPropsCalls).toHaveLength(0);
+  });
+
+  it('later prop changes go through setProps, never a second mount', async () => {
+    const webComponent = createWebComponentRenderer({ bundleBasePath: '/web-components' });
+    const { rerender } = render(
+      <webComponent.Mount manifest={manifest} composition={{ props: { a: 1 } }} />,
+    );
+    await waitFor(() => expect(mountCalls).toHaveLength(1));
+    rerender(
+      <webComponent.Mount manifest={manifest} composition={{ props: { a: 2 } }} />,
+    );
+    await waitFor(() => expect(setPropsCalls).toHaveLength(1));
+    expect(setPropsCalls[0]).toMatchObject({ a: 2 });
+    expect(mountCalls).toHaveLength(1);
   });
 });

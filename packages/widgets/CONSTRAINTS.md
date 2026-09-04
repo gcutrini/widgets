@@ -6,7 +6,7 @@
 >
 > **One hosting model, two renderers.** Every widget mounts through the Widget contract (`manifest` + `compose` + `Client` → `<Widget>`) into a shadow root — see `RC-U`. `<Widget>` picks a renderer: `reactComponent` (the host's React 19, into a `createWidgetShadow`) or `webComponent` (the widget's own React 17 as a self-contained custom element). Both are shadow-DOM, so the trade-offs below apply to both.
 >
-> **Host paths.** Constraints marked HOST are configuration the host owns, not this repo. Bare `src/…` paths in host-side items (`src/widgets/<w>/`, `src/widgets/host/…`, `src/lib/…`) are the reference host's, not this repo's.
+> **Host paths.** Constraints marked HOST are configuration the host owns, not this repo. Bare `src/…` paths in host-side items (`src/widgets/catalog/<w>/`, `src/widgets/host/…`, `src/lib/…`) are the reference host's, not this repo's.
 
 ## Contents
 
@@ -67,7 +67,7 @@ Most are legacy React 16 / Redux 4.x class-heavy code, pre-bundled by webpack ye
 
 Every widget spans two places: its uicore-bound `manifest` + `vendor-styles`
 live here at `src/<name>/`, and its integration glue lives in
-the host at `src/widgets/<name>/` — `index.tsx` (Server Component) fetches data,
+the host at `src/widgets/catalog/<name>/` — `index.tsx` (Server Component) fetches data,
 `Client.tsx` binds live state via `compose.ts`, and `<Widget>` mounts the dist
 inside a shadow root via `createWidgetShadow`.
 This adds CSS containment, a stable per-widget root for Sentry, and bridges for
@@ -154,7 +154,7 @@ Widget `dist/index.js` files inline-require CSS. `openstack-uicore-foundation/li
 
 - **E.1 — `awesome-bootstrap-checkbox` global CSS gets loaded** any time a widget rendering uses uicore extra-questions. Legacy Bootstrap-3 CSS bleeds into our page. *Largely neutralized by the shadow-DOM modules:* widget markup lives inside a shadow root, so head-injected legacy rules match nothing in the light DOM — the bytes still ship, the visual bleed is gone.
 - **E.2 — uicore CSS chain (`circle-button.css`, etc.) inline-required from widget dists.** Every schedule widget pulls the button styling; if unused visually it still ships. *Inverted by the shadow-DOM modules:* head-injected CSS can't reach into a shadow root, so each side-effect stylesheet a widget actually needs (pure-react-carousel layout, uicore circle-button) is generated as a typed vendor-css module by the package's `scripts/generate-assets.mjs` and listed in that module's `sheets` — see each module's `vendor-styles.ts`.
-- **E.3 — `@openeventkit/widgets` is subpath-only.** The package has no root export — anything uicore-heavy (a widget manifest, `uicore-host`, the compat modules) sitting on a shared barrel would compile the entire uicore chain into every widget-touching page. Consumers import each surface via its own subpath (`./extra-questions/manifest`, `./uicore-host`, `./compat/*`), and the `./mount` barrel deliberately excludes `configureWidgetHost` (exported as `./host`) for the same reason — it pulls uicore. A widget's uicore-bound `manifest` is exported via its own subpath (`@openeventkit/widgets/registration/manifest`, etc.) so the host-side Client imports just that declaration; the widget's Server Component + integration glue live in the host (`src/widgets/<widget>/`), not here.
+- **E.3 — `@openeventkit/widgets` is subpath-only.** The package has no root export — anything uicore-heavy (a widget manifest, `uicore-host`, the compat modules) sitting on a shared barrel would compile the entire uicore chain into every widget-touching page. Consumers import each surface via its own subpath (`./extra-questions/manifest`, `./uicore-host`, `./compat/*`), and the `./mount` barrel deliberately excludes `configureWidgetHost` (exported as `./host`) for the same reason — it pulls uicore. A widget's uicore-bound `manifest` is exported via its own subpath (`@openeventkit/widgets/registration/manifest`, etc.) so the host-side Client imports just that declaration; the widget's Server Component + integration glue live in the host (`src/widgets/catalog/<widget>/`), not here.
 
 **Why the widgets force it.** The dist bundles literally contain `require('.css')` calls at the JS level. There's no way to intercept this without rebundling the widget.
 
@@ -256,7 +256,7 @@ Every Gatsby Redux action the widget expects becomes a hand-ported async functio
 - **K.4 — Every OTP/OAuth step exposed as widget prop.** `getPasswordlessCode`, `loginWithCode`, `authUser`, `authErrorCallback` — bridged to `src/lib/auth/passwordless.ts` + `useAuth`.
 - **K.5 — `trackEvent` analytics callback (mandatory, not optional).** The registration widget calls `trackEvent(name, params)` **unconditionally** on ticket-change, add-to-cart, begin-checkout, and purchase-complete (GA4 ecommerce events `view_item` / `add_to_cart` / `begin_checkout` / `purchase_complete`). If the prop is absent the widget throws `TypeError: trackEvent is not a function` mid-flow — selecting a ticket crashes the form. Wired in `useRegistrationCallbacks` to `trackEvent` from `src/lib/analytics/gtm.ts`, which pushes a gtag event tuple to the dataLayer **after scrubbing PII** (`first_name`, `last_name`, `email`, `owner_*`, `qr_code`) — the ecommerce params carry buyer identity that must never reach GTM. Same callback + PII-scrub applies to every other widget that fires analytics (orders/my-tickets) in later rounds.
 
-- **K.6 — `triggerAction` must RESOLVE to the value the widget re-dispatches.** The schedule widgets don't fire-and-forget: they `await triggerAction` and re-dispatch into their OWN store with its **resolved value** — `triggerAction('ADDED_TO_SCHEDULE', { event }).then((event) => dispatch(createAction(ADDED_TO_SCHEDULE)({ event })))`. The `.then` parameter **shadows** the original `event`, so the reducer reads `.id` off *whatever we resolve to*. A handler that resolves `void` makes the widget dispatch `{ event: undefined }` and crash at `event.id` on every add/remove click while signed in — so the handlers `await` the write and `return payload.event` (`src/widgets/composition/schedule-callbacks.ts` `useScheduleWriteCallbacks`, shared by the schedule widgets, and `upcoming-events/compose.ts`). **The same latent contract exists for `RSVP_CONFIRMED` / `RSVP_CANCELLED`** (full-schedule's `.then(rsvp =>)` / `.then(event =>)`) — dormant only because RSVP is cut; re-enabling it without echoing the resolved value back would crash identically. A `triggerAction` case that returns the wrong resolved type is a silent crash-in-waiting, not a no-op.
+- **K.6 — `triggerAction` must RESOLVE to the value the widget re-dispatches.** The schedule widgets don't fire-and-forget: they `await triggerAction` and re-dispatch into their OWN store with its **resolved value** — `triggerAction('ADDED_TO_SCHEDULE', { event }).then((event) => dispatch(createAction(ADDED_TO_SCHEDULE)({ event })))`. The `.then` parameter **shadows** the original `event`, so the reducer reads `.id` off *whatever we resolve to*. A handler that resolves `void` makes the widget dispatch `{ event: undefined }` and crash at `event.id` on every add/remove click while signed in — so the handlers `await` the write and `return payload.event` (`src/widgets/shared/schedule-callbacks.ts` `useScheduleWriteCallbacks`, shared by the schedule widgets, and `upcoming-events/compose.ts`). **The same latent contract exists for `RSVP_CONFIRMED` / `RSVP_CANCELLED`** (full-schedule's `.then(rsvp =>)` / `.then(event =>)`) — dormant only because RSVP is cut; re-enabling it without echoing the resolved value back would crash identically. A `triggerAction` case that returns the wrong resolved type is a silent crash-in-waiting, not a no-op.
 
 **Why the widgets force it.** Widgets take a hand-shaped callback for every action. No batch or convention.
 
@@ -546,10 +546,10 @@ one copy:
   `openstack-uicore-foundation/*` import from the web-components package's own
   `node_modules`. The shared runtime chunks serve `lib/utils/config` and
   `lib/security/methods` as import-map modules; the element's
-  `configureHost()` calls `configureUicore()` on them once per module graph
+  `mount()` calls `configureUicore()` on them once per module graph
   (the only call site, both variants). The island bundles its own copies of
-  the core ports, whose module singletons start empty; `configureHost`
-  registers the host impls into them before anything mounts — the DOM
+  the core ports, whose module singletons start empty; `mount`
+  registers the host impls into them before anything renders — the DOM
   element is the only host↔island channel, nothing rides window.
 
 **Cache footgun (host-side; the reference host's `next.config.ts` handles

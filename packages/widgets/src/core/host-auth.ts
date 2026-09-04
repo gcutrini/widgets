@@ -15,8 +15,8 @@
  *    `registerHostAuth`, setting the module `singleton`; uicore-host is in the
  *    same graph and reads it.
  *  - Bundle / webComponent: the bundle has its own copy of this module; the
- *    element's `configureHost()` registers the host impl into it before
- *    anything mounts (the renderer hands the ports across the DOM).
+ *    element's `mount()` registers the host impl into it before
+ *    anything renders (the renderer hands the ports across the DOM).
  */
 
 export interface HostAuth {

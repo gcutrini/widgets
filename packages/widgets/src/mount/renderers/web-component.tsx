@@ -149,25 +149,35 @@ export function createWebComponentRenderer(
 
     // The island has its own copies of the widget-core ports; hand it the
     // host impls through the element — the only channel between the two module
-    // graphs — before the props. The element defers shadow setup and uicore
-    // configuration until configureHost arrives, so ordering here is the
-    // contract. Props cross in one setProps call (the element renders the
-    // complete set); widget colors reach the shadow via inherited :root
-    // --color_* vars, not per-element props.
+    // graphs. The first call is mount({ hostAuth, hostConfig, props }): ports
+    // and the complete initial prop set in one shot, so there is no ordering
+    // between two calls to get wrong. Later prop changes cross via setProps.
+    // Widget colors reach the shadow via inherited :root --color_* vars, not
+    // per-element props.
+    const mountedElRef = useRef<HTMLElement | null>(null);
     useEffect(() => {
       if (!defined) return;
       const el = ref.current as
         | (HTMLElement & {
-            configureHost?: (ports: {
+            mount?: (args: {
               hostAuth?: HostAuth | null;
               hostConfig?: HostConfig | null;
+              props?: Record<string, unknown>;
             }) => void;
             setProps?: (props: Record<string, unknown>) => void;
           })
         | null;
       if (!el) return;
-      el.configureHost?.({ hostAuth: getHostAuth(), hostConfig: getHostConfig() });
-      el.setProps?.(isolated);
+      if (mountedElRef.current !== el) {
+        mountedElRef.current = el;
+        el.mount?.({
+          hostAuth: getHostAuth(),
+          hostConfig: getHostConfig(),
+          props: isolated,
+        });
+      } else {
+        el.setProps?.(isolated);
+      }
     }, [defined, isolated]);
 
     // Raise any error — a runtime/bundle load failure or a widget render error

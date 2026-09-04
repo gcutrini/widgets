@@ -7,9 +7,9 @@
  * sheets + bridges) is set up by `createWidgetShadow` — the SAME primitive the
  * host's reactComponent renderer uses — so the two renderers can't drift on any
  * of that. The kit adds only what's web-component-specific: the React-17
- * ReactDOM.render, the `setProps` prop channel, the error boundary, `wrapTree`,
+ * ReactDOM.render, the `mount`/`setProps` prop channel, the error boundary, `wrapTree`,
  * and `elementAttrs`. There's no prop name list — the host hands over the whole
- * prop object via `setProps`.
+ * prop object (`mount` first, `setProps` for updates).
  *
  * React/ReactDOM are injected (not imported) so the SAME kit powers both build
  * variants: `shared` (the default build) reads them from the runtime global;
@@ -25,7 +25,7 @@ import { ShadowRootContext } from '@openeventkit/widgets/shadow-root-context';
 import { configureUicore } from '@openeventkit/widgets/uicore-host';
 
 // Hand this bundle's uicore the host ports — once per module graph, from the
-// first element's configureHost(): the shared variant's uicore imports resolve
+// first element's mount(): the shared variant's uicore imports resolve
 // to the shared import-map chunks (so this configures the shared instance),
 // and the standalone variant configures its bundled copy.
 let uicoreConfigured = false;
@@ -67,8 +67,10 @@ export function defineWidgetWebComponent({ React, ReactDOM, manifest }) {
  * The primitive behind defineWidgetWebComponent. Internal on purpose: widgets
  * register through their manifest so the two renderers can't drift.
  *
- * The host sets the widget's props in one shot via `el.setProps(obj)` (objects,
- * functions, live data), which renders the React-17 tree with the complete set.
+ * The host hands the ports and the widget's props in one shot via
+ * `el.mount({ hostAuth, hostConfig, props })` (objects, functions, live data),
+ * which renders the React-17 tree with the complete set; later updates go
+ * through `el.setProps(obj)`.
  *
  * @param {object} o
  * @param {any} o.React
@@ -112,7 +114,7 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
       this._shadow = null; // WidgetShadow: { root, container, dispose }
       this._root = null; // the container <div> to render into
       this._connected = false;
-      this._hostReady = false;
+      this._mountCalled = false;
       // Report a widget render error out through the host as a DOM event; the
       // app-side renderer listens and raises it into its React-19 boundary.
       this._reportError = (error) => {
@@ -121,25 +123,27 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
     }
 
     /**
-     * Hand the element the host's ports — the ONLY channel between the host
-     * and this module graph (nothing rides window). The host calls this before
-     * setProps; nothing mounts until both this and DOM connection happened,
-     * because shadow setup reads HostConfig (asset URLs) and uicore needs its
-     * config before the first widget render.
+     * The host's single first call: the ports — the ONLY channel between the
+     * host and this module graph (nothing rides window) — and the initial
+     * props, in one shot. Nothing mounts until both this and DOM connection
+     * happened, because shadow setup reads HostConfig (asset URLs) and uicore
+     * needs its config before the first widget render. Later prop updates go
+     * through setProps.
      */
-    configureHost({ hostAuth = null, hostConfig = null } = {}) {
+    mount({ hostAuth = null, hostConfig = null, props = {} } = {}) {
       registerHostAuth(hostAuth);
       registerHostConfig(hostConfig);
       configureUicoreOnce();
-      this._hostReady = true;
+      this._props = { ...props };
+      this._mountCalled = true;
       this._mountIfReady();
     }
 
     /**
-     * Set the widget's props and render. The host hands the whole prop object in
-     * one call, so there's no name list to maintain and no per-property write
-     * burst to coalesce — the widget always renders with the complete set.
-     * Merges, so repeated calls update rather than replace.
+     * Update the widget's props and render. The host hands the whole prop
+     * object in one call, so there's no name list to maintain and no
+     * per-property write burst to coalesce — the widget always renders with
+     * the complete set. Merges, so repeated calls update rather than replace.
      */
     setProps(props) {
       Object.assign(this._props, props);
@@ -152,7 +156,7 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
     }
 
     _mountIfReady() {
-      if (!this._connected || !this._hostReady) return;
+      if (!this._connected || !this._mountCalled) return;
       if (this._shadow) {
         // Reconnect after a disconnect (the host moved the element in the DOM):
         // disconnectedCallback disposed the bridges, so restart them before

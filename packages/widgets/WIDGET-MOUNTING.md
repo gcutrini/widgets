@@ -56,7 +56,7 @@ src/mount/ (./mount)     React mount contract — <Widget>, WidgetRenderer, the 
    ▲                     the generic renderer factories, configureWidgetHost (./host),
    │                     and the React-19 compat / prop-mutation-safety utilities. Host-side only.
 src/<widget>/ + src/lib/ the uicore-bound part of each widget: manifest + vendor-styles.
-   ▲                     (integration glue — compose/Client/index — lives in the host, src/widgets/<w>.)
+   ▲                     (integration glue — compose/Client/index — lives in the host, src/widgets/catalog/<w>.)
 HOST (separate repo)     builds its two renderers from the ./mount/renderers/shadow-react and
                          ./mount/renderers/web-component factories and hands them to
                          configureWidgetHost at startup.
@@ -182,7 +182,7 @@ export function Widget({ manifest, composition, renderAs }: {
 Per widget, just the `manifest` (loads the dist, declares sheets/bridges/tag) and
 `vendor-styles` (its CSS). Everything else about a widget — data fetch, live-state
 binding, the Client wrapper — is host integration glue and lives in the host under
-its `src/widgets/<widget>/`. See this package's [README](./README.md).
+its `src/widgets/catalog/<widget>/`. See this package's [README](./README.md).
 
 ### 4 · The two renderers + the host's one setup call
 
@@ -210,15 +210,15 @@ resolver and handlers read the ports at call time.
 - **`webComponent`** — `createWebComponentRenderer({ bundleBasePath,
   Boundary? })`. Loads `${manifest.name}.shared.js` as an ES module, awaits
   `customElements.whenDefined`, then calls the element's
-  `configureHost({ hostAuth, hostConfig })` followed by
-  `setProps(composition.props)`. The bundle's shared imports (react, the
-  exposed uicore/MUI surfaces) stay bare and resolve through the import map
-  the host inlines (first in the root layout's body) to the generated
-  `runtime/` chunks — the browser walks the module graph; there is no load
-  ordering. The island has its own copies of the core ports; `configureHost`
-  registers the host impls into them and configures the shared uicore, and
-  the element defers shadow setup until that handshake has happened — the DOM
-  element is the only host↔island channel. Render errors escaping the island
+  `mount({ hostAuth, hostConfig, props })` — ports and the complete initial
+  prop set in one call; later prop changes cross via `setProps(props)`. The
+  bundle's shared imports (react, the exposed uicore/MUI surfaces) stay bare
+  and resolve through the import map the host inlines (first in the root
+  layout's body) to the generated `runtime/` chunks — the browser walks the
+  module graph; there is no load ordering. The island has its own copies of
+  the core ports; `mount` registers the host impls into them and configures
+  the shared uicore, and the element defers shadow setup until that handshake
+  has happened — the DOM element is the only host↔island channel. Render errors escaping the island
   reach the host boundary through the `widget-error` DOM event
   (`./core/widget-error`), which the island's React-17 boundary dispatches on
   the element and this renderer listens for and rethrows.
@@ -230,7 +230,7 @@ resolver and handlers read the ports at call time.
 The composer runs in the **host's React 19** for both renderers — the
 web-component can't run host hooks inside its own React, so live state is always
 bound host-side and handed across the boundary. Composers live with the rest of
-the integration glue in the host's `src/widgets/<widget>/compose.ts`.
+the integration glue in the host's `src/widgets/catalog/<widget>/compose.ts`.
 
 ```ts
 export interface WidgetComposition {
@@ -243,7 +243,7 @@ export type WidgetComposer<TServerProps = void> =
 
 ## The call site
 
-The per-widget `Client.tsx` (in the host, its `src/widgets/<widget>/`) calls the
+The per-widget `Client.tsx` (in the host, its `src/widgets/catalog/<widget>/`) calls the
 composer hook and hands the result to `<Widget>`, choosing the renderer by id:
 
 ```tsx

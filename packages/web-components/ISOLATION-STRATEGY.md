@@ -7,7 +7,7 @@ retire the React-19 compat layer the legacy widgets impose.
 > **Shipped:** the web components run **React 17.0.2**. A React ≤16 runtime
 > delegates events at `document`, which shadow-DOM retargeting breaks; React 17
 > moved delegation to the render root and fixed it — see **RC-Y** in
-> CONSTRAINTS.md. The host↔island handshake is the element's `configureHost()` (ports only; nothing rides window). "React 16"
+> CONSTRAINTS.md. The host↔island handshake is the element's `mount()` (ports + initial props; nothing rides window). "React 16"
 > below refers to the widgets' **native** React lineage (what they were built
 > against), not the runtime that hosts them — and it's the *dominant* lineage,
 > not a uniform one: eight widgets peer `react@^16`, but `my-orders-tickets-widget`
@@ -180,9 +180,10 @@ generated ES-module chunk per served bare specifier, single-instance stateful
 internals via esbuild code-splitting, `import-map.json` as the resolution
 table the host inlines before any widget module loads. The host↔island
 ports handshake (`hostAuth`/`hostConfig`) crosses through the element:
-the renderer calls `el.configureHost(ports)` before `setProps`, and the
-element defers shadow setup + uicore configuration until both it and DOM
-connection have happened. Nothing rides window.
+the renderer calls `el.mount({ hostAuth, hostConfig, props })` — ports and
+initial props in one call, `setProps` for updates — and the element defers
+shadow setup + uicore configuration until both it and DOM connection have
+happened. Nothing rides window.
 
 **Who picks what:**
 - **The reference host** (opts in): inline the import map once + load each

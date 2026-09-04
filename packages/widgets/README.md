@@ -21,7 +21,7 @@ A hosted widget spans two places, divided by what each part is allowed to depend
   `uicore-host` (hands uicore the host's config and auth seams), the
   `compat/uicore-*` modules, and the bundle-consumed React contexts
   (`context/`).
-- **The integration glue — the host (its `src/widgets/<w>/`):**
+- **The integration glue — the host (its `src/widgets/catalog/<w>/`):**
   `index.tsx` (a Server Component that fetches host data), `compose.ts` (binds the
   host's live auth / realtime state), `Client.tsx`, `types.ts`, `derive.ts`,
   `use<Widget>Callbacks.ts`. These import the host's own modules freely — they
@@ -114,7 +114,7 @@ framework-free code:
 HOST (separate repo)           pages, DAL, and one configureWidgetHost() call
    │  fills ports              (renderers + HostAuth + HostConfig, via ./host)
    ▼
-HOST src/widgets/<w>/          index / Client / compose / types  (host integration glue)
+HOST src/widgets/catalog/<w>/          index / Client / compose / types  (host integration glue)
    ▼ imports (host → widgets)
 @openeventkit/widgets          ← THIS PACKAGE
    src/<widget>/    manifest + vendor-styles (uicore-bound, per widget)
@@ -167,7 +167,7 @@ fire, so the host renders none (see `CONSTRAINTS.md` RC-R).
 - **Here (uicore-bound):** add `src/<widget>/manifest.ts` (dist `load`,
   `vendorSheets`, `bridges`, `elementTag`) + `src/<widget>/vendor-styles.ts`;
   export `./<widget>/manifest` from `package.json`.
-- **In the host (its `src/widgets/<widget>/`):** `index.tsx` (fetch + derive + render
+- **In the host (its `src/widgets/catalog/<widget>/`):** `index.tsx` (fetch + derive + render
   `<Client>`), `compose.ts` (`use<Widget>Composition` → `{ props }`),
   `Client.tsx` (`<Widget manifest composition renderAs>`), `types.ts`, and any
   `derive.ts` / `use<Widget>Callbacks.ts`.
