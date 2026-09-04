@@ -69,7 +69,7 @@ export const pkgNameOf = (spec) => {
 // reader so the "what" (declared) and the "how" (orchestrated) can't drift.
 async function readManifest(name) {
   for (const ext of ['ts', 'tsx']) {
-    const p = path.join(WIDGETS_DIR, `src/${name}/manifest.${ext}`);
+    const p = path.join(WIDGETS_DIR, `src/catalog/${name}/manifest.${ext}`);
     let src;
     try { src = await fs.readFile(p, 'utf8'); } catch { continue; }
     const load = src.match(/load:\s*\(\)\s*=>\s*import\(\s*['"]([^'"]+)['"]/);

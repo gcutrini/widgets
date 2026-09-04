@@ -27,13 +27,13 @@
  * bundle contains none of them, so the Bulma path is unreachable here.
  */
 
-import { css as reactTooltipCss } from '../lib/styles/react-tooltip';
-import { css as widgetButtonsCss } from '../lib/styles/widget-buttons';
-import { css as skeletonCss } from '../lib/styles/skeleton';
-import { sheet as bootstrap } from '../lib/vendor-css/bootstrap.min';
-import { sheet as fontAwesome } from '../lib/vendor-css/font-awesome.min';
-import { sheet as abcCheckbox } from '../lib/vendor-css/awesome-bootstrap-checkbox';
-import { sheet as regLite } from '../lib/vendor-css/summit-registration-lite';
+import { css as reactTooltipCss } from '../../lib/styles/react-tooltip';
+import { css as widgetButtonsCss } from '../../lib/styles/widget-buttons';
+import { css as skeletonCss } from '../../lib/styles/skeleton';
+import { sheet as bootstrap } from '../../lib/vendor-css/bootstrap.min';
+import { sheet as fontAwesome } from '../../lib/vendor-css/font-awesome.min';
+import { sheet as abcCheckbox } from '../../lib/vendor-css/awesome-bootstrap-checkbox';
+import { sheet as regLite } from '../../lib/vendor-css/summit-registration-lite';
 
 export const registrationSheets = [bootstrap, fontAwesome, abcCheckbox, regLite] as const;
 

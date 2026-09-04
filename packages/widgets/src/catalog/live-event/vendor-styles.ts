@@ -1,7 +1,7 @@
-import { sheet as fontAwesome } from '../lib/vendor-css/font-awesome.min';
-import { sheet as circleButton } from '../lib/vendor-css/uicore-circle-button';
-import { sheet as liveEvent } from '../lib/vendor-css/live-event-widget';
-import { css as buttonCursorCss } from '../lib/styles/button-cursor';
+import { sheet as fontAwesome } from '../../lib/vendor-css/font-awesome.min';
+import { sheet as circleButton } from '../../lib/vendor-css/uicore-circle-button';
+import { sheet as liveEvent } from '../../lib/vendor-css/live-event-widget';
+import { css as buttonCursorCss } from '../../lib/styles/button-cursor';
 
 /**
  * Style dependencies for the Live Event widget — Font Awesome for the

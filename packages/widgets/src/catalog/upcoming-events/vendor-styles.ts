@@ -1,9 +1,9 @@
-import { sheet as fontAwesome } from '../lib/vendor-css/font-awesome.min';
-import { sheet as reactCarousel } from '../lib/vendor-css/react-carousel';
-import { sheet as circleButton } from '../lib/vendor-css/uicore-circle-button';
-import { sheet as upcomingEvents } from '../lib/vendor-css/upcoming-events-widget';
-import { css as buttonCursorCss } from '../lib/styles/button-cursor';
-import { css as suppressAjaxLoaderCss } from '../lib/styles/suppress-ajax-loader';
+import { sheet as fontAwesome } from '../../lib/vendor-css/font-awesome.min';
+import { sheet as reactCarousel } from '../../lib/vendor-css/react-carousel';
+import { sheet as circleButton } from '../../lib/vendor-css/uicore-circle-button';
+import { sheet as upcomingEvents } from '../../lib/vendor-css/upcoming-events-widget';
+import { css as buttonCursorCss } from '../../lib/styles/button-cursor';
+import { css as suppressAjaxLoaderCss } from '../../lib/styles/suppress-ajax-loader';
 
 /**
  * Style dependencies for the Upcoming Events widget.

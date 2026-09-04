@@ -1,5 +1,5 @@
-/// <reference path="../lib/widget-modules.d.ts" />
-import type { WidgetManifest } from '../core/manifest';
+/// <reference path="../../lib/widget-modules.d.ts" />
+import type { WidgetManifest } from '../../core/manifest';
 import { upcomingEventsSheets, upcomingEventsStyles } from './vendor-styles';
 
 export const upcomingEventsManifest: WidgetManifest = {

@@ -1,9 +1,9 @@
-/// <reference path="../lib/widget-modules.d.ts" />
-import type { WidgetManifest } from '../core/manifest';
-import { tooltipBridge } from '../lib/bridges/tooltip';
-import { emotionMirrorBridge } from '../lib/bridges/emotion-mirror';
-import { EmotionShadowProvider } from '../lib/context/EmotionShadowProvider';
-import { MuiThemeBridge } from '../lib/context/MuiThemeBridge';
+/// <reference path="../../lib/widget-modules.d.ts" />
+import type { WidgetManifest } from '../../core/manifest';
+import { tooltipBridge } from '../../lib/bridges/tooltip';
+import { emotionMirrorBridge } from '../../lib/bridges/emotion-mirror';
+import { EmotionShadowProvider } from '../../lib/context/EmotionShadowProvider';
+import { MuiThemeBridge } from '../../lib/context/MuiThemeBridge';
 import { registrationSheets, registrationStyles } from './vendor-styles';
 
 export const registrationManifest: WidgetManifest = {

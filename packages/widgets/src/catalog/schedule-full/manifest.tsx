@@ -1,8 +1,8 @@
-/// <reference path="../lib/widget-modules.d.ts" />
-import type { WidgetManifest } from '../core/manifest';
-import { tooltipBridge } from '../lib/bridges/tooltip';
-import { scopedPortalCssBridge } from '../lib/bridges/scoped-portal-css';
-import { EmotionShadowProvider } from '../lib/context/EmotionShadowProvider';
+/// <reference path="../../lib/widget-modules.d.ts" />
+import type { WidgetManifest } from '../../core/manifest';
+import { tooltipBridge } from '../../lib/bridges/tooltip';
+import { scopedPortalCssBridge } from '../../lib/bridges/scoped-portal-css';
+import { EmotionShadowProvider } from '../../lib/context/EmotionShadowProvider';
 import { deepLinkBridge } from './deep-link';
 import {
   scheduleFullSheets,

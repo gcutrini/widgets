@@ -1,4 +1,4 @@
-import { sheet as myTickets } from '../lib/vendor-css/my-orders-tickets-widget';
+import { sheet as myTickets } from '../../lib/vendor-css/my-orders-tickets-widget';
 
 /**
  * Style dependencies for the My Orders & Tickets widget.

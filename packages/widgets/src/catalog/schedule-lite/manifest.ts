@@ -1,6 +1,6 @@
-/// <reference path="../lib/widget-modules.d.ts" />
-import type { WidgetManifest } from '../core/manifest';
-import { emotionMirrorBridge } from '../lib/bridges/emotion-mirror';
+/// <reference path="../../lib/widget-modules.d.ts" />
+import type { WidgetManifest } from '../../core/manifest';
+import { emotionMirrorBridge } from '../../lib/bridges/emotion-mirror';
 import { scheduleLiteSheets, scheduleLiteStyles } from './vendor-styles';
 
 export const scheduleLiteManifest: WidgetManifest = {

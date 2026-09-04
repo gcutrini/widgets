@@ -1,7 +1,7 @@
-import { sheet as bootstrap } from '../lib/vendor-css/bootstrap.min';
-import { sheet as fontAwesome } from '../lib/vendor-css/font-awesome.min';
-import { sheet as abcCheckbox } from '../lib/vendor-css/awesome-bootstrap-checkbox';
-import { sheet as uicoreExtraQuestions } from '../lib/vendor-css/uicore-extra-questions';
+import { sheet as bootstrap } from '../../lib/vendor-css/bootstrap.min';
+import { sheet as fontAwesome } from '../../lib/vendor-css/font-awesome.min';
+import { sheet as abcCheckbox } from '../../lib/vendor-css/awesome-bootstrap-checkbox';
+import { sheet as uicoreExtraQuestions } from '../../lib/vendor-css/uicore-extra-questions';
 
 /**
  * Style dependencies for the Extra Questions form (uicore
