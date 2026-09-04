@@ -24,7 +24,7 @@ now live there too.
 analyzer verifies the declaration matches reality.**
 
 1. **Declare** — each widget's manifest carries `runtimeNeeds`, a small fixed
-   vocabulary (`RuntimeNeed` in `@openeventkit/widget-core/manifest`). Only the
+   vocabulary (`RuntimeNeed` in `@openeventkit/widgets/core/manifest`). Only the
    widgets that need something declare anything; the other six declare nothing.
 2. **Orchestrate** — `scripts/build.mjs` (the `widgets-build` bin) maps each token to an
    esbuild plugin via `NEEDS_TO_PLUGINS` and selects per widget with `selectPlugins(needs)`.
@@ -58,12 +58,12 @@ that imports `lib/security/methods` directly gets the configured instance.
 ## Derived vs declared (for the `--check` verifier)
 
 The analyzer derives each widget's signature from its **real footprint** — its
-dist imports plus what its manifest `wrapTree`/kit code pulls in — and classifies
+dist imports plus what its manifest `wrapTree`/lib code pulls in — and classifies
 via an auditable `RULES` table:
 
 | Signature field | Source |
 |---|---|
-| `pin:mui5-react17` | dist or kit imports `@mui/*` or `@emotion/*` |
+| `pin:mui5-react17` | dist or lib imports `@mui/*` or `@emotion/*` |
 | `stub:node` | dist imports `@react-pdf/renderer` (Node built-ins) |
 | react / MUI versions | `package.json` peers |
 

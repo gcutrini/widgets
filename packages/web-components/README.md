@@ -31,7 +31,7 @@ scripts/       Node-side tooling; never bundled
 src/           everything below is bundled into the island bundles
   element/     the custom-element machinery
     define-web-component.js   custom element on injected React 17; delegates
-                              shadow setup to widget-core createWidgetShadow
+                              shadow setup to core createWidgetShadow
     resolve-component.js      picks the component out of a webpack-UMD dist
   shims/       esbuild inject targets, referenced only by build.mjs
     import-meta-url-shim.js          (standalone IIFE only; ESM has it native)
@@ -43,12 +43,13 @@ uicore paths, the MUI surface, the i18n seed) into `runtime/`, with esbuild
 code-splitting guaranteeing a single instance of every stateful internal, and
 writes `import-map.json` mapping each specifier to its chunk. The HOST inlines
 that map in its document before any widget module loads
-(`src/components/widget/WidgetImportMap.tsx` in the reference host).
+(`src/widgets/host/WidgetImportMap.tsx` in the reference host).
 
-The bundled `src/` imports `@openeventkit/widgets` (manifests, `uicore-host`,
-the `compat/uicore-*` modules) and `@openeventkit/widget-core`
-(`createWidgetShadow`, the manifest type) by bare specifier — declared as
-`0.1.0` pins, which hosts override to git refs until npm publishing.
+The bundled `src/` imports `@openeventkit/widgets` by bare specifier —
+manifests, `uicore-host`, the `compat/uicore-*` modules, and the framework-free
+kernel via its `core/*` subpaths (`createWidgetShadow`, `webComponentTag`, the
+ports, `widget-error`) — declared as a `0.1.0` pin, which hosts override to a
+git ref until npm publishing.
 
 **Target topology (three homes):**
 
@@ -56,7 +57,7 @@ the `compat/uicore-*` modules) and `@openeventkit/widget-core`
 |---|---|
 | `src/*` (element/shims) | **a published shared kit package** — extracted from this `@openeventkit/web-components` package |
 | each widget's entry (generated in `scripts/build.mjs`) + its CSS | **each widget's own repo** (it owns its dep graph + export shape, so `resolve-component` isn't even needed there) |
-| the host-side renderers + per-widget data composition | **the host** (`src/components/widget/renderers/`, `src/widgets/<widget>/` in the reference host) |
+| the host-side renderers + per-widget data composition | **the host** (`src/widgets/host/renderers/`, `src/widgets/<widget>/` in the reference host) |
 
 Today all build-side roles live here while we prototype; the `src/` vs
 entry split makes those moves mechanical.

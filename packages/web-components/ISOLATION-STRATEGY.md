@@ -47,7 +47,7 @@ slick/FA CSS) — that tax is shared. The axis that differs is **React**.
    MUI `container`/`disablePortal`, react-select `menuPortalTarget`, react-laag
    container. Content then gets the adopted CSS and click-outside works.
    (sweetalert2 is aliased to a host notify shim in the web-component build —
-   `kit/compat/uicore-swal.ts` forwards `Swal.fire` to the widget-notify port —
+   `lib/compat/uicore-swal.ts` forwards `Swal.fire` to the widget-notify port —
    so the ~78 KB library never bundles and there is no in-shadow swal to redirect.)
 3. **Fonts** (shadow `@font-face` never registers): the vendor-css generator
    splits each sheet's `@font-face` blocks into a `fontFaces` field that
@@ -57,7 +57,7 @@ slick/FA CSS) — that tax is shared. The axis that differs is **React**.
 4. **Body-escape inventory**: the static analyzer
    (`./scripts/analyze-widgets.mjs`, the `widgets-analyze` bin) derives each widget's
    dependency footprint; portal/overlay escapes are handled per class by the
-   `kit/bridges/` fix-ups (tooltip, click-outside, scoped portal CSS).
+   `lib/bridges/` fix-ups (tooltip, click-outside, scoped portal CSS).
 5. **Light-DOM carve-out** for any lib that refuses the shadow (**Stripe**): mount
    it outside the shadow. Self-styled iframes don't leak CSS, so this is safe.
 
@@ -141,7 +141,7 @@ modernizing it later.
 **The standard "web component kit"** that makes each widget cheap to wrap:
 our own custom element (`./src/element/define-web-component.js`)
 on a shared React-17 runtime layer, the head-injected font pipeline, the
-`kit/bridges/` portal/overlay fix-ups, and the light-DOM carve-out (Stripe
+`lib/bridges/` portal/overlay fix-ups, and the light-DOM carve-out (Stripe
 slot). The widget repos ideally own the custom-element entry + its CSS
 (self-contained, per the shadow-CSS research); the host owns only data wiring +
 theme CSS custom properties (which pierce the shadow).

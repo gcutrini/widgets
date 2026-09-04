@@ -79,13 +79,14 @@ is dev-build-only; shipped bundles are silent. `setProps` stays synchronous.
    full surface (useId, startTransition, useDeferredValue, …) with no code
    change. Keep the `use-sync-external-store` dependency — uicore's served
    chunks import its shim entries.
-4. Rename `pin:mui5-react17` → `pin:mui5` (`widget-core` RuntimeNeed union, the
-   three declaring manifests, `plugins.mjs`, `policy.mjs`, docs) — the plugin's
-   mechanics are React-version-agnostic; only the name goes stale.
+4. Rename `pin:mui5-react17` → `pin:mui5` (the `RuntimeNeed` union in
+   `packages/widgets/src/core/manifest.ts`, the three declaring manifests,
+   `plugins.mjs`, `policy.mjs`, docs) — the plugin's mechanics are
+   React-version-agnostic; only the name goes stale.
 5. Docs sweep: the "React 17" statements across the four web-components md
    docs, `packages/widgets` CONSTRAINTS/WIDGET-MOUNTING/README/UPSTREAM (mark
-   entry 18's back-fill containment retired), widget-mount, and the reference
-   host's widget-test page and README.
+   entry 18's back-fill containment retired), and the reference host's
+   widget-test page and README.
 6. Update the runtime-entries tests (assert no back-fill; react entry is plain).
 
 pnpm notes: install re-materializes the MUI 5 set peered against react@18

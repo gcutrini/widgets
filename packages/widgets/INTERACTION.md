@@ -6,7 +6,7 @@ and **re-derive their entire internal store whenever a prop changes identity**.
 The host is a React-19 app. This doc is the contract a host implements to keep
 the two seams seamless — most importantly, the rule that stops a legacy bundle
 re-initializing on every host render. The hooks and file paths named here
-(`useAuth`, `use*Callbacks`, `src/components/widget/…`) are the reference
+(`useAuth`, `use*Callbacks`, `src/widgets/host/…`) are the reference
 host's.
 
 ## The one boundary
@@ -58,7 +58,7 @@ legacy subtree on any unrelated host re-render. It is enforced at three points:
    a stable callback that reads `isLoggedIn` live from a ref (the `useEffectEvent`
    shape) — the same live-read a store snapshot getter gives. Rule: **stable
    identity, live reads.**
-3. **Isolate only on change.** `useMutationSafeProps` (widget-mount's `mutation-safe-props` module)
+3. **Isolate only on change.** `useMutationSafeProps` (`src/mount/mutation-safe-props.ts`)
    re-clones a prop only when its source reference changed, and returns the same
    object otherwise — so unchanged data yields the same element and the legacy
    subtree is skipped. (It also preserves the widget's own in-place mutations
@@ -70,10 +70,10 @@ legacy subtree on any unrelated host re-render. It is enforced at three points:
 |---|---|---|
 | **Auth data** | `useAuth()` — `isLoggedIn`, `userProfile`, entitlements, `getAccessToken`, `syncSession` | Changes only on real session/profile change. |
 | **Auth chrome** | `useAuthTransition()` — `isLoggingOut` | A **separate store slice** (own cached snapshot) so the overlay flag never re-renders auth (widget) consumers. Read only by `AuthTransitions`. |
-| **Token** | `getAccessToken` (prop) + the resolver `kit/uicore-host` hands uicore, reading the `HostAuth` port | No real bearer on the client — a presence placeholder (`SESSION_PRESENT`); the proxy re-auths from the httpOnly cookie. |
+| **Token** | `getAccessToken` (prop) + the resolver `lib/uicore-host` hands uicore, reading the `HostAuth` port | No real bearer on the client — a presence placeholder (`SESSION_PRESENT`); the proxy re-auths from the httpOnly cookie. |
 | **Realtime** | `useRealTimeEvents` / `useRealTimeSummit` | External store; the worker holds no token. |
 | **Callbacks** | `use*Callbacks` hooks | Memoized bundle of `useCallback`'d members (see contract §2). |
-| **uicore config** | `configureUicore()` in `kit/uicore-host`, called by the reference host's `src/components/widget/register-host.ts` at startup | `apiBaseUrl`, `idpBaseUrl`, `oauth2ClientId`, `timeApiUrl` from the `HostConfig` port, handed to uicore's `setConfig` before any widget mounts. |
+| **uicore config** | `configureUicore()` in `lib/uicore-host`, called by `configureWidgetHost` (the host's single setup call, at startup) | `apiBaseUrl`, `idpBaseUrl`, `oauth2ClientId`, `timeApiUrl` from the `HostConfig` port, handed to uicore's `setConfig` before any widget mounts. |
 
 ## Adding or changing a widget
 
@@ -85,7 +85,7 @@ legacy subtree on any unrelated host re-render. It is enforced at three points:
 - Read auth via `useAuth()`; never reach for the overlay flag in widget code.
 - If a widget mutates a **nested** prop value (not just a top-level field),
   escalate `mutationSafeProps` to a deep copy for that prop — see the note in
-  widget-mount's `mutation-safe-props` module.
+  `src/mount/mutation-safe-props.ts`.
 
 ## Why this exists
 

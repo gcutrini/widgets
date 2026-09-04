@@ -218,9 +218,9 @@ resurfacing as "unexplained."
   does not depend on a host-level handler.
 - **We delete**: nothing on our side. The token resolver serves uicore's
   internal callers (`query-actions`, the request helpers in `utils/actions`)
-  for every widget dist, so `kit/uicore-host.ts`, the widget-core `HostAuth`
-  port and the host's `register-host.ts` wiring stay as long as any dist
-  externalizes uicore (CONSTRAINTS RC-X). This entry removes my-orders' direct
+  for every widget dist, so `src/lib/uicore-host.ts`, the `src/core/`
+  `HostAuth` port and the host's `configureWidgetHost` wiring stay as long as
+  any dist externalizes uicore (CONSTRAINTS RC-X). This entry removes my-orders' direct
   `security/methods` imports from its footprint and makes its token source
   explicit, like every other widget.
 - **uicore seam (what the host relies on)**: uicore ships opt-in setters:
@@ -477,7 +477,7 @@ the shared runtime:
 - **Resolves**: uicore's `AjaxLoader` renders a plain overlay spinner that clashes
   with the host's loaders.
 - **Change (contained in the shared runtime, implemented)**: the shared runtime serves
-  `kit/compat/uicore-ajaxloader` under the
+  `src/lib/compat/uicore-ajaxloader` under the
   `openstack-uicore-foundation/lib/components/ajaxloader` specifier, so every widget
   that imports `AjaxLoader` gets it. It renders the host's sign-out overlay markup
   (MUI `Backdrop` + `CircularProgress color="inherit"`), reading both from the

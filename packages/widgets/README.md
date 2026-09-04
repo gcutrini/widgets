@@ -5,9 +5,10 @@ widget dists and their dep tree (`openstack-uicore-foundation`, `redux`,
 `react-bootstrap`, …) are allowed to live, keeping them out of the host's
 `package.json`. This package holds the *uicore-bound* part of each widget; the
 host holds the integration glue (data, auth, realtime, routing). It also
-re-exports the mount and core surfaces as `./mount` and `./core` subpaths (the
-façade) — a host depends only on `@openeventkit/widgets` plus the
-`@openeventkit/web-components` build tool. See
+carries the hosting machinery itself — the framework-free kernel at
+`src/core/` (`./core` subpaths) and the React-19 mount layer at `src/mount/`
+(`./mount`, `./host`) — so a host depends only on `@openeventkit/widgets` plus
+the `@openeventkit/web-components` build tool. See
 [`WIDGET-MOUNTING.md`](./WIDGET-MOUNTING.md) for how a widget mounts.
 
 ## How a widget is split
@@ -16,43 +17,53 @@ A hosted widget spans two places, divided by what each part is allowed to depend
 
 - **The uicore-bound part — here (this package):** per widget, `manifest`
   (loads the widget dist + declares its shadow sheets/bridges) and `vendor-styles`
-  (the widget's CSS). Plus the shared uicore machinery under `kit/` — `uicore-host`
-  (hands uicore the host's config and auth seams), the `compat/uicore-*` modules,
-  `ClockProvider`, and the bundle-consumed
-  React contexts (`context/`).
-- **The integration glue — the host (`src/widgets/<w>/` in the reference host):**
+  (the widget's CSS). Plus the shared uicore machinery under `src/lib/` —
+  `uicore-host` (hands uicore the host's config and auth seams), the
+  `compat/uicore-*` modules, and the bundle-consumed React contexts
+  (`context/`).
+- **The integration glue — the host (its `src/widgets/<w>/`):**
   `index.tsx` (a Server Component that fetches host data), `compose.ts` (binds the
-  host's auth / realtime / clock), `Client.tsx`, `types.ts`, `derive.ts`,
+  host's live auth / realtime state), `Client.tsx`, `types.ts`, `derive.ts`,
   `use<Widget>Callbacks.ts`. These import the host's own modules freely — they
   *are* host code — and reach back into this package only for the manifest.
 
-Because the integration glue lives in the host, this package imports **nothing
-host-side**: anything it needs from the host crosses through a widget-core **port**
-(session presence and logout via HostAuth, the API / IDP / time-service settings via
-HostConfig, the auth-error event), never a direct host import.
+Because the integration glue lives in the host, the uicore-bound modules import
+**nothing host-side**: anything they need from the host crosses through a core
+**port** (session presence and logout via HostAuth, the API / IDP / time-service
+settings via HostConfig, the auth-error event), never a direct host import.
 
 ## What lives here
 
-`src/` holds exactly two things: the widgets, and `kit/` (the shared machinery
-they're built from).
+`src/` holds the widgets and the three shared layers they're built from.
+The package is **subpath-only** — no root export, no `main`/`types`; every
+surface is a named entry in the exports map.
 
 - `src/<widget>/` — `manifest.ts(x)` + `vendor-styles.ts` per widget, plus any
   widget-specific bits (e.g. `schedule-lite/transition-group.ts`,
   `schedule-full/{deep-link,hide-widget-toolbar}.ts`). `.tsx` when the manifest
   needs JSX, e.g. a `wrapTree` that renders an `EmotionShadowProvider`
   (schedule-full, registration).
-- `src/index.ts` — the barrel: the small client-safe surface (clock hooks).
-- `src/mount.ts` / `src/core.ts` — the façade re-exports (`./mount`, `./core`):
-  the `@openeventkit/widget-mount` and `@openeventkit/widget-core` surfaces
-  published through this package, so a host needs only this one widget
-  dependency.
+- `src/core/` (`./core`, `./core/*`) — the framework-free kernel: bundled into
+  the React-17 islands as well as imported by the host, so a test
+  (`src/__tests__/core-framework-free.test.ts`) enforces that its files import
+  nothing beyond core siblings and react types. It holds `createWidgetShadow`,
+  the `WidgetManifest` type (incl. `WidgetBridge`), `webComponentTag`, the
+  host ports (`host-auth`, `host-config`), and the DOM event contracts
+  (`widget-auth-error`, `widget-notify`, `widget-error`).
+- `src/mount/` (`./mount`, `./mount/renderers/shadow-react`,
+  `./mount/renderers/web-component`, `./mount/compat/*`, `./host`)
+  — the React-19 host mounting layer: `<Widget>`, the `WidgetRenderer`
+  interface + registry, the `WidgetComposition` contract, the two generic
+  renderer factories, `mutation-safe-props`, the React-19 compat shims, and
+  `configureWidgetHost` (exported as `./host` — see "The host's setup call").
 - `src/lib/` — everything not tied to one widget (by coupling, not consumer count: a generic module stays here even while only one widget uses it):
   - `uicore-host.ts` — `configureUicore()`: reads the HostConfig and HostAuth ports
     and calls uicore's `setConfig`, `setAccessTokenResolver` and `setAuthHandlers`.
     The resolver returns the `SESSION_PRESENT` placeholder while a session exists
     and throws only on a certain signed-out; `initLogOut` delegates to
-    `HostAuth.logout`; 401/403 raise the `widget-auth-error` event. The host calls
-    it once at startup; the web-component runtime calls it on its own uicore copy.
+    `HostAuth.logout`; 401/403 raise the `widget-auth-error` event.
+    `configureWidgetHost` calls it after filling the ports; the web-component
+    runtime calls it on its own uicore copy.
   - `compat/` — `uicore-swal` (the web-component build aliases `sweetalert2` to
     it; forwards to the widget-notify port), `uicore-ajaxloader` (the host-styled
     `AjaxLoader` the shared runtime serves), `uicore-i18n`.
@@ -65,8 +76,6 @@ they're built from).
   - `styles/` — shared hand-authored CSS adopted into the shadow root.
   - `vendor-css/` — generated vendor CSS modules (see “Vendor CSS and asset
     binaries” below).
-  - `ClockProvider.tsx` (a re-export of uicore's clock context)
-    — uicore component surfaces.
   - `webpack-compat.ts` — the webpack compat the host applies via `applyWidgetCompat`:
     one `openstack-uicore-foundation` alias (every import resolves to this package's
     uicore copy, so the setters reach the instance the widgets use) plus the
@@ -102,20 +111,22 @@ Dependencies flow one way; uicore stays contained; the esbuild bundle pulls only
 framework-free code:
 
 ```
-HOST (separate repo)           pages, DAL, the two renderers, and register-host.ts
-   │  fills ports              (fills HostAuth / HostConfig / the renderer registry)
+HOST (separate repo)           pages, DAL, and one configureWidgetHost() call
+   │  fills ports              (renderers + HostAuth + HostConfig, via ./host)
    ▼
 HOST src/widgets/<w>/          index / Client / compose / types  (host integration glue)
    ▼ imports (host → widgets)
-@openeventkit/widgets          manifest + vendor-styles + uicore-host      ← THIS PACKAGE
-   ▼
-@openeventkit/widget-mount ──▶ @openeventkit/widget-core
-   Widget dispatcher,            framework-free kernel: createWidgetShadow,
-   WidgetRenderer, renderer       the WidgetManifest type (incl. WidgetBridge),
-   registry, React-19 shims,      and the ports: host-auth, host-config,
-   mutation-safe-props            widget-auth-error
+@openeventkit/widgets          ← THIS PACKAGE
+   src/<widget>/    manifest + vendor-styles (uicore-bound, per widget)
+   src/lib/         uicore-host, compat/*, bridges/, context/, vendor-css/
+   src/mount/  ──▶  src/core/
+     <Widget>, WidgetRenderer +   framework-free kernel: createWidgetShadow,
+     registry, React-19 shims,    the WidgetManifest type (incl. WidgetBridge),
+     mutation-safe-props,         the ports (host-auth, host-config), and the
+     configureWidgetHost          widget-auth-error / -notify / -error events
       ▲
-@openeventkit/web-components (esbuild) — own React 17; never imports widget-mount
+@openeventkit/web-components (esbuild) — own React 17; imports only ./core/*
+and the uicore-bound subpaths, never ./mount
 ```
 
 ## The mount contract (brief — full detail in WIDGET-MOUNTING.md)
@@ -124,16 +135,29 @@ HOST src/widgets/<w>/          index / Client / compose / types  (host integrati
   to adopt, the `bridges` to run, the shadow host `elementTag` / `elementAttrs`.
 - **`compose`** (in the host) — a hook binding the widget's live inputs (realtime
   store, auth-safe profile, bound callbacks, host vars) into a `WidgetComposition`.
-- **`<Widget manifest composition renderAs>`** (`@openeventkit/widget-mount`) —
+- **`<Widget manifest composition renderAs>`** (`@openeventkit/widgets/mount`) —
   resolves `renderAs` (`'react-component'` | `'web-component'`) via the renderer
-  registry the host fills at startup, and mounts it. The two renderers live in
-  the host (`src/components/widget/renderers/` in the reference host,
-  Next/Sentry/uicore-coupled):
+  registry `configureWidgetHost` fills at startup, and mounts it. The host
+  builds its two renderers from the generic factories
+  (`./mount/renderers/shadow-react`, `./mount/renderers/web-component`),
+  injecting only its own pieces (lazy loading, error boundary, bundle base
+  path):
   - **`reactComponent`** — runs the widget on the host's React 19 in a
-    `createWidgetShadow` (Sentry boundary, `next/dynamic({ ssr: false })`, prop
-    mutation-safety, React-19 compat shims). The default for every widget.
+    `createWidgetShadow` (prop mutation-safety, React-19 compat shims,
+    ShadowRootContext and the uicore i18n seed provided by the renderer). The
+    default for every widget.
   - **`webComponent`** — runs it on its own bundled React 17 as a self-contained
     custom element built by `@openeventkit/web-components`.
+
+## The host's setup call
+
+`configureWidgetHost({ config, auth, renderers })` from
+`@openeventkit/widgets/host` is the host's single setup call, run once at
+startup (module eval, before any widget renders). It fills the HostConfig and
+HostAuth ports, registers the renderers, and calls `configureUicore()` — and it
+owns that ordering (uicore reads the config port eagerly), so no host has to
+know about it. It is deliberately not on the `./mount` barrel: it pulls uicore
+through `uicore-host`, and the barrel is imported by every widget client graph.
 
 Legacy widgets mount their own inner Redux `<Provider>` before their selectors
 fire, so the host renders none (see `CONSTRAINTS.md` RC-R).
