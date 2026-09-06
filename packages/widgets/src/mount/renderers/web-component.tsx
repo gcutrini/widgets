@@ -8,15 +8,12 @@ import {
   type ComponentType,
   type ReactNode,
 } from 'react';
-import {
-  webComponentTag,
-  type WidgetManifest,
-} from '../../core';
+import { webComponentTag } from '../../core';
 import { getHostAuth, type HostAuth } from '../../core/host-auth';
 import { getHostConfig, type HostConfig } from '../../core/host-config';
 import { useMutationSafeProps } from '../mutation-safe-props';
 import { WIDGET_ERROR_EVENT } from '../../core/widget-error';
-import type { WidgetRenderer, WidgetMountProps } from '../widget-renderer';
+import type { WebComponentRenderer, WebComponentMountProps } from '../widget-renderer';
 
 /**
  * Load a module <script> once per src, shared across every mount. The bundle
@@ -82,7 +79,7 @@ export interface WebComponentRendererOptions {
    * (bridged out of the island as `widget-error` DOM events) are thrown into
    * it; without one they propagate to the nearest ancestor boundary.
    */
-  Boundary?: ComponentType<{ manifest: WidgetManifest; children: ReactNode }>;
+  Boundary?: ComponentType<{ name: string; children: ReactNode }>;
 }
 
 /**
@@ -93,14 +90,15 @@ export interface WebComponentRendererOptions {
  */
 export function createWebComponentRenderer(
   options: WebComponentRendererOptions,
-): WidgetRenderer {
+): WebComponentRenderer {
   const { bundleBasePath, Boundary } = options;
 
-  function WebComponentMount({ manifest, composition }: WidgetMountProps) {
+  function WebComponentMount({ name, composition }: WebComponentMountProps) {
     // Shared with the bundle's defineWebComponent so the tag we await and the
-    // tag it registers can never drift.
-    const tag = webComponentTag(manifest.name);
-    const bundleSrc = `${bundleBasePath}/${manifest.name}.shared.js`;
+    // tag it registers can never drift. The name is the whole host-side
+    // identity — the widget's own bundle owns the manifest.
+    const tag = webComponentTag(name);
+    const bundleSrc = `${bundleBasePath}/${name}.shared.js`;
     const ref = useRef<HTMLElement | null>(null);
     const [defined, setDefined] = useState(false);
     const [error, setError] = useState<Error | null>(null);
@@ -191,15 +189,9 @@ export function createWebComponentRenderer(
 
   // Not a boundary itself: the mount THROWS load/render errors (see above), so
   // it must sit under one — this wraps it in the host's Boundary when given.
-  function BoundedWebComponentMount({ manifest, composition }: WidgetMountProps) {
-    const mounted = (
-      <WebComponentMount manifest={manifest} composition={composition} />
-    );
-    return Boundary ? (
-      <Boundary manifest={manifest}>{mounted}</Boundary>
-    ) : (
-      mounted
-    );
+  function BoundedWebComponentMount({ name, composition }: WebComponentMountProps) {
+    const mounted = <WebComponentMount name={name} composition={composition} />;
+    return Boundary ? <Boundary name={name}>{mounted}</Boundary> : mounted;
   }
 
   return {

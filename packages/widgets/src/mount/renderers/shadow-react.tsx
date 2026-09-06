@@ -24,7 +24,7 @@ import {
   type WidgetShadow,
 } from '../../core';
 import { useMutationSafeProps } from '../mutation-safe-props';
-import type { WidgetRenderer, WidgetMountProps } from '../widget-renderer';
+import type { ShadowReactRenderer, ManifestMountProps } from '../widget-renderer';
 import { ShadowRootContext } from '../../lib/context/shadow-root-context';
 
 // Attach the shadow before paint so the raw host element never flashes; fall
@@ -51,9 +51,10 @@ export interface ShadowReactRendererOptions {
   /**
    * Error boundary around the whole mount (host element included). The host
    * supplies its reporting stack and fallback UI; without one, render errors
-   * propagate to the nearest ancestor boundary.
+   * propagate to the nearest ancestor boundary. Takes the widget's name — the
+   * same boundary serves the web-component renderer, which has no manifest.
    */
-  Boundary?: ComponentType<{ manifest: WidgetManifest; children: ReactNode }>;
+  Boundary?: ComponentType<{ name: string; children: ReactNode }>;
 }
 
 /**
@@ -64,10 +65,10 @@ export interface ShadowReactRendererOptions {
  */
 export function createShadowReactRenderer(
   options: ShadowReactRendererOptions,
-): WidgetRenderer {
+): ShadowReactRenderer {
   const { resolveComponent, wrapShadowTree, Boundary } = options;
 
-  function ShadowReactMount({ manifest, composition }: WidgetMountProps) {
+  function ShadowReactMount({ manifest, composition }: ManifestMountProps) {
     const hostRef = useRef<HTMLElement | null>(null);
     const [shadow, setShadow] = useState<WidgetShadow | null>(null);
 
@@ -113,7 +114,7 @@ export function createShadowReactRenderer(
     );
 
     return Boundary ? (
-      <Boundary manifest={manifest}>{mounted}</Boundary>
+      <Boundary name={manifest.name}>{mounted}</Boundary>
     ) : (
       mounted
     );

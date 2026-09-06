@@ -2,10 +2,11 @@
 
 This document is the contract a host implements to mount the legacy widgets: a
 widget is **declared once** (`manifest`), **composed once** (`compose`), and
-**rendered by a swappable renderer** (`<Widget renderAs>`) — `reactComponent`
-(the host's React 19, in the page's tree) or `webComponent` (its own bundled
-React 17, as a self-contained custom element). Host file paths below are the
-reference host's.
+**rendered by a swappable renderer** (`<Widget>`) — `reactComponent` (the
+host's React 19, in the page's tree, from the widget's `manifest`) or
+`webComponent` (its own bundled React 17, as a self-contained custom element,
+from the widget's `name` alone — its own bundle owns the manifest). Host
+file paths below are the reference host's.
 
 Companion docs: [ISOLATION-STRATEGY.md](../web-components/ISOLATION-STRATEGY.md) (why the web-component path exists
 and its trade-offs) and [CONSTRAINTS.md](./CONSTRAINTS.md) (the full root-cause
@@ -25,8 +26,10 @@ Hosting a widget is really three independent choices we kept bundling together:
   or its own bundled React 17 (a self-contained custom element). *The only axis
   that actually differs between the two renderers.*
 
-Separating them means the first two are written **once** and the third is a
-**one-prop swap** (`renderAs`).
+Separating them means the first two are written **once** and the third is
+picked by **which identity prop the page passes**: `name` mounts the
+web-component runtime (no manifest in the host bundle), `manifest` mounts on
+the host React.
 
 ---
 
@@ -38,8 +41,8 @@ Separating them means the first two are written **once** and the third is a
 | `WidgetComposer` → `WidgetComposition` | live-data binding | "its realtime + auth + callbacks, per render" |
 | `WidgetShadow` | shared shadow-DOM primitive | "the shadow the widget renders into" |
 | `WidgetBridge` | host-agnostic DOM fix-up | "a shadow patch: emotion-mirror, click-outside…" |
-| `<Widget renderAs={…}>` | the component a page renders | "put a widget on the page" |
-| `WidgetRenderer` (`renderAs`) | how it runs | `'react-component'` (host React) or `'web-component'` (own React) |
+| `<Widget name>` / `<Widget manifest>` | the component a page renders | "put a widget on the page" — `name` runs the web-component runtime, `manifest` runs on the host React |
+| `WidgetRenderer` | how it runs | `'react-component'` (host React, from a manifest) or `'web-component'` (own React, from a name) |
 
 ---
 
@@ -146,8 +149,8 @@ element machinery).
 
 ```
 src/mount/  (./mount barrel; renderers + compat via their own subpaths)
-  Widget.tsx            the component a page renders; resolves renderAs via the registry
-  WidgetRenderer.ts     the WidgetRenderer interface + RendererId + WidgetMountProps
+  Widget.tsx            the component a page renders; picks the renderer from the identity prop
+  widget-renderer.ts    the WidgetRenderer union + RendererId + the two Mount prop types
   composition.ts        WidgetComposition, WidgetComposer (the mount layer's input contract)
   registry.ts           registerRenderer / getRenderer
   configure-widget-host.ts   configureWidgetHost (exported as ./host, NOT on the barrel — it pulls uicore)
@@ -160,21 +163,22 @@ src/mount/  (./mount barrel; renderers + compat via their own subpaths)
 ```tsx
 export type RendererId = 'react-component' | 'web-component';
 
-export interface WidgetRenderer {
-  readonly id: RendererId;
+// Two Mount contracts on purpose: the widget's own bundle owns the manifest,
+// so the web-component Mount takes only the widget's name; the shadow-react
+// Mount runs the widget from its full manifest on the host React.
+export interface ShadowReactRenderer {
+  readonly id: 'react-component';
   readonly Mount: ComponentType<{ manifest: WidgetManifest; composition: WidgetComposition }>;
 }
-
-export function Widget({ manifest, composition, renderAs }: {
-  manifest: WidgetManifest;
-  composition: WidgetComposition | null;
-  renderAs: RendererId;
-}) {
-  if (!composition) return null;
-  const renderer = getRenderer(renderAs);   // filled by the host at startup
-  if (!renderer) return null;
-  return <renderer.Mount manifest={manifest} composition={composition} />;
+export interface WebComponentRenderer {
+  readonly id: 'web-component';
+  readonly Mount: ComponentType<{ name: string; composition: WidgetComposition }>;
 }
+export type WidgetRenderer = ShadowReactRenderer | WebComponentRenderer;
+
+// The identity prop picks the renderer — no renderAs:
+//   <Widget name="registration" composition={…} />      → web-component
+//   <Widget manifest={extraQuestionsManifest} composition={…} /> → react-component
 ```
 
 ### 3 · The uicore-bound part — `src/<widget>/` + `src/lib/`
@@ -244,21 +248,22 @@ export type WidgetComposer<TServerProps = void> =
 ## The call site
 
 The per-widget `Client.tsx` (in the host, its `src/widgets/catalog/<widget>/`) calls the
-composer hook and hands the result to `<Widget>`, choosing the renderer by id:
+composer hook and hands the result to `<Widget>`, choosing the runtime by
+identity prop — a name for the web-component runtime (no manifest import, so
+the manifest graph stays out of the host bundle), or a manifest for a
+host-React mount:
 
 ```tsx
 import { Widget } from '@openeventkit/widgets/mount';
-import { scheduleLiteManifest } from '@openeventkit/widgets/schedule-lite/manifest';
 import { useScheduleLiteComposition } from './compose';
 
-export default function Client({
-  serverProps,
-  renderAs = 'react-component',   // ← 'web-component' swaps in with no other change
-}: {
-  serverProps: ScheduleLiteServerProps;
-  renderAs?: 'react-component' | 'web-component';
-}) {
+export default function Client({ serverProps }: { serverProps: ScheduleLiteServerProps }) {
   const composition = useScheduleLiteComposition(serverProps);
-  return <Widget manifest={scheduleLiteManifest} composition={composition} renderAs={renderAs} />;
+  return <Widget name="schedule-lite" composition={composition} />;
 }
+
+// Host-React variant — the only widget mounted this way today is
+// extra-questions (it has no web-component build):
+//   import { extraQuestionsManifest } from '@openeventkit/widgets/extra-questions/manifest';
+//   <Widget manifest={extraQuestionsManifest} composition={composition} />
 ```

@@ -135,9 +135,11 @@ and the uicore-bound subpaths, never ./mount
   to adopt, the `bridges` to run, the shadow host `elementTag` / `elementAttrs`.
 - **`compose`** (in the host) — a hook binding the widget's live inputs (realtime
   store, auth-safe profile, bound callbacks, host vars) into a `WidgetComposition`.
-- **`<Widget manifest composition renderAs>`** (`@openeventkit/widgets/mount`) —
-  resolves `renderAs` (`'react-component'` | `'web-component'`) via the renderer
-  registry `configureWidgetHost` fills at startup, and mounts it. The host
+- **`<Widget>`** (`@openeventkit/widgets/mount`) — mounts a composition; the
+  identity prop picks the renderer via the registry `configureWidgetHost`
+  fills at startup: `name` runs the web-component runtime (the widget's own
+  bundle owns the manifest — the host bundle never carries it), `manifest`
+  runs the widget on the host React. The host
   builds its two renderers from the generic factories
   (`./mount/renderers/shadow-react`, `./mount/renderers/web-component`),
   injecting only its own pieces (lazy loading, error boundary, bundle base
@@ -169,7 +171,8 @@ fire, so the host renders none (see `CONSTRAINTS.md` RC-R).
   export `./<widget>/manifest` from `package.json`.
 - **In the host (its `src/widgets/catalog/<widget>/`):** `index.tsx` (fetch + derive + render
   `<Client>`), `compose.ts` (`use<Widget>Composition` → `{ props }`),
-  `Client.tsx` (`<Widget manifest composition renderAs>`), `types.ts`, and any
+  `Client.tsx` (`<Widget name composition>`, or `manifest` for a host-React
+  mount), `types.ts`, and any
   `derive.ts` / `use<Widget>Callbacks.ts`.
 
 ## Trade-offs we still live with

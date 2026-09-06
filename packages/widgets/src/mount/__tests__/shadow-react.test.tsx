@@ -66,7 +66,7 @@ describe('createShadowReactRenderer', () => {
 
   it('wraps the whole mount in the injected Boundary and contains render errors', () => {
     class Boundary extends Component<
-      { manifest: WidgetManifest; children: ReactNode },
+      { name: string; children: ReactNode },
       { failed: boolean }
     > {
       state = { failed: false };
@@ -75,7 +75,7 @@ describe('createShadowReactRenderer', () => {
       }
       render() {
         return this.state.failed ? (
-          <div data-testid="fallback">{this.props.manifest.name}</div>
+          <div data-testid="fallback">{this.props.name}</div>
         ) : (
           this.props.children
         );

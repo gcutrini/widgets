@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 import { registerHostAuth, type HostAuth } from '../../core/host-auth';
 import { registerHostConfig, type HostConfig } from '../../core/host-config';
-import { webComponentTag, type WidgetManifest } from '../../core';
+import { webComponentTag } from '../../core';
 import { createWebComponentRenderer } from '../renderers/web-component';
 
 const auth: HostAuth = { isSignedIn: async () => true, logout: () => {} };
@@ -12,8 +12,6 @@ const config: HostConfig = {
   oauth2ClientId: 'cid',
   timeApiUrl: 'https://time.test',
 };
-const manifest = { name: 'demo', load: async () => ({ default: () => null }) } as unknown as WidgetManifest;
-
 // The element the bundle would define — records the host handshake.
 const mountCalls: Array<{
   hostAuth?: HostAuth | null;
@@ -59,7 +57,7 @@ describe('web-component renderer', () => {
 
   it('hands the host ports and the initial props in one mount call', async () => {
     const webComponent = createWebComponentRenderer({ bundleBasePath: '/web-components' });
-    render(<webComponent.Mount manifest={manifest} composition={{ props: { a: 1 } }} />);
+    render(<webComponent.Mount name="demo" composition={{ props: { a: 1 } }} />);
     await waitFor(() => expect(mountCalls).toHaveLength(1));
     expect(mountCalls[0].hostAuth).toBe(auth);
     expect(mountCalls[0].hostConfig).toBe(config);
@@ -70,11 +68,11 @@ describe('web-component renderer', () => {
   it('later prop changes go through setProps, never a second mount', async () => {
     const webComponent = createWebComponentRenderer({ bundleBasePath: '/web-components' });
     const { rerender } = render(
-      <webComponent.Mount manifest={manifest} composition={{ props: { a: 1 } }} />,
+      <webComponent.Mount name="demo" composition={{ props: { a: 1 } }} />,
     );
     await waitFor(() => expect(mountCalls).toHaveLength(1));
     rerender(
-      <webComponent.Mount manifest={manifest} composition={{ props: { a: 2 } }} />,
+      <webComponent.Mount name="demo" composition={{ props: { a: 2 } }} />,
     );
     await waitFor(() => expect(setPropsCalls).toHaveLength(1));
     expect(setPropsCalls[0]).toMatchObject({ a: 2 });

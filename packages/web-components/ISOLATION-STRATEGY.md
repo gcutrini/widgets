@@ -147,14 +147,13 @@ slot). The widget repos ideally own the custom-element entry + its CSS
 theme CSS custom properties (which pierce the shadow).
 
 **State** — all nine widgets build as island bundles
-(`./scripts/policy.mjs` WIDGETS), the reference host's dev-only gallery mounts
-every one in web-component mode, and registration ships as a web component in
-production (Stripe in the light-DOM slot; sweetalert2 through the host notify
-shim; the MUI widgets share the served MUI chunks). The remaining widgets mount
-in the host's tree on the shadow-react renderer by default — flipping one to
-its island is a `renderAs` change once its interaction surface is proven under
-exercise (open/tab/dismiss every overlay), which is the bar my-tickets still
-has to pass before the in-tree mounts can be retired.
+(`./scripts/policy.mjs` WIDGETS), and the reference host mounts every
+widget that has a web-component build as one by default (registration with Stripe in
+the light-DOM slot; sweetalert2 through the host notify shim; the MUI widgets
+share the served MUI chunks). Moving a widget back into the host's tree on the
+shadow-react renderer is a one-line identity swap at its call site — pass the
+widget's `manifest` instead of its `name` — kept for QA under exercise
+(open/tab/dismiss every overlay) on the dev-only gallery.
 
 ---
 
