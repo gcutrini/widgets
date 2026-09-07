@@ -1,4 +1,8 @@
-export { Widget, type WidgetProps } from './Widget';
+export {
+  createWebComponentWidget,
+  createManifestWidget,
+  type WidgetComponentProps,
+} from './create-widget-component';
 export { registerRenderer } from './registry';
 export type {
   WidgetRenderer,

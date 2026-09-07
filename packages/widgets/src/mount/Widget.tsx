@@ -5,9 +5,11 @@ import type { WidgetComposition } from './composition';
 import { getRenderer } from './registry';
 
 /**
- * Mounts a widget by handing its live composition to a renderer, chosen by
- * which identity prop is passed — the two runtimes take different identities
- * on purpose:
+ * Internal dispatcher behind the per-widget components (`create-widget-component`
+ * builds them; consumers import `@openeventkit/widgets/<widget>/web-component`
+ * or `.../react` and never render this directly). Mounts a widget by handing
+ * its live composition to a renderer, chosen by which identity prop is
+ * passed — the two runtimes take different identities on purpose:
  *
  * - `name`: the web-component runtime. The widget's own bundle owns the
  *   manifest; the host needs only the widget's name (custom-element tag +
