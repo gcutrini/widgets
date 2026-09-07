@@ -1,12 +1,10 @@
 export {
   createWebComponentWidget,
-  createManifestWidget,
+  createReactComponentWidget,
   type WidgetComponentProps,
 } from './create-widget-component';
-export { registerRenderer } from './registry';
+export type { WidgetRenderers } from './registry';
 export type {
-  WidgetRenderer,
-  RendererId,
   ManifestMountProps,
   WebComponentMountProps,
 } from './widget-renderer';

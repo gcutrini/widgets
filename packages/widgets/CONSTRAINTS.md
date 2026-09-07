@@ -121,7 +121,7 @@ No `.d.ts` files. No JSDoc types. No documented prop tables.
 
 - **C.1 — `src/lib/widget-modules.d.ts` (this package).** Ten ambient `declare module '<widget>/dist' { ... }` blocks — every widget declares its default export as `ComponentType<Record<string, unknown>>`. Loose. Any typo in a prop name silently succeeds at compile time.
 - **C.2 — Widget prop interfaces widen with `[key: string]: unknown`.** Where a widget's server-props interface ends with an index signature (registration's `types.ts`), callers can pass undocumented props the widget accepts — TypeScript cannot catch prop-name typos there.
-- **C.3 — Widget code never renders server-side.** Widgets access `window` at module scope, so the shadow-react renderer loads them with `next/dynamic({ ssr: false })` (injected by the host through the renderer factory's `resolveComponent` option) and the web-component path is client-only by nature. Costs us initial HTML for widget content and SEO signal on widget-heavy routes.
+- **C.3 — Widget code never renders server-side.** Widgets access `window` at module scope, so the react-component renderer loads them with `next/dynamic({ ssr: false })` (injected by the host through the renderer factory's `resolveComponent` option) and the web-component path is client-only by nature. Costs us initial HTML for widget content and SEO signal on widget-heavy routes.
 
 **Why the widgets force it.** No published types means every prop shape must be reconstructed from reading widget source. Widgets change internal expectations without notice.
 

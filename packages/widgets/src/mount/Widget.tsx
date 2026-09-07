@@ -2,7 +2,7 @@
 
 import type { WidgetManifest } from '../core';
 import type { WidgetComposition } from './composition';
-import { getRenderer } from './registry';
+import { getRenderers, type WidgetRenderers } from './registry';
 
 /**
  * Internal dispatcher behind the per-widget components (`create-widget-component`
@@ -13,12 +13,11 @@ import { getRenderer } from './registry';
  *
  * - `name`: the web-component runtime. The widget's own bundle owns the
  *   manifest; the host needs only the widget's name (custom-element tag +
- *   bundle filename), so the manifest graph never enters the host bundle.
+ *   bundle filename).
  * - `manifest`: the react-component runtime. The widget runs on the host's
  *   React from its full manifest (dist loader, sheets, bridges).
  *
- * Renders nothing until the composition is ready (or if no renderer is
- * registered).
+ * Renders nothing until the composition is ready.
  */
 export type WidgetProps =
   | { name: string; manifest?: never; composition: WidgetComposition | null }
@@ -26,26 +25,22 @@ export type WidgetProps =
 
 export function Widget(props: WidgetProps) {
   const { composition } = props;
-  const rendererId = props.name !== undefined ? 'web-component' : 'react-component';
   if (!composition) return null;
-  const renderer = getRenderer(rendererId);
-  if (!renderer) {
-    if (process.env.NODE_ENV !== 'production') {
-      // A silent blank region otherwise — usually a missing register-host
-      // import (the module that registers the renderers at startup).
-      console.warn(
-        `[widget-mount] no renderer registered for "${rendererId}" — did the host run its renderer registration?`,
-      );
-    }
-    return null;
+  if (props.name !== undefined) {
+    const Mount = getRenderers().webComponent;
+    if (!Mount) return missingRenderer('webComponent');
+    return <Mount name={props.name} composition={composition} />;
   }
-  // The registry is keyed by id, so the looked-up renderer's Mount matches
-  // the identity prop we dispatched on; the guards let TypeScript see that.
-  if (props.name !== undefined && renderer.id === 'web-component') {
-    return <renderer.Mount name={props.name} composition={composition} />;
-  }
-  if (props.manifest !== undefined && renderer.id === 'react-component') {
-    return <renderer.Mount manifest={props.manifest} composition={composition} />;
-  }
+  const Mount = getRenderers().reactComponent;
+  if (!Mount) return missingRenderer('reactComponent');
+  return <Mount manifest={props.manifest} composition={composition} />;
+}
+
+// Loud in development (the overlay surfaces it), a warned blank in
+// production — a widget region is not worth crashing a live page over.
+function missingRenderer(slot: keyof WidgetRenderers): null {
+  const message = `[widget-mount] no "${slot}" renderer — did the host call its widget-host registration (configureWidgetHost) before rendering widgets?`;
+  if (process.env.NODE_ENV !== 'production') throw new Error(message);
+  console.warn(message);
   return null;
 }

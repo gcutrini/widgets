@@ -151,7 +151,7 @@ theme CSS custom properties (which pierce the shadow).
 widget that has a web-component build as one by default (registration with Stripe in
 the light-DOM slot; sweetalert2 through the host notify shim; the MUI widgets
 share the served MUI chunks). Moving a widget back into the host's tree on the
-shadow-react renderer is a one-line identity swap at its call site — pass the
+react-component renderer is a one-line identity swap at its call site — pass the
 widget's `manifest` instead of its `name` — kept for QA under exercise
 (open/tab/dismiss every overlay) on the dev-only gallery.
 

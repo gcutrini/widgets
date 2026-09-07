@@ -13,7 +13,7 @@ import { getHostAuth, type HostAuth } from '../../core/host-auth';
 import { getHostConfig, type HostConfig } from '../../core/host-config';
 import { useMutationSafeProps } from '../mutation-safe-props';
 import { WIDGET_ERROR_EVENT } from '../../core/widget-error';
-import type { WebComponentRenderer, WebComponentMountProps } from '../widget-renderer';
+import type { WebComponentMountProps } from '../widget-renderer';
 
 /** The element's host-facing surface (defined by the widget's bundle). */
 type WidgetElement = HTMLElement & {
@@ -101,7 +101,7 @@ export interface WebComponentRendererOptions {
  */
 export function createWebComponentRenderer(
   options: WebComponentRendererOptions,
-): WebComponentRenderer {
+): ComponentType<WebComponentMountProps> {
   const { bundleBasePath, Boundary } = options;
 
   function WebComponentMount({ name, composition }: WebComponentMountProps) {
@@ -116,7 +116,7 @@ export function createWebComponentRenderer(
 
     // Shallow-isolate props so a legacy widget mutating what it's handed can't
     // corrupt the host's store slices (RC-W) — the same protection the
-    // shadow-react renderer applies. The widget receives the SAME prop objects
+    // react-component renderer applies. The widget receives the SAME prop objects
     // across the DOM boundary, so the mutation risk is identical here.
     const isolated = useMutationSafeProps(composition.props);
 
@@ -201,7 +201,7 @@ export function createWebComponentRenderer(
     // Raise any error — a runtime/bundle load failure or a widget render error
     // bridged from the kit's in-widget boundary — into the boundary, so both
     // render the same fallback. (Event-handler and async throws stay uncaught
-    // here, exactly as in the shadow-react renderer.)
+    // here, exactly as in the react-component renderer.)
     if (error) throw error;
 
     return createElement(tag, { ref });
@@ -214,8 +214,5 @@ export function createWebComponentRenderer(
     return Boundary ? <Boundary name={name}>{mounted}</Boundary> : mounted;
   }
 
-  return {
-    id: 'web-component',
-    Mount: BoundedWebComponentMount,
-  };
+  return BoundedWebComponentMount;
 }

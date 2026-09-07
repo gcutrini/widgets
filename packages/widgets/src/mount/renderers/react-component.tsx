@@ -24,7 +24,7 @@ import {
   type WidgetShadow,
 } from '../../core';
 import { useMutationSafeProps } from '../mutation-safe-props';
-import type { ShadowReactRenderer, ManifestMountProps } from '../widget-renderer';
+import type { ManifestMountProps } from '../widget-renderer';
 import { ShadowRootContext } from '../../lib/context/shadow-root-context';
 
 // Attach the shadow before paint so the raw host element never flashes; fall
@@ -33,7 +33,7 @@ import { ShadowRootContext } from '../../lib/context/shadow-root-context';
 const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-export interface ShadowReactRendererOptions {
+export interface ReactComponentRendererOptions {
   /**
    * Turn a manifest into the widget's React component. The host decides how
    * the lazy load happens (e.g. Next's `dynamic(manifest.load, { ssr: false })`
@@ -61,14 +61,15 @@ export interface ShadowReactRendererOptions {
  * Generic "run the widget on the host's React" renderer: mounts the widget
  * into a `createWidgetShadow` host via a portal, with mutation-safe props.
  * Everything host-specific (lazy loading, error reporting, shadow context)
- * is injected through the options.
+ * is injected through the options. Returns the mount component the host
+ * hands to configureWidgetHost as `renderers.reactComponent`.
  */
-export function createShadowReactRenderer(
-  options: ShadowReactRendererOptions,
-): ShadowReactRenderer {
+export function createReactComponentRenderer(
+  options: ReactComponentRendererOptions,
+): ComponentType<ManifestMountProps> {
   const { resolveComponent, wrapShadowTree, Boundary } = options;
 
-  function ShadowReactMount({ manifest, composition }: ManifestMountProps) {
+  function ReactComponentMount({ manifest, composition }: ManifestMountProps) {
     const hostRef = useRef<HTMLElement | null>(null);
     const [shadow, setShadow] = useState<WidgetShadow | null>(null);
 
@@ -120,8 +121,5 @@ export function createShadowReactRenderer(
     );
   }
 
-  return {
-    id: 'react-component',
-    Mount: ShadowReactMount,
-  };
+  return ReactComponentMount;
 }

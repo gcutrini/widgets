@@ -1,17 +1,25 @@
-import type { RendererId, WidgetRenderer } from './widget-renderer';
+import type { ComponentType } from 'react';
+import type { ManifestMountProps, WebComponentMountProps } from './widget-renderer';
 
 /**
- * The host registers its concrete renderers here at startup; widget Clients
- * resolve them by id via the Widget dispatcher. This is the seam that lets
- * widget definitions stay free of the host's (Next/Sentry/uicore-coupled)
- * renderer implementations.
+ * The two ways a widget can mount — the host supplies both at setup
+ * (configureWidgetHost) and the per-widget components read them here at
+ * render time. This is the seam that lets widget definitions stay free of
+ * the host's (Next/Sentry-coupled) mount implementations.
  */
-const renderers = new Map<RendererId, WidgetRenderer>();
-
-export function registerRenderer(renderer: WidgetRenderer): void {
-  renderers.set(renderer.id, renderer);
+export interface WidgetRenderers {
+  /** Runs the widget on the host's React from its manifest. */
+  reactComponent?: ComponentType<ManifestMountProps>;
+  /** Runs the widget as a self-contained custom element from its name. */
+  webComponent?: ComponentType<WebComponentMountProps>;
 }
 
-export function getRenderer(id: RendererId): WidgetRenderer | undefined {
-  return renderers.get(id);
+let renderers: WidgetRenderers = {};
+
+export function setRenderers(r: WidgetRenderers): void {
+  renderers = r;
+}
+
+export function getRenderers(): WidgetRenderers {
+  return renderers;
 }

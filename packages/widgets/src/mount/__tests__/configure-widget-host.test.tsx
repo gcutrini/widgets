@@ -18,7 +18,7 @@ vi.mock('../../lib/uicore-host', () => ({
   configureUicore: vi.fn(() => calls.push('uicore')),
 }));
 vi.mock('../registry', () => ({
-  registerRenderer: vi.fn(() => calls.push('renderer')),
+  setRenderers: vi.fn(() => calls.push('renderers')),
 }));
 
 import { configureWidgetHost } from '../configureWidgetHost';
@@ -30,11 +30,11 @@ describe('configureWidgetHost', () => {
     configureWidgetHost({
       config: { apiBaseUrl: '/x', idpBaseUrl: '', oauth2ClientId: '', timeApiUrl: '' },
       auth: { isSignedIn: async () => false, logout: async () => {} },
-      renderers: [{ id: 'a' } as never, { id: 'b' } as never],
+      renderers: {},
     });
     expect(calls.indexOf('config')).toBeGreaterThanOrEqual(0);
     expect(calls.indexOf('config')).toBeLessThan(calls.indexOf('uicore'));
-    expect(calls.filter((c) => c === 'renderer')).toHaveLength(2);
+    expect(calls).toContain('renderers');
     expect(calls).toContain('auth');
   });
 });

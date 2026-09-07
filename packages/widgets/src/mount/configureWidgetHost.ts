@@ -1,7 +1,6 @@
 'use client';
 
-import { registerRenderer } from './registry';
-import type { WidgetRenderer } from './widget-renderer';
+import { setRenderers, type WidgetRenderers } from './registry';
 import { registerHostConfig, type HostConfig } from '../core/host-config';
 import { registerHostAuth, type HostAuth } from '../core/host-auth';
 import { configureUicore } from '../lib/uicore-host';
@@ -9,11 +8,11 @@ import { configureUicore } from '../lib/uicore-host';
 export interface WidgetHostSetup {
   config: HostConfig;
   auth: HostAuth;
-  renderers: WidgetRenderer[];
+  renderers: WidgetRenderers;
 }
 
 /**
- * The host's single setup call: fills the ports, registers the renderers and
+ * The host's single setup call: fills the ports, supplies the renderers and
  * hands uicore its configuration. Owning the sequence here matters —
  * configureUicore reads the config port eagerly, so it must run after the
  * port is filled, an ordering no caller should have to know about.
@@ -25,6 +24,6 @@ export interface WidgetHostSetup {
 export function configureWidgetHost({ config, auth, renderers }: WidgetHostSetup): void {
   registerHostConfig(config);
   registerHostAuth(auth);
-  for (const renderer of renderers) registerRenderer(renderer);
+  setRenderers(renderers);
   configureUicore();
 }

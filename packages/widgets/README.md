@@ -50,7 +50,7 @@ surface is a named entry in the exports map.
   the `WidgetManifest` type (incl. `WidgetBridge`), `webComponentTag`, the
   host ports (`host-auth`, `host-config`), and the DOM event contracts
   (`widget-auth-error`, `widget-notify`, `widget-error`).
-- `src/mount/` (`./mount`, `./mount/renderers/shadow-react`,
+- `src/mount/` (`./mount`, `./mount/renderers/react-component`,
   `./mount/renderers/web-component`, `./mount/compat/*`, `./host`)
   — the React-19 host mounting layer: `<Widget>`, the `WidgetRenderer`
   interface + registry, the `WidgetComposition` contract, the two generic
@@ -142,7 +142,7 @@ and the uicore-bound subpaths, never ./mount
   the host bundle never carries it); `/react` runs the widget on the host
   React from its full manifest. The host
   builds its two renderers from the generic factories
-  (`./mount/renderers/shadow-react`, `./mount/renderers/web-component`),
+  (`./mount/renderers/react-component`, `./mount/renderers/web-component`),
   injecting only its own pieces (lazy loading, error boundary, bundle base
   path):
   - **`reactComponent`** — runs the widget on the host's React 19 in a

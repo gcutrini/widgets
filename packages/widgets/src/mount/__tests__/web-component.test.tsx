@@ -61,8 +61,8 @@ describe('web-component renderer', () => {
   });
 
   it('hands the host ports and the initial props in one mount call', async () => {
-    const webComponent = createWebComponentRenderer({ bundleBasePath: '/web-components' });
-    render(<webComponent.Mount name="demo" composition={{ props: { a: 1 } }} />);
+    const Mount = createWebComponentRenderer({ bundleBasePath: '/web-components' });
+    render(<Mount name="demo" composition={{ props: { a: 1 } }} />);
     await waitFor(() => expect(mountCalls).toHaveLength(1));
     expect(mountCalls[0].hostAuth).toBe(auth);
     expect(mountCalls[0].hostConfig).toBe(config);
@@ -71,13 +71,13 @@ describe('web-component renderer', () => {
   });
 
   it('later prop changes go through setProps, never a second mount', async () => {
-    const webComponent = createWebComponentRenderer({ bundleBasePath: '/web-components' });
+    const Mount = createWebComponentRenderer({ bundleBasePath: '/web-components' });
     const { rerender } = render(
-      <webComponent.Mount name="demo" composition={{ props: { a: 1 } }} />,
+      <Mount name="demo" composition={{ props: { a: 1 } }} />,
     );
     await waitFor(() => expect(mountCalls).toHaveLength(1));
     rerender(
-      <webComponent.Mount name="demo" composition={{ props: { a: 2 } }} />,
+      <Mount name="demo" composition={{ props: { a: 2 } }} />,
     );
     await waitFor(() => expect(setPropsCalls).toHaveLength(1));
     expect(setPropsCalls[0]).toMatchObject({ a: 2 });
@@ -86,9 +86,9 @@ describe('web-component renderer', () => {
   });
 
   it('unmounting the mount closes the visit with el.unmount()', async () => {
-    const webComponent = createWebComponentRenderer({ bundleBasePath: '/web-components' });
+    const Mount = createWebComponentRenderer({ bundleBasePath: '/web-components' });
     const { unmount } = render(
-      <webComponent.Mount name="demo" composition={{ props: { a: 1 } }} />,
+      <Mount name="demo" composition={{ props: { a: 1 } }} />,
     );
     await waitFor(() => expect(mountCalls).toHaveLength(1));
     unmount();
@@ -96,18 +96,18 @@ describe('web-component renderer', () => {
   });
 
   it('a strict-mode style remount opens a fresh visit with the current props', async () => {
-    const webComponent = createWebComponentRenderer({ bundleBasePath: '/web-components' });
+    const Mount = createWebComponentRenderer({ bundleBasePath: '/web-components' });
     const view = render(
-      <webComponent.Mount name="demo" composition={{ props: { a: 1 } }} />,
+      <Mount name="demo" composition={{ props: { a: 1 } }} />,
     );
     await waitFor(() => expect(mountCalls).toHaveLength(1));
     view.rerender(
-      <webComponent.Mount name="demo" composition={{ props: { a: 2 } }} />,
+      <Mount name="demo" composition={{ props: { a: 2 } }} />,
     );
     await waitFor(() => expect(setPropsCalls).toHaveLength(1));
     view.unmount();
     const again = render(
-      <webComponent.Mount name="demo" composition={{ props: { a: 3 } }} />,
+      <Mount name="demo" composition={{ props: { a: 3 } }} />,
     );
     await waitFor(() => expect(mountCalls).toHaveLength(2));
     expect(mountCalls[1].props).toMatchObject({ a: 3 });

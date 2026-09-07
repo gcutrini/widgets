@@ -34,12 +34,12 @@ export function createWebComponentWidget(
  * graph into the consumer's bundle — the price of running the widget in the
  * host's tree.
  */
-export function createManifestWidget(
+export function createReactComponentWidget(
   manifest: WidgetManifest,
 ): ComponentType<WidgetComponentProps> {
-  function ManifestWidget({ composition }: WidgetComponentProps) {
+  function ReactComponentWidget({ composition }: WidgetComponentProps) {
     return <Widget manifest={manifest} composition={composition} />;
   }
-  ManifestWidget.displayName = `Widget(${manifest.name})`;
-  return ManifestWidget;
+  ReactComponentWidget.displayName = `Widget(${manifest.name})`;
+  return ReactComponentWidget;
 }

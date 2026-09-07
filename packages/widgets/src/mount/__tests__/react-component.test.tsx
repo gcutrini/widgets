@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { Component, type ReactNode } from 'react';
 import { render } from '@testing-library/react';
 import type { WidgetManifest } from '../../core';
-import { createShadowReactRenderer } from '../renderers/shadow-react';
+import { createReactComponentRenderer } from '../renderers/react-component';
 
 /**
  * jsdom notes: style mechanics (constructable vs <style> fallback) are owned
@@ -26,15 +26,15 @@ function Probe(props: Record<string, unknown>) {
   return <div data-testid="probe" />;
 }
 
-describe('createShadowReactRenderer', () => {
+describe('createReactComponentRenderer', () => {
   it('attaches a shadow to the host element and portals the widget into its container', () => {
-    const renderer = createShadowReactRenderer({ resolveComponent: () => Probe });
+    const Mount = createReactComponentRenderer({ resolveComponent: () => Probe });
     const manifest = manifestOf({
       elementTag: 'section',
       elementAttrs: { 'data-widget': 'demo' },
     });
     const { container } = render(
-      <renderer.Mount manifest={manifest} composition={{ props: {} }} />,
+      <Mount manifest={manifest} composition={{ props: {} }} />,
     );
 
     const host = container.querySelector('section[data-widget="demo"]') as HTMLElement;
@@ -49,12 +49,12 @@ describe('createShadowReactRenderer', () => {
     const wrapShadowTree = vi.fn((tree: ReactNode, _root: ShadowRoot) => (
       <div data-testid="wrapper">{tree}</div>
     ));
-    const renderer = createShadowReactRenderer({
+    const Mount = createReactComponentRenderer({
       resolveComponent: () => Probe,
       wrapShadowTree,
     });
     const { container } = render(
-      <renderer.Mount manifest={manifestOf()} composition={{ props: {} }} />,
+      <Mount manifest={manifestOf()} composition={{ props: {} }} />,
     );
 
     const host = container.querySelector('div') as HTMLElement;
@@ -84,13 +84,13 @@ describe('createShadowReactRenderer', () => {
     const Throwing = () => {
       throw new Error('widget render error');
     };
-    const renderer = createShadowReactRenderer({
+    const Mount = createReactComponentRenderer({
       resolveComponent: () => Throwing,
       Boundary,
     });
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { getByTestId } = render(
-      <renderer.Mount manifest={manifestOf()} composition={{ props: {} }} />,
+      <Mount manifest={manifestOf()} composition={{ props: {} }} />,
     );
     spy.mockRestore();
     expect(getByTestId('fallback').textContent).toBe('demo');
@@ -98,22 +98,22 @@ describe('createShadowReactRenderer', () => {
 
   it('resolves the component once per manifest across prop changes', () => {
     const resolveComponent = vi.fn(() => Probe);
-    const renderer = createShadowReactRenderer({ resolveComponent });
+    const Mount = createReactComponentRenderer({ resolveComponent });
     const manifest = manifestOf();
     const { rerender } = render(
-      <renderer.Mount manifest={manifest} composition={{ props: { a: 1 } }} />,
+      <Mount manifest={manifest} composition={{ props: { a: 1 } }} />,
     );
     rerender(
-      <renderer.Mount manifest={manifest} composition={{ props: { a: 2 } }} />,
+      <Mount manifest={manifest} composition={{ props: { a: 2 } }} />,
     );
     expect(resolveComponent).toHaveBeenCalledTimes(1);
   });
 
   it('hands the widget mutation-safe props (in-place mutation cannot reach the source)', () => {
     const source = { data: { a: 1 }, list: [1, 2] };
-    const renderer = createShadowReactRenderer({ resolveComponent: () => Probe });
+    const Mount = createReactComponentRenderer({ resolveComponent: () => Probe });
     render(
-      <renderer.Mount
+      <Mount
         manifest={manifestOf()}
         composition={{
           props: {
@@ -131,12 +131,12 @@ describe('createShadowReactRenderer', () => {
   });
 
   it('applies manifest.wrapTree around the widget inside the shadow', () => {
-    const renderer = createShadowReactRenderer({ resolveComponent: () => Probe });
+    const Mount = createReactComponentRenderer({ resolveComponent: () => Probe });
     const manifest = manifestOf({
       wrapTree: (children) => <div data-testid="wraptree">{children}</div>,
     });
     const { container } = render(
-      <renderer.Mount manifest={manifest} composition={{ props: {} }} />,
+      <Mount manifest={manifest} composition={{ props: {} }} />,
     );
     const host = container.querySelector('div') as HTMLElement;
     const wrap = host.shadowRoot!.querySelector('[data-testid="wraptree"]');
@@ -145,10 +145,10 @@ describe('createShadowReactRenderer', () => {
 
   it('runs bridge cleanups on unmount (shadow disposed)', () => {
     const cleanup = vi.fn();
-    const renderer = createShadowReactRenderer({ resolveComponent: () => Probe });
+    const Mount = createReactComponentRenderer({ resolveComponent: () => Probe });
     const manifest = manifestOf({ bridges: [() => cleanup] });
     const { unmount } = render(
-      <renderer.Mount manifest={manifest} composition={{ props: {} }} />,
+      <Mount manifest={manifest} composition={{ props: {} }} />,
     );
     expect(cleanup).not.toHaveBeenCalled();
     unmount();
@@ -163,11 +163,11 @@ describe('createShadowReactRenderer', () => {
       seen = useContext(ShadowRootContext);
       return null;
     };
-    const renderer = createShadowReactRenderer({
+    const Mount = createReactComponentRenderer({
       resolveComponent: () => Probe,
     });
     const { container } = render(
-      <renderer.Mount manifest={manifestOf()} composition={{ props: {} }} />,
+      <Mount manifest={manifestOf()} composition={{ props: {} }} />,
     );
     const host = container.querySelector('[data-widget]') ?? container.firstElementChild;
     expect(seen).toBeTruthy();

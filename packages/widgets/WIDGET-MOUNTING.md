@@ -45,7 +45,7 @@ code you don't ship.
 | `WidgetShadow` | shared shadow-DOM primitive | "the shadow the widget renders into" |
 | `WidgetBridge` | host-agnostic DOM fix-up | "a shadow patch: emotion-mirror, click-outside…" |
 | `<widget>/web-component` · `<widget>/react` | the component a page renders | "put a widget on the page" — the import path picks the runtime |
-| `WidgetRenderer` | how it runs | `'react-component'` (host React, from a manifest) or `'web-component'` (own React, from a name) |
+| `WidgetRenderers` | how it runs | `reactComponent` (host React, from a manifest) or `webComponent` (own React, from a name) — the host supplies both mounts |
 
 ---
 
@@ -58,12 +58,12 @@ modules; the esbuild bundle pulls only framework-free code. Everything lives in
 ```
 src/core/  (./core)      framework-free kernel — imported by BOTH the host and the esbuild build.
    ▲                     WidgetManifest type (incl. WidgetBridge), createWidgetShadow, + host ports.
-src/mount/ (./mount)     React mount contract — <Widget>, WidgetRenderer, the renderer registry,
+src/mount/ (./mount)     React mount contract — <Widget>, WidgetRenderers, the renderer slots,
    ▲                     the generic renderer factories, configureWidgetHost (./host),
    │                     and the React-19 compat / prop-mutation-safety utilities. Host-side only.
 src/<widget>/ + src/lib/ the uicore-bound part of each widget: manifest + vendor-styles.
    ▲                     (integration glue — compose/Client/index — lives in the host, src/widgets/catalog/<w>.)
-HOST (separate repo)     builds its two renderers from the ./mount/renderers/shadow-react and
+HOST (separate repo)     builds its two renderers from the ./mount/renderers/react-component and
                          ./mount/renderers/web-component factories and hands them to
                          configureWidgetHost at startup.
 ```
@@ -145,7 +145,7 @@ export function createWidgetShadow(
 
 ### 2 · `./mount` — the mount contract
 
-`<Widget>`, the `WidgetRenderer` interface, the renderer **registry**, the
+`<Widget>`, the `WidgetRenderers` slots, the
 host's setup call, and the React-19 compat / prop-mutation-safety utilities.
 Host-side only — the esbuild bundle never imports it (the bundle has its own
 element machinery).
@@ -154,11 +154,11 @@ element machinery).
 src/mount/  (./mount barrel; renderers + compat via their own subpaths)
   create-widget-component.tsx   builds the per-widget components the catalog entries export
   Widget.tsx            internal dispatcher; picks the renderer from the identity prop
-  widget-renderer.ts    the WidgetRenderer union + RendererId + the two Mount prop types
+  widget-renderer.ts    the two Mount prop types
   composition.ts        WidgetComposition, WidgetComposer (the mount layer's input contract)
-  registry.ts           registerRenderer / getRenderer
+  registry.ts           WidgetRenderers — the two named renderer slots the host fills
   configure-widget-host.ts   configureWidgetHost (exported as ./host, NOT on the barrel — it pulls uicore)
-  renderers/            shadow-react · web-component (generic mount factories; hosts inject
+  renderers/            react-component · web-component (generic mount factories; hosts inject
                         lazy-loading, error boundary, bundle base path)
   mutation-safe-props.ts   shallow-copy so a widget's in-place prop mutations can't reach host state
   compat/               find-dom-node · react-element-symbol · react-dom-with-find-dom-node (React-19 shims)
@@ -168,17 +168,13 @@ src/mount/  (./mount barrel; renderers + compat via their own subpaths)
 export type RendererId = 'react-component' | 'web-component';
 
 // Two Mount contracts on purpose: the widget's own bundle owns the manifest,
-// so the web-component Mount takes only the widget's name; the shadow-react
-// Mount runs the widget from its full manifest on the host React.
-export interface ShadowReactRenderer {
-  readonly id: 'react-component';
-  readonly Mount: ComponentType<{ manifest: WidgetManifest; composition: WidgetComposition }>;
+// so the web-component Mount takes only the widget's name; the react-component
+// Mount runs the widget from its full manifest on the host React. The host
+// fills both slots at setup:
+export interface WidgetRenderers {
+  reactComponent?: ComponentType<{ manifest: WidgetManifest; composition: WidgetComposition }>;
+  webComponent?: ComponentType<{ name: string; composition: WidgetComposition }>;
 }
-export interface WebComponentRenderer {
-  readonly id: 'web-component';
-  readonly Mount: ComponentType<{ name: string; composition: WidgetComposition }>;
-}
-export type WidgetRenderer = ShadowReactRenderer | WebComponentRenderer;
 
 // The import path picks the renderer — consumers never render <Widget>:
 //   import Registration from '@openeventkit/widgets/registration/web-component';
@@ -195,7 +191,7 @@ its `src/widgets/catalog/<widget>/`. See this package's [README](./README.md).
 
 ### 4 · The two renderers + the host's one setup call
 
-The generic renderer mounts ship here (`./mount/renderers/shadow-react`,
+The generic renderer mounts ship here (`./mount/renderers/react-component`,
 `./mount/renderers/web-component`); the host configures them with its own
 pieces and hands the results to `configureWidgetHost({ config, auth,
 renderers })` from `@openeventkit/widgets/host` — its single setup call,
@@ -207,7 +203,7 @@ authority), registers the renderers, and calls `configureUicore()` from
 handlers — owning that ordering (uicore reads the config port eagerly). The
 resolver and handlers read the ports at call time.
 
-- **`reactComponent`** — `createShadowReactRenderer({ resolveComponent,
+- **`reactComponent`** — `createReactComponentRenderer({ resolveComponent,
   Boundary? })`. The host supplies only `resolveComponent` (how the lazy load
   happens — e.g. Next's `dynamic(manifest.load, { ssr: false })`) and
   optionally an error `Boundary`. The renderer does the rest:
