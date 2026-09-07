@@ -85,6 +85,14 @@ describe('web-component renderer', () => {
     expect(unmountCalls).toBe(0);
   });
 
+  it('forwards a ref to the custom element', async () => {
+    const Mount = createWebComponentRenderer({ bundleBasePath: '/web-components' });
+    const ref: { current: HTMLElement | null } = { current: null };
+    render(<Mount name="demo" composition={{ props: { a: 1 } }} ref={ref} />);
+    await waitFor(() => expect(ref.current).not.toBeNull());
+    expect(ref.current!.tagName.toLowerCase()).toBe(webComponentTag('demo'));
+  });
+
   it('unmounting the mount closes the visit with el.unmount()', async () => {
     const Mount = createWebComponentRenderer({ bundleBasePath: '/web-components' });
     const { unmount } = render(

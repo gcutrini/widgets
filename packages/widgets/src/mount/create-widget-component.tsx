@@ -1,13 +1,18 @@
 'use client';
 
-import type { ComponentType } from 'react';
+import type { ComponentType, Ref } from 'react';
 import type { WidgetManifest } from '../core';
 import type { WidgetComposition } from './composition';
 import { Widget } from './Widget';
 
-/** The props every per-widget component takes: just the live composition. */
+/**
+ * The props every per-widget component takes: the live composition, plus an
+ * optional ref that lands on the widget's host element (the custom element
+ * for the web-component runtime, the shadow host for the react runtime).
+ */
 export interface WidgetComponentProps {
   composition: WidgetComposition | null;
+  ref?: Ref<HTMLElement>;
 }
 
 /**
@@ -21,8 +26,8 @@ export interface WidgetComponentProps {
 export function createWebComponentWidget(
   name: string,
 ): ComponentType<WidgetComponentProps> {
-  function WebComponentWidget({ composition }: WidgetComponentProps) {
-    return <Widget name={name} composition={composition} />;
+  function WebComponentWidget({ composition, ref }: WidgetComponentProps) {
+    return <Widget name={name} composition={composition} ref={ref} />;
   }
   WebComponentWidget.displayName = `Widget(${name})`;
   return WebComponentWidget;
@@ -37,8 +42,8 @@ export function createWebComponentWidget(
 export function createReactComponentWidget(
   manifest: WidgetManifest,
 ): ComponentType<WidgetComponentProps> {
-  function ReactComponentWidget({ composition }: WidgetComponentProps) {
-    return <Widget manifest={manifest} composition={composition} />;
+  function ReactComponentWidget({ composition, ref }: WidgetComponentProps) {
+    return <Widget manifest={manifest} composition={composition} ref={ref} />;
   }
   ReactComponentWidget.displayName = `Widget(${manifest.name})`;
   return ReactComponentWidget;

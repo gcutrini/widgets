@@ -12,7 +12,6 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
   type ComponentType,
   type ReactNode,
@@ -24,6 +23,7 @@ import {
   type WidgetShadow,
 } from '../../core';
 import { useMutationSafeProps } from '../mutation-safe-props';
+import { useHostRef } from '../use-host-ref';
 import type { ManifestMountProps } from '../widget-renderer';
 import { ShadowRootContext } from '../../lib/context/shadow-root-context';
 
@@ -69,8 +69,8 @@ export function createReactComponentRenderer(
 ): ComponentType<ManifestMountProps> {
   const { resolveComponent, wrapShadowTree, Boundary } = options;
 
-  function ReactComponentMount({ manifest, composition }: ManifestMountProps) {
-    const hostRef = useRef<HTMLElement | null>(null);
+  function ReactComponentMount({ manifest, composition, ref: forwardedRef }: ManifestMountProps) {
+    const { ref: hostRef, setRef: setHostRef } = useHostRef(forwardedRef);
     const [shadow, setShadow] = useState<WidgetShadow | null>(null);
 
     // One component per manifest — resolution (and any lazy-load setup) runs
@@ -101,7 +101,7 @@ export function createReactComponentRenderer(
 
     const mounted = createElement(
       manifest.elementTag ?? 'div',
-      { ref: hostRef, ...manifest.elementAttrs },
+      { ref: setHostRef, ...manifest.elementAttrs },
       shadow
         ? createPortal(
             wrapShadowTree ? (

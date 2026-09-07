@@ -64,6 +64,15 @@ describe('createReactComponentRenderer', () => {
     expect(wrapper?.querySelector('[data-testid="probe"]')).toBeTruthy();
   });
 
+  it('forwards a ref to the shadow host element', () => {
+    const Mount = createReactComponentRenderer({ resolveComponent: () => Probe });
+    const ref: { current: HTMLElement | null } = { current: null };
+    const { container } = render(
+      <Mount manifest={manifestOf()} composition={{ props: {} }} ref={ref} />,
+    );
+    expect(ref.current).toBe(container.querySelector('div'));
+  });
+
   it('wraps the whole mount in the injected Boundary and contains render errors', () => {
     class Boundary extends Component<
       { name: string; children: ReactNode },

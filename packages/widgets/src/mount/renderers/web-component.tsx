@@ -12,6 +12,7 @@ import { webComponentTag } from '../../core';
 import { getHostAuth, type HostAuth } from '../../core/host-auth';
 import { getHostConfig, type HostConfig } from '../../core/host-config';
 import { useMutationSafeProps } from '../mutation-safe-props';
+import { useHostRef } from '../use-host-ref';
 import { WIDGET_ERROR_EVENT } from '../../core/widget-error';
 import type { WebComponentMountProps } from '../widget-renderer';
 
@@ -104,13 +105,13 @@ export function createWebComponentRenderer(
 ): ComponentType<WebComponentMountProps> {
   const { bundleBasePath, Boundary } = options;
 
-  function WebComponentMount({ name, composition }: WebComponentMountProps) {
+  function WebComponentMount({ name, composition, ref: forwardedRef }: WebComponentMountProps) {
     // Shared with the bundle's defineWebComponent so the tag we await and the
     // tag it registers can never drift. The name is the whole host-side
     // identity — the widget's own bundle owns the manifest.
     const tag = webComponentTag(name);
     const bundleSrc = `${bundleBasePath}/${name}.shared.js`;
-    const ref = useRef<HTMLElement | null>(null);
+    const { ref: elementRef, setRef: setHostRef } = useHostRef<WidgetElement>(forwardedRef);
     const [defined, setDefined] = useState(false);
     const [error, setError] = useState<Error | null>(null);
 
@@ -143,7 +144,7 @@ export function createWebComponentRenderer(
     // it here so the same boundary + fallback handle it. Attached on mount,
     // long before the async bundle load lets the widget first render.
     useEffect(() => {
-      const el = ref.current;
+      const el = elementRef.current;
       if (!el) return;
       const onWidgetError = (e: Event) => {
         const detail = (e as CustomEvent<{ error?: unknown }>).detail;
@@ -175,7 +176,7 @@ export function createWebComponentRenderer(
     // current props.
     useEffect(() => {
       if (!defined) return;
-      const el = ref.current as WidgetElement | null;
+      const el = elementRef.current;
       if (!el) return;
       sentRef.current = propsRef.current;
       el.mount?.({
@@ -195,7 +196,7 @@ export function createWebComponentRenderer(
     useEffect(() => {
       if (!defined || sentRef.current === isolated) return;
       sentRef.current = isolated;
-      (ref.current as WidgetElement | null)?.setProps?.(isolated);
+      elementRef.current?.setProps?.(isolated);
     }, [defined, isolated]);
 
     // Raise any error — a runtime/bundle load failure or a widget render error
@@ -204,13 +205,15 @@ export function createWebComponentRenderer(
     // here, exactly as in the react-component renderer.)
     if (error) throw error;
 
-    return createElement(tag, { ref });
+    return createElement(tag, { ref: setHostRef });
   }
 
   // Not a boundary itself: the mount THROWS load/render errors (see above), so
   // it must sit under one — this wraps it in the host's Boundary when given.
-  function BoundedWebComponentMount({ name, composition }: WebComponentMountProps) {
-    const mounted = <WebComponentMount name={name} composition={composition} />;
+  function BoundedWebComponentMount({ name, composition, ref }: WebComponentMountProps) {
+    const mounted = (
+      <WebComponentMount name={name} composition={composition} ref={ref} />
+    );
     return Boundary ? <Boundary name={name}>{mounted}</Boundary> : mounted;
   }
 

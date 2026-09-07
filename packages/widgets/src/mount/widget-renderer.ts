@@ -1,3 +1,4 @@
+import type { Ref } from 'react';
 import type { WidgetManifest } from '../core';
 import type { WidgetComposition } from './composition';
 
@@ -8,6 +9,8 @@ import type { WidgetComposition } from './composition';
 export interface ManifestMountProps {
   manifest: WidgetManifest;
   composition: WidgetComposition;
+  /** Forwarded to the shadow host element. */
+  ref?: Ref<HTMLElement>;
 }
 
 /**
@@ -18,4 +21,6 @@ export interface ManifestMountProps {
 export interface WebComponentMountProps {
   name: string;
   composition: WidgetComposition;
+  /** Forwarded to the custom element. */
+  ref?: Ref<HTMLElement>;
 }

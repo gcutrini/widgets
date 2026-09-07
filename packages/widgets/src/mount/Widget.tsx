@@ -1,5 +1,6 @@
 'use client';
 
+import type { Ref } from 'react';
 import type { WidgetManifest } from '../core';
 import type { WidgetComposition } from './composition';
 import { getRenderers, type WidgetRenderers } from './registry';
@@ -19,9 +20,10 @@ import { getRenderers, type WidgetRenderers } from './registry';
  *
  * Renders nothing until the composition is ready.
  */
-export type WidgetProps =
-  | { name: string; manifest?: never; composition: WidgetComposition | null }
-  | { manifest: WidgetManifest; name?: never; composition: WidgetComposition | null };
+export type WidgetProps = { composition: WidgetComposition | null; ref?: Ref<HTMLElement> } & (
+  | { name: string; manifest?: never }
+  | { manifest: WidgetManifest; name?: never }
+);
 
 export function Widget(props: WidgetProps) {
   const { composition } = props;
@@ -29,11 +31,11 @@ export function Widget(props: WidgetProps) {
   if (props.name !== undefined) {
     const Mount = getRenderers().webComponent;
     if (!Mount) return missingRenderer('webComponent');
-    return <Mount name={props.name} composition={composition} />;
+    return <Mount name={props.name} composition={composition} ref={props.ref} />;
   }
   const Mount = getRenderers().reactComponent;
   if (!Mount) return missingRenderer('reactComponent');
-  return <Mount manifest={props.manifest} composition={composition} />;
+  return <Mount manifest={props.manifest} composition={composition} ref={props.ref} />;
 }
 
 // Loud in development (the overlay surfaces it), a warned blank in
