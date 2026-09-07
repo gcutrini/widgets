@@ -1,5 +1,5 @@
 /**
- * Every hand-written DECISION behind the island builds and the analyzer —
+ * Every hand-written DECISION behind the web-component builds and the analyzer —
  * the served surfaces, the derivation adjustments, and the dep-classification
  * judgment. Zero logic, zero imports; everything derivable from the widget
  * dists lives in footprint.mjs.
@@ -48,7 +48,7 @@ export const UICORE_IMPORT_OVERRIDES = {
 };
 
 /**
- * Node built-ins stubbed to empty modules in the island build — their code
+ * Node built-ins stubbed to empty modules in the web-component build — their code
  * paths (real file/PDF I/O) never run in the browser.
  */
 export const STUBBED_NODE_BUILTINS = [

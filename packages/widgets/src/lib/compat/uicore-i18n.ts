@@ -11,7 +11,7 @@
  * uicore entrypoint happens to self-seed shows the raw key (e.g. an error
  * modal displaying `errors.session_expired`). The host's reactComponent
  * renderer imports this module alongside the other compat shims, and the
- * each island widget entry imports it (an external, served once by the
+ * each widget's web-component entry imports it (an external, served once by the
  * shared runtime graph), so the
  * dictionary exists before any widget bundle loads, on every page.
  *

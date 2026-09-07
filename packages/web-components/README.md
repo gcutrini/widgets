@@ -28,7 +28,7 @@ scripts/       Node-side tooling; never bundled
                             lists, the dep-classification tables
   analyze-widgets.baseline.json   accepted analyzer exceptions
 
-src/           everything below is bundled into the island bundles
+src/           everything below is bundled into the web-component bundles
   element/     the custom-element machinery
     define-web-component.js   custom element on injected React 17; delegates
                               shadow setup to core createWidgetShadow

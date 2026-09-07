@@ -2,11 +2,13 @@
 
 This document is the contract a host implements to mount the legacy widgets: a
 widget is **declared once** (`manifest`), **composed once** (`compose`), and
-**rendered by a swappable renderer** (`<Widget>`) — `reactComponent` (the
-host's React 19, in the page's tree, from the widget's `manifest`) or
-`webComponent` (its own bundled React 17, as a self-contained custom element,
-from the widget's `name` alone — its own bundle owns the manifest). Host
-file paths below are the reference host's.
+**rendered by the runtime the consumer imports** — per widget the package
+exports both `@openeventkit/widgets/<widget>/web-component` (its own bundled
+React 17, as a self-contained custom element, from the widget's name alone —
+the widget's own bundle owns the manifest) and
+`@openeventkit/widgets/<widget>/react` (the host's React 19, in the page's
+tree, from the widget's full manifest). Host file paths below are the
+reference host's.
 
 Companion docs: [ISOLATION-STRATEGY.md](../web-components/ISOLATION-STRATEGY.md) (why the web-component path exists
 and its trade-offs) and [CONSTRAINTS.md](./CONSTRAINTS.md) (the full root-cause
@@ -27,9 +29,10 @@ Hosting a widget is really three independent choices we kept bundling together:
   that actually differs between the two renderers.*
 
 Separating them means the first two are written **once** and the third is
-picked by **which identity prop the page passes**: `name` mounts the
-web-component runtime (no manifest in the host bundle), `manifest` mounts on
-the host React.
+picked by **which entry the consumer imports**: `<widget>/web-component`
+mounts the web-component runtime (no manifest in the consumer's bundle),
+`<widget>/react` mounts on the host React — a module you don't import is
+code you don't ship.
 
 ---
 
@@ -41,7 +44,7 @@ the host React.
 | `WidgetComposer` → `WidgetComposition` | live-data binding | "its realtime + auth + callbacks, per render" |
 | `WidgetShadow` | shared shadow-DOM primitive | "the shadow the widget renders into" |
 | `WidgetBridge` | host-agnostic DOM fix-up | "a shadow patch: emotion-mirror, click-outside…" |
-| `<Widget name>` / `<Widget manifest>` | the component a page renders | "put a widget on the page" — `name` runs the web-component runtime, `manifest` runs on the host React |
+| `<widget>/web-component` · `<widget>/react` | the component a page renders | "put a widget on the page" — the import path picks the runtime |
 | `WidgetRenderer` | how it runs | `'react-component'` (host React, from a manifest) or `'web-component'` (own React, from a name) |
 
 ---
@@ -68,7 +71,7 @@ HOST (separate repo)     builds its two renderers from the ./mount/renderers/sha
 ### 1 · `./core` — the framework-free kernel
 
 No React runtime, no widget specifics. It holds what hosting *any* widget
-requires, and the ports the host fills. Bundled into the React-17 islands, so a
+requires, and the ports the host fills. Bundled into the React-17 web components, so a
 test (`src/__tests__/core-framework-free.test.ts`) enforces that its files
 import nothing beyond core siblings and react types.
 
@@ -81,7 +84,7 @@ src/core/  (./core barrel + ./core/* wildcards)
   host-config.ts     HostConfig port — apiBaseUrl / idpBaseUrl / oauth2ClientId / timeApiUrl the host registers
   widget-auth-error.ts   the 401/403 DOM event the injected uicore auth handler raises and the host dialog handles
   widget-notify.ts   the notification DOM event the sweetalert2 shim raises and the host dialog handles
-  widget-error.ts    the render-error DOM event the island's boundary raises and the host-side renderer rethrows
+  widget-error.ts    the render-error DOM event the bundle's boundary raises and the host-side renderer rethrows
 
 src/lib/bridges/   (implementations of the WidgetBridge contract)
   emotion-mirror.ts · click-outside-retarget.ts · tooltip.ts · scoped-portal-css.ts
@@ -149,7 +152,8 @@ element machinery).
 
 ```
 src/mount/  (./mount barrel; renderers + compat via their own subpaths)
-  Widget.tsx            the component a page renders; picks the renderer from the identity prop
+  create-widget-component.tsx   builds the per-widget components the catalog entries export
+  Widget.tsx            internal dispatcher; picks the renderer from the identity prop
   widget-renderer.ts    the WidgetRenderer union + RendererId + the two Mount prop types
   composition.ts        WidgetComposition, WidgetComposer (the mount layer's input contract)
   registry.ts           registerRenderer / getRenderer
@@ -176,9 +180,10 @@ export interface WebComponentRenderer {
 }
 export type WidgetRenderer = ShadowReactRenderer | WebComponentRenderer;
 
-// The identity prop picks the renderer — no renderAs:
-//   <Widget name="registration" composition={…} />      → web-component
-//   <Widget manifest={extraQuestionsManifest} composition={…} /> → react-component
+// The import path picks the renderer — consumers never render <Widget>:
+//   import Registration from '@openeventkit/widgets/registration/web-component';
+//   import ExtraQuestions from '@openeventkit/widgets/extra-questions/react';
+//   <Registration composition={…} />   <ExtraQuestions composition={…} />
 ```
 
 ### 3 · The uicore-bound part — `src/<widget>/` + `src/lib/`
@@ -213,19 +218,35 @@ resolver and handlers read the ports at call time.
   shims (`find-dom-node`, `react-element-symbol`).
 - **`webComponent`** — `createWebComponentRenderer({ bundleBasePath,
   Boundary? })`. Loads `${manifest.name}.shared.js` as an ES module, awaits
-  `customElements.whenDefined`, then calls the element's
-  `mount({ hostAuth, hostConfig, props })` — ports and the complete initial
-  prop set in one call; later prop changes cross via `setProps(props)`. The
+  `customElements.whenDefined`, then drives the element's **visit
+  lifecycle**: `mount({ hostAuth, hostConfig, props })` opens the visit
+  (ports and the complete initial prop set in one call), `setProps(props)`
+  REPLACES the whole prop bag while it's open (React semantics — a key
+  absent from the bag is gone), and `unmount()` closes it, unmounting the
+  widget's React tree so its effect cleanups run. The renderer ties the
+  visit to its own effect lifecycle, so the widget is torn down on real
+  unmount AND when the router hides the page in an `<Activity>` boundary
+  (which keeps the DOM connected — the element's `disconnectedCallback`
+  never fires there) and mounted fresh, from current props, on return. The
   bundle's shared imports (react, the exposed uicore/MUI surfaces) stay bare
   and resolve through the import map the host inlines (first in the root
   layout's body) to the generated `runtime/` chunks — the browser walks the
-  module graph; there is no load ordering. The island has its own copies of
+  module graph; there is no load ordering. The bundle has its own copies of
   the core ports; `mount` registers the host impls into them and configures
   the shared uicore, and the element defers shadow setup until that handshake
-  has happened — the DOM element is the only host↔island channel. Render errors escaping the island
-  reach the host boundary through the `widget-error` DOM event
-  (`./core/widget-error`), which the island's React-17 boundary dispatches on
-  the element and this renderer listens for and rethrows.
+  has happened — the DOM element is the only host↔widget channel.
+
+  Two DOM events cross back from the element:
+  - `widget-error` (`./core/widget-error`) — a render error's full path is:
+    the widget throws → the bundle's React-17 boundary catches it → the
+    boundary dispatches `widget-error` on the element → this renderer's
+    listener stores it → the next render rethrows it into the host `Boundary`
+    — so both runtimes end at the same fallback. Bundle load failures and the
+    define timeout throw into the same boundary directly. Event-handler and
+    async errors stay uncaught, exactly as in React.
+  - `widget-painted` (`./core/widget-painted`) — dispatched (bubbling) one
+    frame after the visit's first commit, so a host skeleton can reveal on an
+    announced signal. Fires once per visit.
 
 ---
 
@@ -248,22 +269,21 @@ export type WidgetComposer<TServerProps = void> =
 ## The call site
 
 The per-widget `Client.tsx` (in the host, its `src/widgets/catalog/<widget>/`) calls the
-composer hook and hands the result to `<Widget>`, choosing the runtime by
-identity prop — a name for the web-component runtime (no manifest import, so
-the manifest graph stays out of the host bundle), or a manifest for a
-host-React mount:
+composer hook and renders the widget component it imported — the import path
+is the runtime choice (`/web-component` keeps the manifest graph out of the
+host bundle; `/react` pulls the full manifest and runs on the host React):
 
 ```tsx
-import { Widget } from '@openeventkit/widgets/mount';
+import ScheduleLiteWidget from '@openeventkit/widgets/schedule-lite/web-component';
 import { useScheduleLiteComposition } from './compose';
 
 export default function Client({ serverProps }: { serverProps: ScheduleLiteServerProps }) {
   const composition = useScheduleLiteComposition(serverProps);
-  return <Widget name="schedule-lite" composition={composition} />;
+  return <ScheduleLiteWidget composition={composition} />;
 }
 
 // Host-React variant — the only widget mounted this way today is
 // extra-questions (it has no web-component build):
-//   import { extraQuestionsManifest } from '@openeventkit/widgets/extra-questions/manifest';
-//   <Widget manifest={extraQuestionsManifest} composition={composition} />
+//   import ExtraQuestionsWidget from '@openeventkit/widgets/extra-questions/react';
+//   <ExtraQuestionsWidget composition={composition} />
 ```

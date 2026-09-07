@@ -4,7 +4,7 @@ import path from 'node:path';
 
 /**
  * src/core is the framework-free kernel: its files are bundled INTO the
- * React-17 island bundles, so they must never import React code, MUI,
+ * React-17 web-component bundles, so they must never import React code, MUI,
  * uicore, or anything from the rest of this package. Only sibling files
  * and type-only react imports are allowed. This test is the boundary the
  * old separate widget-core package used to provide.

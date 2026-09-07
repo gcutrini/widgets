@@ -519,7 +519,7 @@ the shared runtime:
   to its React 17 — dual React, broken hooks).
 - **Change**: upstream, `react` moves to `peerDependencies`. Until then the
   workspace carries a pnpm override forcing `react-star-ratings>react` to the
-  island's React 17 (`pnpm-workspace.yaml` overrides).
+  web components' React 17 (`pnpm-workspace.yaml` overrides).
 - **Safe because**: the library's components run on whatever React renders
   them; it never relied on its own copy.
 - **We delete**: the `react-star-ratings>react` override once an upstream
@@ -532,13 +532,13 @@ the shared runtime:
 - **Resolves**: a production crash on `/register` right after payment: the
   post-payment skeleton renders, react-content-loader v7 calls
   `React.useId()` (a React 18 API, unguarded since v7 dropped its own uid
-  counter), and the React-17 island runtime has no `useId` —
+  counter), and the React-17 web-component runtime has no `useId` —
   `TypeError: st.useId is not a function`, boundary fallback swallows the
   widget. The order itself is created fine; only the UI dies.
 - **Change**: upstream, pin `react-content-loader` to `^6` (v6 keeps its own
   uid counter and runs on React 16/17) or hold v7 until the uicore 5.x /
   React-19 port. Until then the shared runtime's react entry back-fills
-  `useId` (a client-only counter id — the islands never server-render), the
+  `useId` (a client-only counter id — the web components never server-render), the
   same containment as the react-redux `useSyncExternalStore` back-fill.
 - **Safe because**: the back-fill only fills a missing property; on React 18+
   the native hook wins.
@@ -585,7 +585,7 @@ Ranked by readiness, blast radius, and the release-batching noted above:
     ([#156](https://github.com/fntechgit/summit-registration-lite/pull/156),
     merged, awaiting release + pin); the served-surface barrel drop already landed.
 13. **Entry 11** (S–M) — reg-lite Stripe slot (PR #159, changes requested); keeps
-    registration as an island; needs a PR.
+    registration as a web component; needs a PR.
 14. **Entry 13** (S) — my-orders `CustomTheme` font; retires `quirk:myTicketsFont`
     + `myTicketsFontPlugin`; cosmetic, contained. Batch with #110's my-orders release.
 15. **Entry 16** (S) — upcoming-events propTypes vs store (`widgetLoading` counter,

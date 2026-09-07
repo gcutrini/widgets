@@ -1,5 +1,5 @@
 /**
- * The esbuild resolution policy for the island builds — every plugin and alias
+ * The esbuild resolution policy for the web-component builds — every plugin and alias
  * table build.mjs wires into its passes. No side effects on import (the MUI
  * version log lives in build.mjs).
  */
@@ -189,7 +189,7 @@ export const uicorePinPlugin = {
 };
 
 /**
- * The esbuild options every island pass shares (the per-pass bits — minify,
+ * The esbuild options every build pass shares (the per-pass bits — minify,
  * define, format, entry — stay with the caller). One definition so the real
  * builds and the analyzer's metafile discovery resolve the graph identically.
  */

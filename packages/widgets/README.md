@@ -44,7 +44,7 @@ surface is a named entry in the exports map.
   needs JSX, e.g. a `wrapTree` that renders an `EmotionShadowProvider`
   (schedule-full, registration).
 - `src/core/` (`./core`, `./core/*`) — the framework-free kernel: bundled into
-  the React-17 islands as well as imported by the host, so a test
+  the React-17 bundles as well as imported by the host, so a test
   (`src/__tests__/core-framework-free.test.ts`) enforces that its files import
   nothing beyond core siblings and react types. It holds `createWidgetShadow`,
   the `WidgetManifest` type (incl. `WidgetBridge`), `webComponentTag`, the
@@ -135,11 +135,12 @@ and the uicore-bound subpaths, never ./mount
   to adopt, the `bridges` to run, the shadow host `elementTag` / `elementAttrs`.
 - **`compose`** (in the host) — a hook binding the widget's live inputs (realtime
   store, auth-safe profile, bound callbacks, host vars) into a `WidgetComposition`.
-- **`<Widget>`** (`@openeventkit/widgets/mount`) — mounts a composition; the
-  identity prop picks the renderer via the registry `configureWidgetHost`
-  fills at startup: `name` runs the web-component runtime (the widget's own
-  bundle owns the manifest — the host bundle never carries it), `manifest`
-  runs the widget on the host React. The host
+- **`<widget>/web-component` · `<widget>/react`** — per widget the package
+  exports one component per runtime; the consumer's import picks it (both
+  resolve renderers via the registry `configureWidgetHost` fills at startup).
+  `/web-component` runs the widget's own bundle (which owns the manifest —
+  the host bundle never carries it); `/react` runs the widget on the host
+  React from its full manifest. The host
   builds its two renderers from the generic factories
   (`./mount/renderers/shadow-react`, `./mount/renderers/web-component`),
   injecting only its own pieces (lazy loading, error boundary, bundle base
@@ -171,8 +172,8 @@ fire, so the host renders none (see `CONSTRAINTS.md` RC-R).
   export `./<widget>/manifest` from `package.json`.
 - **In the host (its `src/widgets/catalog/<widget>/`):** `index.tsx` (fetch + derive + render
   `<Client>`), `compose.ts` (`use<Widget>Composition` → `{ props }`),
-  `Client.tsx` (`<Widget name composition>`, or `manifest` for a host-React
-  mount), `types.ts`, and any
+  `Client.tsx` (renders the imported `<widget>/web-component` — or `/react` —
+  component with the composition), `types.ts`, and any
   `derive.ts` / `use<Widget>Callbacks.ts`.
 
 ## Trade-offs we still live with

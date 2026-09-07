@@ -18,7 +18,7 @@ const EXCLUDED = new Map([
 ]);
 
 // Both uicore consumers must declare the full peer set: this package for the
-// island bundles, the widgets package for the host's webpack graph.
+// web-component bundles, the widgets package for the host's webpack graph.
 for (const pkgDir of [pkgRoot, path.resolve(pkgRoot, '../widgets')]) {
   test(`every uicore peerDependency is declared by ${path.basename(pkgDir)} (or excluded with a reason)`, () => {
     const uicorePkg = require('openstack-uicore-foundation/package.json');

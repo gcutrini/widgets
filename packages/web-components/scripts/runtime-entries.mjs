@@ -100,7 +100,7 @@ export function entrySource(spec, importSpec, shape) {
     //   with-selector — the non-shim entry that calls it off React directly —
     //   so redux-connected widgets (e.g. schedule-full) crash at mount.
     // - useId: react-content-loader v7 (reg-lite's skeletons) calls
-    //   React.useId() directly. The islands never server-render, so a counter
+    //   React.useId() directly. The web components never server-render, so a counter
     //   id held stable per component via useRef is fully correct.
     lines.unshift("import { useSyncExternalStore as __uSES } from 'use-sync-external-store/shim';");
     lines.push('if (!__m.useSyncExternalStore) __m.useSyncExternalStore = __uSES;');

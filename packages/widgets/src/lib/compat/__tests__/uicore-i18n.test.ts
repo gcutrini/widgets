@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import T from 'i18n-react';
 // The seed under test: imports uicore's dictionary module for its
 // T.setTexts side effect, exactly as the reactComponent renderer and the
-// island widget entries do before any widget code runs.
+// web-component widget entries do before any widget code runs.
 import '../uicore-i18n';
 
 /**

@@ -154,7 +154,7 @@ Widget `dist/index.js` files inline-require CSS. `openstack-uicore-foundation/li
 
 - **E.1 — `awesome-bootstrap-checkbox` global CSS gets loaded** any time a widget rendering uses uicore extra-questions. Legacy Bootstrap-3 CSS bleeds into our page. *Largely neutralized by the shadow-DOM modules:* widget markup lives inside a shadow root, so head-injected legacy rules match nothing in the light DOM — the bytes still ship, the visual bleed is gone.
 - **E.2 — uicore CSS chain (`circle-button.css`, etc.) inline-required from widget dists.** Every schedule widget pulls the button styling; if unused visually it still ships. *Inverted by the shadow-DOM modules:* head-injected CSS can't reach into a shadow root, so each side-effect stylesheet a widget actually needs (pure-react-carousel layout, uicore circle-button) is generated as a typed vendor-css module by the package's `scripts/generate-assets.mjs` and listed in that module's `sheets` — see each module's `vendor-styles.ts`.
-- **E.3 — `@openeventkit/widgets` is subpath-only.** The package has no root export — anything uicore-heavy (a widget manifest, `uicore-host`, the compat modules) sitting on a shared barrel would compile the entire uicore chain into every widget-touching page. Consumers import each surface via its own subpath (`./extra-questions/manifest`, `./uicore-host`, `./compat/*`), and the `./mount` barrel deliberately excludes `configureWidgetHost` (exported as `./host`) for the same reason — it pulls uicore. A widget's uicore-bound `manifest` is exported via its own subpath (`@openeventkit/widgets/registration/manifest`, etc.) so the host-side Client imports just that declaration; the widget's Server Component + integration glue live in the host (`src/widgets/catalog/<widget>/`), not here.
+- **E.3 — `@openeventkit/widgets` is subpath-only.** The package has no root export — anything uicore-heavy (a widget manifest, `uicore-host`, the compat modules) sitting on a shared barrel would compile the entire uicore chain into every widget-touching page. Consumers import each surface via its own subpath (`./extra-questions/manifest`, `./uicore-host`, `./compat/*`), and the `./mount` barrel deliberately excludes `configureWidgetHost` (exported as `./host`) for the same reason — it pulls uicore. A widget's uicore-bound `manifest` is exported via its own subpath (`@openeventkit/widgets/registration/manifest`, etc.); the widget's Server Component + integration glue live in the host (`src/widgets/catalog/<widget>/`), not here. The per-widget runtime entries follow the same discipline: `./<widget>/web-component` is manifest-free by construction (the widget's own bundle owns the manifest — guarded by `src/__tests__/web-component-entries.test.ts`), while `./<widget>/react` deliberately pulls the manifest graph, so a consumer ships that graph only by importing it.
 
 **Why the widgets force it.** The dist bundles literally contain `require('.css')` calls at the JS level. There's no way to intercept this without rebundling the widget.
 
@@ -489,7 +489,7 @@ every widget request carries.
 This package's `src/lib/uicore-host.ts` exports `configureUicore()`, which
 reads the `HostConfig` and `HostAuth` ports from `src/core/` and calls the
 three setters. It is host-agnostic (no host import), so the same file runs in
-the Next graph and in the isolated React-17 island bundle. It keeps uicore's
+the Next graph and in the isolated React-17 web-component bundle. It keeps uicore's
 contract:
 
 - The token resolver returns the `SESSION_PRESENT` placeholder while the host
@@ -541,16 +541,16 @@ one copy:
   module ships as `@openeventkit/widgets/webpack-compat`, so any host — the
   reference host and base-theme consumers alike — applies it with the same
   `applyWidgetCompat(config)` call in its own `next.config`.
-- Island (webComponent path): `@openeventkit/web-components`' `scripts/build.mjs`
+- Web component: `@openeventkit/web-components`' `scripts/build.mjs`
   applies `uicorePinPlugin` to every build, resolving every
   `openstack-uicore-foundation/*` import from the web-components package's own
   `node_modules`. The shared runtime chunks serve `lib/utils/config` and
   `lib/security/methods` as import-map modules; the element's
   `mount()` calls `configureUicore()` on them once per module graph
-  (the only call site, both variants). The island bundles its own copies of
+  (the only call site, both variants). The bundle carries its own copies of
   the core ports, whose module singletons start empty; `mount`
   registers the host impls into them before anything renders — the DOM
-  element is the only host↔island channel, nothing rides window.
+  element is the only host↔widget channel, nothing rides window.
 
 **Cache footgun (host-side; the reference host's `next.config.ts` handles
 it).** Webpack's persistent cache tracks the host's `next.config.ts` as a
