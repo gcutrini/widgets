@@ -39,7 +39,6 @@
     "speakers:react-bootstrap"
   ],
   "acceptedMuiMissing": [
-    "@mui/base",
-    "@mui/material"
+    "@mui/base"
   ]
 }

@@ -11,8 +11,9 @@ export const myTicketsManifest: WidgetManifest = {
   load: () => import('my-orders-tickets-widget/dist/index'),
   vendorSheets: myTicketsSheets,
   inlineStyles: myTicketsStyles,
-  // The widget portals its filter/sort dropdowns into document.body — inject
-  // its (hashed) CSS to the head so that markup is styled too.
+  // The widget's datepicker portals into document.body (filter/sort render
+  // in-flow inside the shadow) — inject its (hashed) CSS to the head so the
+  // portaled markup is styled too.
   portalSheets: myTicketsSheets,
   // emotion-mirror: the widget's MUI runs on its own split emotion-11 instance
   // that injects into document.head; click-outside-retarget: its Filter/Sort
