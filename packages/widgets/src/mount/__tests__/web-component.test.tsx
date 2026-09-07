@@ -19,6 +19,7 @@ const mountCalls: Array<{
   props?: Record<string, unknown>;
 }> = [];
 const setPropsCalls: Array<Record<string, unknown>> = [];
+let unmountCalls = 0;
 class FakeWidget extends HTMLElement {
   mount(args: {
     hostAuth?: HostAuth | null;
@@ -30,6 +31,9 @@ class FakeWidget extends HTMLElement {
   setProps(props: Record<string, unknown>) {
     setPropsCalls.push(props);
   }
+  unmount() {
+    unmountCalls += 1;
+  }
 }
 customElements.define(webComponentTag('demo'), FakeWidget);
 
@@ -39,6 +43,7 @@ describe('web-component renderer', () => {
   beforeEach(() => {
     mountCalls.length = 0;
     setPropsCalls.length = 0;
+    unmountCalls = 0;
     registerHostAuth(auth);
     registerHostConfig(config);
     // Let the module <script> "load" immediately — jsdom never fetches it.
@@ -77,5 +82,38 @@ describe('web-component renderer', () => {
     await waitFor(() => expect(setPropsCalls).toHaveLength(1));
     expect(setPropsCalls[0]).toMatchObject({ a: 2 });
     expect(mountCalls).toHaveLength(1);
+    expect(unmountCalls).toBe(0);
+  });
+
+  it('unmounting the mount closes the visit with el.unmount()', async () => {
+    const webComponent = createWebComponentRenderer({ bundleBasePath: '/web-components' });
+    const { unmount } = render(
+      <webComponent.Mount name="demo" composition={{ props: { a: 1 } }} />,
+    );
+    await waitFor(() => expect(mountCalls).toHaveLength(1));
+    unmount();
+    expect(unmountCalls).toBe(1);
+  });
+
+  it('a strict-mode style remount opens a fresh visit with the current props', async () => {
+    const webComponent = createWebComponentRenderer({ bundleBasePath: '/web-components' });
+    const view = render(
+      <webComponent.Mount name="demo" composition={{ props: { a: 1 } }} />,
+    );
+    await waitFor(() => expect(mountCalls).toHaveLength(1));
+    view.rerender(
+      <webComponent.Mount name="demo" composition={{ props: { a: 2 } }} />,
+    );
+    await waitFor(() => expect(setPropsCalls).toHaveLength(1));
+    view.unmount();
+    const again = render(
+      <webComponent.Mount name="demo" composition={{ props: { a: 3 } }} />,
+    );
+    await waitFor(() => expect(mountCalls).toHaveLength(2));
+    expect(mountCalls[1].props).toMatchObject({ a: 3 });
+    // mount() delivered the current bag; no redundant setProps follows.
+    expect(setPropsCalls).toHaveLength(1);
+    again.unmount();
+    expect(unmountCalls).toBe(2);
   });
 });

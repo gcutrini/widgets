@@ -15,6 +15,17 @@ import { useMutationSafeProps } from '../mutation-safe-props';
 import { WIDGET_ERROR_EVENT } from '../../core/widget-error';
 import type { WebComponentRenderer, WebComponentMountProps } from '../widget-renderer';
 
+/** The element's host-facing surface (defined by the widget's bundle). */
+type WidgetElement = HTMLElement & {
+  mount?: (args: {
+    hostAuth?: HostAuth | null;
+    hostConfig?: HostConfig | null;
+    props?: Record<string, unknown>;
+  }) => void;
+  setProps?: (props: Record<string, unknown>) => void;
+  unmount?: () => void;
+};
+
 /**
  * Load a module <script> once per src, shared across every mount. The bundle
  * is an ES module whose bare imports (react, the shared uicore/MUI surfaces)
@@ -41,7 +52,7 @@ function loadModuleOnce(src: string): Promise<void> {
 }
 
 /**
- * A bundle whose registration fails inside the island (manifest.load()
+ * A bundle whose registration fails during evaluation (manifest.load()
  * rejects, defineWebComponent throws) never defines the element, and
  * `customElements.whenDefined` would pend forever — a blank widget with no
  * error. Race it against a generous timeout so that failure reaches the
@@ -70,13 +81,13 @@ function whenDefinedOrTimeout(tag: string): Promise<void> {
 
 export interface WebComponentRendererOptions {
   /**
-   * Base URL path the island bundles are served from — `<name>.shared.js`
+   * Base URL path the widget bundles are served from — `<name>.shared.js`
    * resolves against it. A host-serving decision, so the host must supply it.
    */
   bundleBasePath: string;
   /**
    * Error boundary around the mount. Load failures and widget render errors
-   * (bridged out of the island as `widget-error` DOM events) are thrown into
+   * (bridged out of the element as `widget-error` DOM events) are thrown into
    * it; without one they propagate to the nearest ancestor boundary.
    */
   Boundary?: ComponentType<{ name: string; children: ReactNode }>;
@@ -84,9 +95,9 @@ export interface WebComponentRendererOptions {
 
 /**
  * Generic "run the widget as a self-contained custom element" renderer: loads
- * the shared island runtime + the widget's bundle, mirrors the host ports into
- * the runtime global before the island evaluates, and hands props across the
- * DOM boundary via the element's setProps.
+ * the shared runtime + the widget's bundle, then drives the element's visit
+ * lifecycle across the DOM boundary — mount() with the ports and initial
+ * props, setProps() for updates, unmount() when this mount goes away.
  */
 export function createWebComponentRenderer(
   options: WebComponentRendererOptions,
@@ -145,37 +156,46 @@ export function createWebComponentRenderer(
       return () => el.removeEventListener(WIDGET_ERROR_EVENT, onWidgetError);
     }, []);
 
-    // The island has its own copies of the widget-core ports; hand it the
-    // host impls through the element — the only channel between the two module
-    // graphs. The first call is mount({ hostAuth, hostConfig, props }): ports
-    // and the complete initial prop set in one shot, so there is no ordering
-    // between two calls to get wrong. Later prop changes cross via setProps.
-    // Widget colors reach the shadow via inherited :root --color_* vars, not
-    // per-element props.
-    const mountedElRef = useRef<HTMLElement | null>(null);
+    // Current props for the visit-lifecycle effect to read at mount time —
+    // its deps are [defined] on purpose, so a plain closure would go stale.
+    const propsRef = useRef(isolated);
+    propsRef.current = isolated;
+    // The prop bag the element already holds, so the update effect can skip
+    // the one mount() just delivered.
+    const sentRef = useRef<Record<string, unknown> | null>(null);
+
+    // The visit lifecycle. The widget's bundle has its own copies of the widget-core
+    // ports; hand it the host impls through the element — the only channel
+    // between the two module graphs — together with the complete initial prop
+    // set in one mount() call. The cleanup ends the visit: it runs on real
+    // unmount AND when the router hides this page in an <Activity> boundary
+    // (which keeps the DOM connected, so the element's disconnectedCallback
+    // never fires there) — the element unmounts its React tree either way,
+    // and the effect re-running on return opens a fresh visit with the
+    // current props.
     useEffect(() => {
       if (!defined) return;
-      const el = ref.current as
-        | (HTMLElement & {
-            mount?: (args: {
-              hostAuth?: HostAuth | null;
-              hostConfig?: HostConfig | null;
-              props?: Record<string, unknown>;
-            }) => void;
-            setProps?: (props: Record<string, unknown>) => void;
-          })
-        | null;
+      const el = ref.current as WidgetElement | null;
       if (!el) return;
-      if (mountedElRef.current !== el) {
-        mountedElRef.current = el;
-        el.mount?.({
-          hostAuth: getHostAuth(),
-          hostConfig: getHostConfig(),
-          props: isolated,
-        });
-      } else {
-        el.setProps?.(isolated);
-      }
+      sentRef.current = propsRef.current;
+      el.mount?.({
+        hostAuth: getHostAuth(),
+        hostConfig: getHostConfig(),
+        props: propsRef.current,
+      });
+      return () => {
+        sentRef.current = null;
+        el.unmount?.();
+      };
+    }, [defined]);
+
+    // Prop updates while the visit is open. setProps replaces the whole bag
+    // (React semantics); widget colors reach the shadow via inherited :root
+    // --color_* vars, not per-element props.
+    useEffect(() => {
+      if (!defined || sentRef.current === isolated) return;
+      sentRef.current = isolated;
+      (ref.current as WidgetElement | null)?.setProps?.(isolated);
     }, [defined, isolated]);
 
     // Raise any error — a runtime/bundle load failure or a widget render error

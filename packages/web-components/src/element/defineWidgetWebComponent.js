@@ -7,9 +7,10 @@
  * sheets + bridges) is set up by `createWidgetShadow` — the SAME primitive the
  * host's reactComponent renderer uses — so the two renderers can't drift on any
  * of that. The kit adds only what's web-component-specific: the React-17
- * ReactDOM.render, the `mount`/`setProps` prop channel, the error boundary, `wrapTree`,
- * and `elementAttrs`. There's no prop name list — the host hands over the whole
- * prop object (`mount` first, `setProps` for updates).
+ * ReactDOM.render, the `mount`/`setProps`/`unmount` visit lifecycle, the error
+ * boundary, `wrapTree`, and `elementAttrs`. There's no prop name list — the host
+ * hands over the whole prop object (`mount` opens the visit, `setProps` replaces
+ * while it's open, `unmount` closes it).
  *
  * React/ReactDOM are injected (not imported) so the SAME kit powers both build
  * variants: `shared` (the default build) reads them from the runtime global;
@@ -20,6 +21,7 @@ import { webComponentTag } from '@openeventkit/widgets/core/manifest';
 import { registerHostAuth } from '@openeventkit/widgets/core/host-auth';
 import { registerHostConfig } from '@openeventkit/widgets/core/host-config';
 import { WIDGET_ERROR_EVENT } from '@openeventkit/widgets/core/widget-error';
+import { WIDGET_PAINTED_EVENT } from '@openeventkit/widgets/core/widget-painted';
 import { resolveWidgetComponent } from './resolveWidgetComponent.js';
 import { ShadowRootContext } from '@openeventkit/widgets/shadow-root-context';
 import { configureUicore } from '@openeventkit/widgets/uicore-host';
@@ -70,7 +72,7 @@ export function defineWidgetWebComponent({ React, ReactDOM, manifest }) {
  * The host hands the ports and the widget's props in one shot via
  * `el.mount({ hostAuth, hostConfig, props })` (objects, functions, live data),
  * which renders the React-17 tree with the complete set; later updates go
- * through `el.setProps(obj)`.
+ * through `el.setProps(obj)`, and `el.unmount()` closes the visit.
  *
  * @param {object} o
  * @param {any} o.React
@@ -108,13 +110,20 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
   }
 
   class WebComponentElement extends HTMLElement {
+    // Two lifecycles, deliberately separate:
+    //   visit (host-driven, React semantics): mount() opens it, setProps()
+    //     REPLACES props while it's open, unmount() closes it.
+    //   DOM (safety net): connectedCallback renders if a visit is open;
+    //     disconnectedCallback tears the tree down but KEEPS the visit, so a
+    //     same-tick reparent (a React list reorder) reconnects with state and
+    //     a standalone host that only removes the node still gets cleanup.
     constructor() {
       super();
-      this._props = {};
-      this._shadow = null; // WidgetShadow: { root, container, dispose }
-      this._root = null; // the container <div> to render into
+      this._props = null; // null = no open visit
+      this._shadow = null; // WidgetShadow: { root, container, dispose } — permanent once created (attachShadow is one-way)
       this._connected = false;
-      this._mountCalled = false;
+      this._mounted = false;
+      this._painted = false; // first-commit-of-visit announced?
       // Report a widget render error out through the host as a DOM event; the
       // app-side renderer listens and raises it into its React-19 boundary.
       this._reportError = (error) => {
@@ -123,40 +132,57 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
     }
 
     /**
-     * The host's single first call: the ports — the ONLY channel between the
-     * host and this module graph (nothing rides window) — and the initial
-     * props, in one shot. Nothing mounts until both this and DOM connection
-     * happened, because shadow setup reads HostConfig (asset URLs) and uicore
-     * needs its config before the first widget render. Later prop updates go
-     * through setProps.
+     * Open a visit: the ports — the ONLY channel between the host and this
+     * module graph (nothing rides window) — and the initial props, in one
+     * shot. Nothing renders until both this and DOM connection happened,
+     * because shadow setup reads HostConfig (asset URLs) and uicore needs its
+     * config before the first widget render. Later prop updates go through
+     * setProps; unmount() closes the visit.
      */
     mount({ hostAuth = null, hostConfig = null, props = {} } = {}) {
       registerHostAuth(hostAuth);
       registerHostConfig(hostConfig);
       configureUicoreOnce();
       this._props = { ...props };
-      this._mountCalled = true;
-      this._mountIfReady();
+      this._mounted = true;
+      this._painted = false;
+      this._renderIfReady();
     }
 
     /**
-     * Update the widget's props and render. The host hands the whole prop
-     * object in one call, so there's no name list to maintain and no
-     * per-property write burst to coalesce — the widget always renders with
-     * the complete set. Merges, so repeated calls update rather than replace.
+     * Replace the widget's props and render — React semantics: the host hands
+     * the complete prop object each call; a key absent from it is gone. No-op
+     * outside an open visit.
      */
     setProps(props) {
-      Object.assign(this._props, props);
+      if (!this._mounted) return;
+      this._props = { ...props };
       this._render();
+    }
+
+    /**
+     * Close the visit: unmount the React tree (running the widget's effect
+     * cleanups — how a widget resets its own state on exit) and dispose the
+     * bridges. The shadow root stays attached — attachShadow can't run twice —
+     * and a later mount() renders a fresh tree into it. Idempotent, including
+     * after disconnectedCallback already tore the tree down.
+     */
+    unmount() {
+      this._mounted = false;
+      this._props = null;
+      if (this._shadow) {
+        ReactDOM.unmountComponentAtNode(this._shadow.container);
+        this._shadow.dispose();
+      }
     }
 
     connectedCallback() {
       this._connected = true;
-      this._mountIfReady();
+      this._renderIfReady();
     }
 
-    _mountIfReady() {
-      if (!this._connected || !this._mountCalled) return;
+    _renderIfReady() {
+      if (!this._connected || !this._mounted) return;
       if (this._shadow) {
         // Reconnect after a disconnect (the host moved the element in the DOM):
         // disconnectedCallback disposed the bridges, so restart them before
@@ -172,14 +198,12 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
       // path (cascade order, fonts, portal sheets, bridges). Widget colors reach
       // the shadow via inherited :root --color_* vars.
       this._shadow = createWidgetShadow(this, manifest);
-      this._root = this._shadow.container;
       this._render();
     }
 
     _render() {
-      // Nothing to render until the shadow is attached and the host has set
-      // props (a mount with no props would crash widgets that deref data).
-      if (!this._root || Object.keys(this._props).length === 0) return;
+      // Nothing to render until the shadow is attached and a visit is open.
+      if (!this._shadow || this._props === null) return;
       // wrapTree adds the widget's React-context wrap (e.g. EmotionShadowProvider,
       // which scopes emotion to the shadow). It reads the shadow root from
       // ShadowRootContext, so provide that above it — the same context the
@@ -192,14 +216,28 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
           { onError: this._reportError },
           React.createElement(ShadowRootContext.Provider, { value: this._shadow.root }, wrapped),
         ),
-        this._root,
+        this._shadow.container,
+        () => this._announcePaint(),
       );
+    }
+
+    // Announce the visit's first commit one frame later, when the browser has
+    // painted it. Once per visit; a render that threw never commits, so a
+    // failed first render announces nothing.
+    _announcePaint() {
+      if (this._painted) return;
+      this._painted = true;
+      requestAnimationFrame(() => {
+        this.dispatchEvent(new CustomEvent(WIDGET_PAINTED_EVENT, { bubbles: true }));
+      });
     }
 
     disconnectedCallback() {
       this._connected = false;
-      if (this._root) ReactDOM.unmountComponentAtNode(this._root);
-      if (this._shadow) this._shadow.dispose();
+      if (this._shadow) {
+        ReactDOM.unmountComponentAtNode(this._shadow.container);
+        this._shadow.dispose();
+      }
     }
   }
 
