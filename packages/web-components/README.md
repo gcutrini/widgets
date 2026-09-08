@@ -1,8 +1,8 @@
 # @openeventkit/web-components
 
-Legacy widgets packaged as self-contained **React-17 web components**, built by
+Legacy widgets packaged as self-contained **React-18 web components**, built by
 esbuild into static assets. The build is a **separate compile** from any host's
-(own React 17, own dependency tree), so the widgets' React 17 never enters a
+(own React 18, own dependency tree), so the widgets' React never enters a
 host's module graph. The package ships two bins — `widgets-build` and
 `widgets-analyze` — that hosts run from their own installs; `esbuild` is a
 regular dependency for that reason.
@@ -30,7 +30,7 @@ scripts/       Node-side tooling; never bundled
 
 src/           everything below is bundled into the web-component bundles
   element/     the custom-element machinery
-    define-web-component.js   custom element on injected React 17; delegates
+    defineWidgetWebComponent.js   custom element on injected React 18; delegates
                               shadow setup to core createWidgetShadow
     resolve-component.js      picks the component out of a webpack-UMD dist
   shims/       esbuild inject targets, referenced only by build.mjs
@@ -69,7 +69,7 @@ entry split makes those moves mechanical.
   stay bare and resolve through the host-inlined import map to the `runtime/`
   chunks — the browser walks the module graph; there is no load ordering.
   This is the variant the reference host loads.
-- **standalone** — `‹name›.standalone.js`, React 17 bundled in. Drop-in for a
+- **standalone** — `‹name›.standalone.js`, React 18 bundled in. Drop-in for a
   host that loads no runtime chunks. Opt-in build.
 
 ## Build
@@ -101,10 +101,10 @@ path. Nothing here assumes a host directory layout.
 The `dependencies` list plays four roles; when pruning, know which one an entry
 serves:
 
-1. **The pinned React-17 runtime** — exact `react`/`react-dom` 17.0.2 plus the
+1. **The pinned React-18 runtime** — exact `react`/`react-dom` 18.3.1 plus the
    full top-level `@mui/*` v5 set and `@emotion/*`, so pnpm materializes the
-   coherent React-17-peered MUI 5 tree in THIS package's `node_modules` (the
-   `muiReact17Plugin` re-resolves from here; see SHARED-MUI-RUNTIME.md).
+   coherent React-18-peered MUI 5 tree in THIS package's `node_modules` (the
+   `mui5PinPlugin` re-resolves from here; see SHARED-MUI-RUNTIME.md).
    `@emotion/styled` is declared even though no widget dist imports it yet:
    undeclared, a future import would resolve up to the root's React-19-peered
    copy.
@@ -114,8 +114,8 @@ serves:
 3. **uicore 4.x peers** — the long tail (`history`, `superagent`, `urijs`,
    `validator`, `react-select`, …): uicore's dist files resolve these from this
    package, whether or not a widget bundles the module that uses them.
-4. **Build helpers** — `use-sync-external-store` (the react runtime entry's
-   back-fill), `esbuild` + `esbuild-plugin-polyfill-node` (runtime deps, not
+4. **Build helpers** — `use-sync-external-store` (uicore's served chunks
+   import its shim entries), `esbuild` + `esbuild-plugin-polyfill-node` (runtime deps, not
    dev: the `widgets-build` / `widgets-analyze` bins run inside host installs).
 
 ## Analyzer

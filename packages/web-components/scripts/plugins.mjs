@@ -57,24 +57,24 @@ const vendorAlias = {
   get sweetalert2() { return resolveWidgetsCompat('uicore-swal'); },
 };
 
-// ─── Pin every @mui/* + @emotion/* to the React-17 build of MUI 5 ─────────────
+// ─── Pin every @mui/* + @emotion/* to this package's MUI 5 tree ───────────────
 // uicore declares @mui/material as a peer (^5) but ships v5-era code. With no
 // pin, esbuild resolves that peer to whatever MUI the surrounding installation
 // holds. package.json declares EVERY top-level @mui/* the bundles import at v5
-// while react is 17, so pnpm materializes the coherent React-17-peered v5 set
-// in this package's own node_modules — the only place versions are declared and
+// alongside this package's react, so pnpm materializes the coherent v5 set in
+// this package's own node_modules — the only place versions are declared and
 // therefore deterministic. Imports from INSIDE the MUI/emotion trees resolve
 // naturally (each package keeps its nested v5 copies; no cross-version mixing).
 const isMuiInternal = (importer) => /[\\/]\.pnpm[\\/]@(mui|emotion)\+/.test(importer || '');
 
-export const muiReact17Plugin = {
-  name: 'mui-react17',
+export const mui5PinPlugin = {
+  name: 'mui5-pin',
   setup(build) {
     // react itself rides the same pin: source bundled from the widgets
     // package (the kit compat modules) would otherwise resolve react and
     // react/jsx-runtime through THAT package's peer — React 19 — putting a
-    // second React in the runtime graph next to the React 17 the entries
-    // serve (null hooks dispatcher at render).
+    // second React in the runtime graph next to the one the entries serve
+    // (null hooks dispatcher at render).
     build.onResolve({ filter: /^(react|react-dom|scheduler)(\/.*)?$/ }, async (args) => {
       if (args.pluginData?.mui5) return null;
       const r = await build.resolve(args.path, {
@@ -234,7 +234,7 @@ defineWidgetWebComponent({ React, ReactDOM, manifest });
 // runtimeNeeds token → the plugin that acts on it, in registration order.
 // Tokens are the manifest vocabulary (see the core manifest's RuntimeNeed type).
 export const NEEDS_TO_PLUGINS = new Map([
-  ['pin:mui5-react17', muiReact17Plugin],
+  ['pin:mui5', mui5PinPlugin],
   ['quirk:myTicketsFont', myTicketsFontPlugin],
   ['stub:node', nodePolyfills],
 ]);

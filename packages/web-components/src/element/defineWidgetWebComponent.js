@@ -1,12 +1,12 @@
 /**
  * Web-component kit — registers a legacy widget as a custom element that runs on
- * an injected React 17 inside a shadow root, driven by the widget's shared
+ * an injected React 18 inside a shadow root, driven by the widget's shared
  * manifest.
  *
  * The shadow itself (attach + adopt sheets + font-faces + portal
  * sheets + bridges) is set up by `createWidgetShadow` — the SAME primitive the
  * host's reactComponent renderer uses — so the two renderers can't drift on any
- * of that. The kit adds only what's web-component-specific: the React-17
+ * of that. The kit adds only what's web-component-specific: the React-18
  * ReactDOM.render, the `mount`/`setProps`/`unmount` visit lifecycle, the error
  * boundary, `wrapTree`, and `elementAttrs`. There's no prop name list — the host
  * hands over the whole prop object (`mount` opens the visit, `setProps` replaces
@@ -14,7 +14,7 @@
  *
  * React/ReactDOM are injected (not imported) so the SAME kit powers both build
  * variants: `shared` (the default build) reads them from the runtime global;
- * `standalone` (`build.mjs --standalone`) bundles React 17.
+ * `standalone` (`build.mjs --standalone`) bundles React 18.
  */
 import { createWidgetShadow } from '@openeventkit/widgets/core/widget-shadow';
 import { webComponentTag } from '@openeventkit/widgets/core/manifest';
@@ -71,7 +71,7 @@ export function defineWidgetWebComponent({ React, ReactDOM, manifest }) {
  *
  * The host hands the ports and the widget's props in one shot via
  * `el.mount({ hostAuth, hostConfig, props })` (objects, functions, live data),
- * which renders the React-17 tree with the complete set; later updates go
+ * which renders the widget's React tree with the complete set; later updates go
  * through `el.setProps(obj)`, and `el.unmount()` closes the visit.
  *
  * @param {object} o
@@ -89,7 +89,7 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
   const wrapTree = manifest.wrapTree;
   const elementAttrs = manifest.elementAttrs ?? {};
 
-  // A React-17 error boundary around the widget's OWN tree — the host's React-19
+  // A bundle-side React error boundary around the widget's OWN tree — the host's React-19
   // boundary can't see across the shadow into a different React instance. On a
   // widget render/lifecycle throw it renders nothing and reports the error out
   // through the host (`onError`), so the host can show its own fallback.

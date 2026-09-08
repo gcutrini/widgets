@@ -4,11 +4,11 @@
 > [ISOLATION-STRATEGY.md](./ISOLATION-STRATEGY.md),
 > [RUNTIME-REQUIREMENTS.md](./RUNTIME-REQUIREMENTS.md), [UPSTREAM.md](../widgets/UPSTREAM.md),
 > [CONSTRAINTS.md](../widgets/CONSTRAINTS.md). MUI is a shared runtime layer for the
-> web-component widgets, the way React 17 and uicore already are.
+> web-component widgets, the way React 18 and uicore already are.
 
 ## Problem it solved
 
-The web-component widgets run their own React 17 in a shadow root, and MUI 5 is a
+The web-component widgets run their own React 18 in a shadow root, and MUI 5 is a
 **peer dependency of uicore** (`openstack-uicore-foundation` declares
 `@mui/material`, `@mui/icons-material`, `@emotion/react`, `@emotion/styled` as
 peers). uicore's built `lib/*` therefore emits bare `require("@mui/material/...")`
@@ -31,9 +31,9 @@ into common chunks with a SINGLE instance, and the host-inlined import map
 resolves each bare specifier to its chunk. There is no separate layer to load
 and no ordering: the browser fetches exactly the MUI chunks a widget's module
 graph imports — non-MUI widgets never pull any, the MUI widgets
-(registration, my-tickets, schedule-full) share one copy. `pin:mui5-react17`
+(registration, my-tickets, schedule-full) share one copy. `pin:mui5`
 in a manifest's `runtimeNeeds` keeps its build-time meaning: bundle any
-non-served `@mui` import from the React-17 MUI-5 tree.
+non-served `@mui` import from the package's MUI-5 tree.
 
 ## The MUI surface
 
@@ -55,7 +55,7 @@ used, not whole libraries.
 
 1. **Runtime entries** — the build generates one ES-module entry per served
    specifier and bundles them in ONE esbuild pass (`format: esm`,
-   `splitting: true`) with `muiReact17Plugin` pinning the React-17 MUI 5 tree.
+   `splitting: true`) with `mui5PinPlugin` pinning this package's MUI 5 tree.
 2. **Shared widget builds** leave every served `@mui/*` / `@emotion/*` import
    bare (the browser resolves it through the import map); a `require()` call in
    a webpack-UMD dist goes through the require-to-import bridge. Non-served

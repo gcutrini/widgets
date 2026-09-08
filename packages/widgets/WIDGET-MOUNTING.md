@@ -4,7 +4,7 @@ This document is the contract a host implements to mount the legacy widgets: a
 widget is **declared once** (`manifest`), **composed once** (`compose`), and
 **rendered by the runtime the consumer imports** — per widget the package
 exports both `@openeventkit/widgets/<widget>/web-component` (its own bundled
-React 17, as a self-contained custom element, from the widget's name alone —
+React 18, as a self-contained custom element, from the widget's name alone —
 the widget's own bundle owns the manifest) and
 `@openeventkit/widgets/<widget>/react` (the host's React 19, in the page's
 tree, from the widget's full manifest). Host file paths below are the
@@ -25,7 +25,7 @@ Hosting a widget is really three independent choices we kept bundling together:
 - **What live data it needs** — realtime + auth + callbacks, bound each render.
   *Independent of how it runs.*
 - **Which React runs it** — the host's React 19 (a component in the page's tree)
-  or its own bundled React 17 (a self-contained custom element). *The only axis
+  or its own bundled React 18 (a self-contained custom element). *The only axis
   that actually differs between the two renderers.*
 
 Separating them means the first two are written **once** and the third is
@@ -71,7 +71,7 @@ HOST (separate repo)     builds its two renderers from the ./mount/renderers/rea
 ### 1 · `./core` — the framework-free kernel
 
 No React runtime, no widget specifics. It holds what hosting *any* widget
-requires, and the ports the host fills. Bundled into the React-17 web components, so a
+requires, and the ports the host fills. Bundled into the web components, so a
 test (`src/__tests__/core-framework-free.test.ts`) enforces that its files
 import nothing beyond core siblings and react types.
 
@@ -119,7 +119,7 @@ export interface WidgetManifest {
   readonly wrapTree?: (children: ReactNode) => ReactElement; // React-context wrap (emotion-11); per-widget
   readonly elementTag?: string;                              // default 'div'; semantic or custom-element tag
   readonly elementAttrs?: Readonly<Record<string, string>>;
-  readonly runtimeNeeds?: readonly RuntimeNeed[];            // wc-build-actionable needs (pin:mui5-react17 | stub:node | ...)
+  readonly runtimeNeeds?: readonly RuntimeNeed[];            // wc-build-actionable needs (pin:mui5 | stub:node | ...)
 }
 ```
 
@@ -234,7 +234,7 @@ resolver and handlers read the ports at call time.
 
   Two DOM events cross back from the element:
   - `widget-error` (`./core/widget-error`) — a render error's full path is:
-    the widget throws → the bundle's React-17 boundary catches it → the
+    the widget throws → the bundle's React boundary catches it → the
     boundary dispatches `widget-error` on the element → this renderer's
     listener stores it → the next render rethrows it into the host `Boundary`
     — so both runtimes end at the same fallback. Bundle load failures and the

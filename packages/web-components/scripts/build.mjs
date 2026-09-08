@@ -3,7 +3,7 @@
  * Builds each widget web component with esbuild — into `--out <path>` (the
  * host passes where it serves bundles from) or this package's dist/ by
  * default. A SEPARATE build from any host compile — each bundle carries its
- * own React 17.
+ * own React 18.
  *
  * Outputs (per the packaging design in ../ISOLATION-STRATEGY.md):
  *   - runtime/*.js + import-map.json   the shared runtime as native ES modules:
@@ -15,7 +15,7 @@
  *       module loads.
  *   - <name>.shared.js    ESM; shared specifiers left as bare imports the
  *                         browser resolves through the import map.
- *   - <name>.standalone.js  IIFE with React 17 + everything bundled in.
+ *   - <name>.standalone.js  IIFE with React 18 + everything bundled in.
  *                           Drop-in for a host that serves no runtime chunks.
  */
 import esbuild from 'esbuild';
@@ -28,7 +28,7 @@ import { WIDGETS, UICORE_IMPORT_OVERRIDES } from './policy.mjs';
 import { probeModules, entrySource, chunkName, importMapFor } from './runtime-entries.mjs';
 import {
   nodePolyfills,
-  muiReact17Plugin,
+  mui5PinPlugin,
   sharedExternals,
   uicorePinPlugin,
   selectPlugins,
@@ -67,7 +67,7 @@ const SHARED_SPECIFIERS = sigs ? sharedSpecifiers(sigs) : [];
 const declaredNeedsOf = async (name) =>
   sigs ? (sigs.find((s) => s.name === name)?.declaredNeeds ?? []) : await readDeclaredNeeds(name);
 
-console.log(`MUI pinned to @mui/material@${JSON.parse(await fs.readFile(require.resolve('@mui/material/package.json'), 'utf8')).version} (React 17)`);
+console.log(`MUI pinned to @mui/material@${JSON.parse(await fs.readFile(require.resolve('@mui/material/package.json'), 'utf8')).version} (react@${JSON.parse(await fs.readFile(require.resolve('react/package.json'), 'utf8')).version})`);
 
 // Shared variant: every runtime-served specifier stays a bare import the
 // browser resolves through the host's import map (plugins.mjs).
@@ -125,7 +125,7 @@ async function buildRuntime() {
     // The entries' `__ns.default` runtime check is intentionally "statically
     // undefined" for pure-ESM modules — that's the branch the ternary handles.
     logOverride: { 'import-is-undefined': 'silent' },
-    plugins: [muiReact17Plugin, nodePolyfills, uicorePinPlugin],
+    plugins: [mui5PinPlugin, nodePolyfills, uicorePinPlugin],
   });
 
   // The import map — the host inlines this in its document (first in body)

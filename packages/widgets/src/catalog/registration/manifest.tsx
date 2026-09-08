@@ -24,7 +24,7 @@ export const registrationManifest: WidgetManifest = {
     </EmotionShadowProvider>
   ),
   // v5-era MUI (dist + the MuiThemeBridge/emotion wrapTree).
-  runtimeNeeds: ['pin:mui5-react17'],
+  runtimeNeeds: ['pin:mui5'],
   elementTag: 'section',
   elementAttrs: { 'aria-label': 'Registration form' },
 };

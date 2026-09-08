@@ -21,7 +21,7 @@ export const myTicketsManifest: WidgetManifest = {
   bridges: [emotionMirrorBridge, clickOutsideRetargetBridge],
   // v5-era MUI; dist pulls @react-pdf/renderer (Node built-ins); ships its own
   // MUI theme (CustomTheme) with no fontFamily.
-  runtimeNeeds: ['pin:mui5-react17', 'stub:node', 'quirk:myTicketsFont'],
+  runtimeNeeds: ['pin:mui5', 'stub:node', 'quirk:myTicketsFont'],
   elementTag: 'section',
   elementAttrs: { 'aria-label': 'My orders and tickets' },
 };

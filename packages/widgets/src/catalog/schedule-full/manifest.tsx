@@ -29,7 +29,7 @@ export const scheduleFullManifest: WidgetManifest = {
     <EmotionShadowProvider cacheKey="w-schedule-full">{children}</EmotionShadowProvider>
   ),
   // v5-era MUI (via the emotion wrapTree); dist pulls PDF export (Node built-ins).
-  runtimeNeeds: ['pin:mui5-react17', 'stub:node'],
+  runtimeNeeds: ['pin:mui5', 'stub:node'],
   elementTag: 'section',
   elementAttrs: { 'aria-label': 'Event schedule' },
 };

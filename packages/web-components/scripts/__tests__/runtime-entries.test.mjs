@@ -34,14 +34,15 @@ test('entrySource: imports the override specifier, not the served slot', () => {
   assert.doesNotMatch(src, /served-slot/);
 });
 
-test('entrySource: react entry back-fills useSyncExternalStore and useId without mutating the shape', () => {
-  const shape = { named: ['useState'], hasDefault: true, isEsm: false };
+test('entrySource: the react entry is plain — React 18 carries its own API surface', () => {
+  const shape = { named: ['useState', 'useId', 'useSyncExternalStore'], hasDefault: true, isEsm: false };
   const src = entrySource('react', 'react', shape);
-  assert.match(src, /use-sync-external-store\/shim/);
-  assert.match(src, /export const useSyncExternalStore = __pick\("useSyncExternalStore"\);/);
-  assert.match(src, /if \(!__m\.useId\) __m\.useId = __useId;/);
+  // No back-fills: the probed exports pass through like any other module's.
+  assert.doesNotMatch(src, /use-sync-external-store\/shim/);
+  assert.doesNotMatch(src, /__useId/);
   assert.match(src, /export const useId = __pick\("useId"\);/);
-  assert.deepEqual(shape.named, ['useState']);
+  assert.match(src, /export const useSyncExternalStore = __pick\("useSyncExternalStore"\);/);
+  assert.deepEqual(shape.named, ['useState', 'useId', 'useSyncExternalStore']);
 });
 
 test('importMapFor maps specifiers to prefixed chunk URLs in input order', () => {

@@ -35,7 +35,7 @@ import {
 import {
   baseOptions,
   widgetEntry,
-  muiReact17Plugin,
+  mui5PinPlugin,
   nodePolyfills,
   uicorePinPlugin,
 } from './plugins.mjs';
@@ -102,7 +102,7 @@ async function discoverGraph(name) {
     minify: false,
     define: { 'process.env.NODE_ENV': '"development"' },
     logLevel: 'silent',
-    plugins: [muiReact17Plugin, nodePolyfills, uicorePinPlugin],
+    plugins: [mui5PinPlugin, nodePolyfills, uicorePinPlugin],
   });
   return result.metafile;
 }

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 // The element under test lives in the web-components package; its imports
 // resolve through this workspace. React/ReactDOM are injected by contract,
-// so fakes exercise the element's visit/DOM state machine without React 17.
+// so fakes exercise the element's visit/DOM state machine without a real React.
 import { defineWidgetWebComponent } from '../../../web-components/src/element/defineWidgetWebComponent.js';
 import { webComponentTag } from '../core/manifest';
 import { WIDGET_PAINTED_EVENT } from '../core/widget-painted';

@@ -4,15 +4,14 @@ Companion to [CONSTRAINTS.md](../widgets/CONSTRAINTS.md) (the containment map) a
 [UPSTREAM.md](../widgets/UPSTREAM.md) (the upstream backlog). This doc weighs **how** to
 retire the React-19 compat layer the legacy widgets impose.
 
-> **Shipped:** the web components run **React 17.0.2**. A React ≤16 runtime
+> **Shipped:** the web components run **React 18.3.1**. A React ≤16 runtime
 > delegates events at `document`, which shadow-DOM retargeting breaks; React 17
 > moved delegation to the render root and fixed it — see **RC-Y** in
 > CONSTRAINTS.md. The host↔widget handshake is the element's visit lifecycle — `mount()` (ports + initial props), `setProps()` (replace), `unmount()`; nothing rides window. "React 16"
 > below refers to the widgets' **native** React lineage (what they were built
 > against), not the runtime that hosts them — and it's the *dominant* lineage,
 > not a uniform one: eight widgets peer `react@^16`, but `my-orders-tickets-widget`
-> is React 18 (`react@^18.2`). Running an 18-built widget on the React-17 runtime
-> is a latent risk if it reaches for 18-only APIs.
+> is React 18 (`react@^18.2`) — satisfied by the React-18 runtime.
 
 ---
 
@@ -81,7 +80,7 @@ Rated by boundary burden (data/auth/callback surface + fonts + portals).
 
 Two cross-cutting notes:
 - **my-tickets / registration are MUI-based** (MUI 5 needs React ≥17). They run on the
-  same single bundled React 17.0.2 runtime as every other web component — there is no
+  same single bundled React 18.3.1 runtime as every other web component — there is no
   separate runtime tier.
 - **schedule-filters ⇄ schedule-full share a React context** (`ScheduleStateProvider`).
   Two separate web components can't share context → that filter/view state must be
@@ -101,9 +100,9 @@ Everything else reduces to a mechanism or a rule; these two don't fully:
    shadow. A scoped carve-out; **registration-only**.
 
 Plus one cost to engineer around:
-- **N× bundles** — each web-component bundles React 17 + uicore (~2.5 MB unminified).
-  Mitigation: a **shared "web-component runtime"** chunk (React 17 + uicore) loaded once,
-  widgets as separate entries. (Reintroduces a version-coupling: all React-17
+- **N× bundles** — each web-component bundles React 18 + uicore (~2.5 MB unminified).
+  Mitigation: a **shared "web-component runtime"** chunk (React 18 + uicore) loaded once,
+  widgets as separate entries. (Reintroduces a version-coupling: all React-18
   web components share one React/uicore version.)
 
 ---
@@ -139,8 +138,8 @@ debt-paydown, and shipping a widget as a web component doesn't preclude
 modernizing it later.
 
 **The standard "web component kit"** that makes each widget cheap to wrap:
-our own custom element (`./src/element/define-web-component.js`)
-on a shared React-17 runtime layer, the head-injected font pipeline, the
+our own custom element (`./src/element/defineWidgetWebComponent.js`)
+on a shared React-18 runtime layer, the head-injected font pipeline, the
 `lib/bridges/` portal/overlay fix-ups, and the light-DOM carve-out (Stripe
 slot). The widget repos ideally own the custom-element entry + its CSS
 (self-contained, per the shadow-CSS research); the host owns only data wiring +
@@ -169,7 +168,7 @@ variants** built from the same source:
   `runtime/` chunks. Small (widget code only). The default `scripts/build.mjs`
   (`widgets-build`) run emits this variant plus the chunks + `import-map.json`;
   it is the only variant the reference host loads.
-- **`<widget>.standalone.js`** — React 17 bundled in. Drop-in, works anywhere,
+- **`<widget>.standalone.js`** — React 18 bundled in. Drop-in, works anywhere,
   larger (~2.5 MB). For any integrator who just wants it to work. An opt-in
   build: `build.mjs --standalone` (`pnpm build:standalone` in this package,
   `pnpm build:wc:standalone` at this repo's root) emits only these files.
@@ -187,7 +186,7 @@ window.
 
 **Who picks what:**
 - **The reference host** (opts in): inline the import map once + load each
-  widget's `<widget>.shared.js` module → one React 17 for all web components,
+  widget's `<widget>.shared.js` module → one React 18 for all web components,
   small per-widget bytes, the browser fetches shared chunks on demand.
 - **A third-party integrator**: load `<widget>.standalone.js` → no runtime, no
   coordination.

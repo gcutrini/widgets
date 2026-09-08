@@ -322,7 +322,7 @@ resurfacing as "unexplained."
   No dependencies; contribute to both lines.
 
 ### 8. Umbrella: React-19 modernization wave (not a version bump)
-> **Alternative strategy:** isolating each widget as a React-17 web-component
+> **Alternative strategy:** isolating each widget as a web component
 > "web component" deletes the same shims *without* modernizing — evaluated with a
 > working POC in [ISOLATION-STRATEGY.md](../web-components/ISOLATION-STRATEGY.md). Web components and modernization are not
 > exclusive; this entry is the long-term debt-paydown path.
@@ -367,16 +367,16 @@ resurfacing as "unexplained."
   **MUI 9** (React-18+), where `TextField`/`Autocomplete` moved
   `InputLabelProps` / `ListboxProps` into `slotProps` — the old props spread
   onto DOM nodes (`React does not recognize the InputLabelProps prop…`), and a
-  v9-on-React-17 mismatch lurks beyond the warnings.
+  v9-on-the-bundled-runtime mismatch lurks beyond the warnings.
 - **Contained (implemented)**: the web-component build pins MUI to the
-  installed **React-17 build of MUI 5** — `muiReact17Plugin` in
+  installed **MUI 5 tree** — `mui5PinPlugin` in
   `@openeventkit/web-components`' `scripts/build.mjs` redirects every top-level
   `@mui/*` / `@emotion/*` import to that tree via esbuild's ESM-aware
   `build.resolve`. MUI 5
   lives in **shared import-map MUI chunks**, fetched only by the widgets
   whose module graphs import them; each MUI widget's
   `.shared.js` externalizes `@mui/*`/`@emotion/*` to it rather than bundling its
-  own. So uicore + all MUI widgets share one coherent React-17 MUI 5, the host's
+  own. So uicore + all MUI widgets share one coherent MUI 5, the host's
   MUI 9 never enters, and the prop warnings are gone. (Same pin is the vehicle for
   widget font via `--font_family` — see CONSTRAINTS RC-H.2. Full design in
   [SHARED-MUI-RUNTIME.md](../web-components/SHARED-MUI-RUNTIME.md).)
@@ -385,7 +385,7 @@ resurfacing as "unexplained."
   `personal-information/index.js:269` `ListboxProps` → `slotProps.listbox` (or
   both align their MUI major with the host). Non-breaking on 5.x (slotProps
   since 5.15).
-- **We delete**: `muiReact17Plugin` (the React-17 MUI-5 pin) once uicore/widgets
+- **We delete**: `mui5PinPlugin` (the MUI-5 pin) once uicore/widgets
   align MUI majors — an instance of the per-widget-runtime-requirements
   direction (a pin belongs to the widgets that need MUI 5, not the build
   globally).
@@ -516,10 +516,10 @@ the shared runtime:
 - **Resolves**: `react-star-ratings@2.3.0` declares `react: 16.14.0` as a
   regular dependency, so a second React lands in any install and node-resolving
   bundler (the web-component `--standalone` variant would inline React 16 next
-  to its React 17 — dual React, broken hooks).
+  to its React 18 — dual React, broken hooks).
 - **Change**: upstream, `react` moves to `peerDependencies`. Until then the
   workspace carries a pnpm override forcing `react-star-ratings>react` to the
-  web components' React 17 (`pnpm-workspace.yaml` overrides).
+  web components' React 18 (`pnpm-workspace.yaml` overrides).
 - **Safe because**: the library's components run on whatever React renders
   them; it never relied on its own copy.
 - **We delete**: the `react-star-ratings>react` override once an upstream
@@ -527,26 +527,18 @@ the shared runtime:
 - **Status**: contained by the override; upstream is a third-party repo, so a
   fix there is best-effort (fork/replace if it ever matters beyond standalone).
 
-### 18. reg-lite: react-content-loader v7 requires React 18 (useId)
+### 18. reg-lite: react-content-loader v7 requires React 18 (useId) — RESOLVED by the React-18 runtime
 - **Repo**: `fntechgit/summit-registration-lite` (dependency choice).
 - **Resolves**: a production crash on `/register` right after payment: the
   post-payment skeleton renders, react-content-loader v7 calls
   `React.useId()` (a React 18 API, unguarded since v7 dropped its own uid
-  counter), and the React-17 web-component runtime has no `useId` —
+  counter), and a React-17 runtime has no `useId` —
   `TypeError: st.useId is not a function`, boundary fallback swallows the
   widget. The order itself is created fine; only the UI dies.
-- **Change**: upstream, pin `react-content-loader` to `^6` (v6 keeps its own
-  uid counter and runs on React 16/17) or hold v7 until the uicore 5.x /
-  React-19 port. Until then the shared runtime's react entry back-fills
-  `useId` (a client-only counter id — the web components never server-render), the
-  same containment as the react-redux `useSyncExternalStore` back-fill.
-- **Safe because**: the back-fill only fills a missing property; on React 18+
-  the native hook wins.
-- **We delete**: the `useId` back-fill lines in
-  `@openeventkit/web-components`' `scripts/runtime-entries.mjs` when the runtime
-  moves past React 17 or reg-lite drops v7.
-- **Status**: contained by the back-fill; needs a reg-lite dep pin or the 5.x
-  port to retire.
+- **Change**: none needed upstream — the web-component runtime runs React
+  18.3.1, whose native `useId` satisfies the dep. The runtime's former
+  `useId`/`useSyncExternalStore` back-fills are deleted.
+- **Status**: resolved by the runtime's React 18.
 
 ## Suggested implementation order
 

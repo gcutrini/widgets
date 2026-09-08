@@ -44,7 +44,7 @@ surface is a named entry in the exports map.
   needs JSX, e.g. a `wrapTree` that renders an `EmotionShadowProvider`
   (schedule-full, registration).
 - `src/core/` (`./core`, `./core/*`) — the framework-free kernel: bundled into
-  the React-17 bundles as well as imported by the host, so a test
+  the web-component bundles as well as imported by the host, so a test
   (`src/__tests__/core-framework-free.test.ts`) enforces that its files import
   nothing beyond core siblings and react types. It holds `createWidgetShadow`,
   the `WidgetManifest` type (incl. `WidgetBridge`), `webComponentTag`, the
@@ -125,7 +125,7 @@ HOST src/widgets/catalog/<w>/          index / Client / compose / types  (host i
      mutation-safe-props,         the ports (host-auth, host-config), and the
      configureWidgetHost          widget-auth-error / -notify / -error events
       ▲
-@openeventkit/web-components (esbuild) — own React 17; imports only ./core/*
+@openeventkit/web-components (esbuild) — own React 18; imports only ./core/*
 and the uicore-bound subpaths, never ./mount
 ```
 
@@ -149,7 +149,7 @@ and the uicore-bound subpaths, never ./mount
     `createWidgetShadow` (prop mutation-safety, React-19 compat shims,
     ShadowRootContext and the uicore i18n seed provided by the renderer). The
     default for every widget.
-  - **`webComponent`** — runs it on its own bundled React 17 as a self-contained
+  - **`webComponent`** — runs it on its own bundled React 18 as a self-contained
     custom element built by `@openeventkit/web-components`.
 
 ## The host's setup call

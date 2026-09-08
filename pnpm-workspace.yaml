@@ -3,9 +3,9 @@ packages:
 
 
 # react-star-ratings@2.3.0 mis-declares react@16.14.0 as a regular dependency
-# (not a peer) — force it onto the web-component bundle's React 17 so the
+# (not a peer) — force it onto the web-component bundle's React 18 so the
 # standalone build can't inline a second React.
 overrides:
-  'react-star-ratings>react': 17.0.2
+  'react-star-ratings>react': 18.3.1
   'openstack-uicore-foundation': github:gcutrini/openstack-uicore-foundation#deploy
   'summit-registration-lite': github:gcutrini/summit-registration-lite#deploy/wc-registration

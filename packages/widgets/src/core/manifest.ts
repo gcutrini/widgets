@@ -2,12 +2,12 @@
  * A `WidgetManifest` is the static, renderer-independent declaration of one
  * legacy widget: what it is, what styles it needs, how it behaves inside a
  * shadow root. Both renderers read the same manifest — the host's React 19
- * (`reactComponent`) and the widget's own React 17 web component
+ * (`reactComponent`) and the widget's own React 18 web component
  * (`webComponent`).
  *
  * React is referenced by TYPE only, so this module pulls in no React runtime —
  * the esbuild web-component build can import a manifest without dragging React
- * 19 into its React-17 bundle.
+ * 19 into its React-18 bundle.
  */
 import type { ComponentType, ReactElement, ReactNode } from 'react';
 import type { VendorSheet } from './vendor-sheet';
@@ -31,7 +31,7 @@ export type WidgetBridge = (root: ShadowRoot) => void | (() => void);
  * build acts on live here — React-19 renderer shims, shadow bridges, and vendor
  * CSS are declared elsewhere (`bridges`, `vendorSheets`, the renderer).
  *
- *  - 'pin:mui5-react17'     bundle uses v5-era MUI/emotion → pin to the React-17 MUI 5 tree
+ *  - 'pin:mui5'             bundle uses v5-era MUI/emotion → pin to the build package's MUI 5 tree
  *  - 'stub:node'            bundle pulls Node built-ins (fs/zlib/…) → browser stubs
  *  - 'quirk:myTicketsFont'  my-tickets' CustomTheme sets no fontFamily → build patches the site font in
  *
@@ -40,7 +40,7 @@ export type WidgetBridge = (root: ShadowRoot) => void | (() => void);
  * match derived). 'quirk:myTicketsFont' is behavioral and declared-only.
  */
 export type RuntimeNeed =
-  | 'pin:mui5-react17'
+  | 'pin:mui5'
   | 'stub:node'
   | 'quirk:myTicketsFont';
 
@@ -85,7 +85,7 @@ export interface WidgetManifest {
  * suffix so it forms a valid tag. Both the host-side web-component renderer and
  * the esbuild-bundled `defineWebComponent` derive the tag through this one
  * helper, so the tag one registers and the tag the other awaits can never
- * drift. Framework-free — safe for the React-17 bundle to import.
+ * drift. Framework-free — safe for the web-component bundle to import.
  */
 export function webComponentTag(name: string): string {
   return name.includes('-') ? name : `${name}-widget`;

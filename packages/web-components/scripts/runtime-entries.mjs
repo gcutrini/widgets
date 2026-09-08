@@ -93,23 +93,6 @@ export function entrySource(spec, importSpec, shape) {
     // modules while esbuild bundles the browser ESM build.
     'const __pick = (k) => (__ns[k] !== undefined ? __ns[k] : __m == null ? undefined : __m[k]);',
   ];
-  if (spec === 'react') {
-    // Back-fill the React 18 APIs that React-18-era deps bundled inside the
-    // widgets call unguarded on this React-17 runtime:
-    // - useSyncExternalStore: react-redux v8 imports use-sync-external-store/
-    //   with-selector — the non-shim entry that calls it off React directly —
-    //   so redux-connected widgets (e.g. schedule-full) crash at mount.
-    // - useId: react-content-loader v7 (reg-lite's skeletons) calls
-    //   React.useId() directly. The web components never server-render, so a counter
-    //   id held stable per component via useRef is fully correct.
-    lines.unshift("import { useSyncExternalStore as __uSES } from 'use-sync-external-store/shim';");
-    lines.push('if (!__m.useSyncExternalStore) __m.useSyncExternalStore = __uSES;');
-    lines.push('let __nextId = 0;');
-    lines.push('const __useId = () => { const r = __m.useRef(); if (r.current === undefined) r.current = ":wc-r" + (__nextId++).toString(36) + ":"; return r.current; };');
-    lines.push('if (!__m.useId) __m.useId = __useId;');
-    if (!named.includes('useSyncExternalStore')) named.push('useSyncExternalStore');
-    if (!named.includes('useId')) named.push('useId');
-  }
   for (const k of named) lines.push(`export const ${k} = __pick(${JSON.stringify(k)});`);
   lines.push('export default __m;');
   return lines.join('\n') + '\n';
