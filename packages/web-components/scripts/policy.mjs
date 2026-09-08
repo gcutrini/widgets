@@ -76,7 +76,7 @@ export const EMOTION_SERVED = ['@emotion/cache', '@emotion/react'];
  * The framework specifiers every shared widget bundle leaves external — served
  * by the shared runtime alongside the uicore + MUI surfaces.
  */
-export const FRAMEWORK_SERVED = ['react', 'react-dom', 'react/jsx-runtime'];
+export const FRAMEWORK_SERVED = ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'];
 
 /**
  * Shared side-effect modules: the i18n seed must run ONCE in the shared module

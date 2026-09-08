@@ -1,7 +1,7 @@
-# The React-18 web-component runtime — and the createRoot plan
+# The React-18 web-component runtime
 
 The web-component runtime (`packages/web-components`) runs **react/react-dom
-18.3.1** on legacy `ReactDOM.render`. The host runs React 19 and is not
+18.3.1** on the `createRoot` API. The host runs React 19 and is not
 involved. React 18 is the ceiling for shim-free legacy hosting: React 19
 removes exactly what the legacy dists stand on (`findDOMNode` for
 react-select@2, legacy context for react-bootstrap, `ReactDOM.render`, the
@@ -21,11 +21,24 @@ for these widgets is the rebuild wave (UPSTREAM entry 8), not a runtime swap.
   its shim entries.
 - The MUI pin token is `pin:mui5` (`mui5PinPlugin`) — it pins bundles to this
   package's MUI 5 tree; its mechanics don't depend on the React version.
-- Legacy `ReactDOM.render` on 18 behaves identically to 17: sync commits, no
-  automatic batching outside event handlers, `setProps` commits
-  synchronously. React logs a dev-build-only deprecation for it (one per
-  widget mount); production bundles are silent. That warning retires with
-  phase 2 below.
+- Each element holds one React root per **connected span of a visit**:
+  `mount()`'s first render creates it lazily, `setProps` renders on it,
+  `unmount()` and `disconnectedCallback` unmount it (an unmounted 18 root
+  cannot be reused — a reconnect or a new visit creates a fresh one, with the
+  guard making the disconnect-then-unmount removal sequence a no-op second
+  time). Commits are asynchronous and widget-internal setState batches
+  automatically everywhere; nothing host-side reads the DOM after `setProps`,
+  and readiness rides the `widget-painted` event — announced by a
+  `FirstCommitSignal` wrapper (`useLayoutEffect`) placed below the error
+  boundary, so a failed first render announces nothing.
+- `react-dom/client` is served through the import map alongside react and
+  react-dom.
+- Dev builds still log deprecations from INSIDE the legacy dists —
+  react-bootstrap's `OverlayTrigger` renders its overlays through legacy
+  sub-root APIs (`unstable_renderSubtreeIntoContainer`), warning per overlay
+  render in four widgets (schedule-full/lite, speakers, live-event).
+  Production bundles are silent; those calls retire with the React-19 widget
+  rebuild (UPSTREAM entry 8).
 
 ## Compatibility inventory (evidence-checked against installed dists)
 
@@ -54,32 +67,10 @@ API references.
 No widget is riskier on 18 than on 17; the dev-only 18.3 deprecation warnings
 (`defaultProps`, legacy context) inventory the eventual React-19 rebuild.
 
-## Phase 2 — `createRoot` (~1–2 days incl. verification)
+## Toward React 19
 
-Where the real behavior deltas live; mandatory only at React 19.
-
-- `src/element/defineWidgetWebComponent.js`: `createRoot(container)` held per
-  visit; `root.render()` per `setProps`; `root.unmount()` on unmount() and
-  disconnect. An unmounted 18 root cannot be reused — every new visit creates
-  a new root (the mount/unmount visit lifecycle already models this). Serve
-  `react-dom/client` as a runtime specifier (add to `FRAMEWORK_SERVED`).
-- The `widget-painted` announcement rides `ReactDOM.render`'s third-argument
-  callback, which `root.render()` doesn't have — rework it (e.g. an effect in
-  a kit wrapper component announcing the visit's first commit).
-- Behavior deltas to verify: `root.render()` commits asynchronously (the
-  synchronous `setProps` guarantee disappears), automatic batching of
-  widget-internal setState in promises/timeouts (the class-era fetch/clock
-  widgets), react-bootstrap's `OverlayTrigger` spawning a legacy sub-root
-  inside a concurrent tree (functional in 18, sketchiest mix in the fleet).
-- Verification ladder: both build variants + analyzer `--check` + script
-  tests + vitest; `/widget-test` gallery, all nine widgets; interactive
-  smoke (schedule-full redux + realtime, schedule-lite day tabs, my-tickets
-  portals + PDF, event-feedback stars, reconnect path); registration payment
-  flow with a test card behind a QA window.
-
-## Timing
-
-Neutral-to-slightly-easier for the uicore 5.x port (5.x still peers react
-^17 — no conflict, no duplication). The createRoot work and any batching bugs
-it flushes are down-payments on the eventual React-19 rebuild of the widget
-fleet.
+The runtime is as far as legacy hosting goes: the remaining React-19 blockers
+live in the widget dists themselves (findDOMNode, legacy context, the
+@react-pdf 3 internals) and retire with the widget rebuild (UPSTREAM entry
+8). The uicore 5.x port is unaffected (5.x peers react ^17 — no conflict, no
+duplication).

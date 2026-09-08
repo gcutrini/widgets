@@ -88,7 +88,7 @@ const CUSTOM_ELEMENT_HOST_CSS = ':host { display: block; }';
  *
  * The one shadow-DOM primitive both renderers share — the reactComponent
  * renderer portals the widget into `container` on the host's React; the
- * webComponent renderer ReactDOM.renders into it on its own React.
+ * webComponent renderer renders a root into it on its own React.
  */
 export function createWidgetShadow(
   host: HTMLElement,

@@ -1,20 +1,20 @@
 /**
  * Web-component kit — registers a legacy widget as a custom element that runs on
- * an injected React 18 inside a shadow root, driven by the widget's shared
- * manifest.
+ * an injected React 18 root inside a shadow root, driven by the widget's
+ * shared manifest.
  *
  * The shadow itself (attach + adopt sheets + font-faces + portal
  * sheets + bridges) is set up by `createWidgetShadow` — the SAME primitive the
  * host's reactComponent renderer uses — so the two renderers can't drift on any
  * of that. The kit adds only what's web-component-specific: the React-18
- * ReactDOM.render, the `mount`/`setProps`/`unmount` visit lifecycle, the error
- * boundary, `wrapTree`, and `elementAttrs`. There's no prop name list — the host
+ * root per connected span, the `mount`/`setProps`/`unmount` visit lifecycle,
+ * the error boundary, `wrapTree`, and `elementAttrs`. There's no prop name list — the host
  * hands over the whole prop object (`mount` opens the visit, `setProps` replaces
  * while it's open, `unmount` closes it).
  *
- * React/ReactDOM are injected (not imported) so the SAME kit powers both build
- * variants: `shared` (the default build) reads them from the runtime global;
- * `standalone` (`build.mjs --standalone`) bundles React 18.
+ * React/createRoot are injected (not imported) so the SAME kit powers both
+ * build variants: `shared` (the default build) resolves them through the
+ * import map; `standalone` (`build.mjs --standalone`) bundles React 18.
  */
 import { createWidgetShadow } from '@openeventkit/widgets/core/widget-shadow';
 import { webComponentTag } from '@openeventkit/widgets/core/manifest';
@@ -41,7 +41,7 @@ function configureUicoreOnce() {
  * Register a widget as a web component from its shared WidgetManifest — the SAME
  * manifest the host's reactComponent renderer reads. The manifest is the single
  * source of a widget's dist, sheets, inline styles, bridges, and props; the
- * entry supplies only the injected React/ReactDOM.
+ * entry supplies only the injected React/createRoot.
  *
  * The widget dist loads through `manifest.load()` (the same loader the
  * reactComponent path uses), so it's bundled exactly once. Definition is async:
@@ -50,15 +50,15 @@ function configureUicoreOnce() {
  *
  * @param {object} o
  * @param {any} o.React
- * @param {any} o.ReactDOM
+ * @param {any} o.createRoot   react-dom/client's createRoot
  * @param {import('@openeventkit/widgets/core/manifest').WidgetManifest} o.manifest
  * @returns {Promise<void>}
  */
-export function defineWidgetWebComponent({ React, ReactDOM, manifest }) {
+export function defineWidgetWebComponent({ React, createRoot, manifest }) {
   return manifest.load().then((mod) =>
     defineWebComponent({
       React,
-      ReactDOM,
+      createRoot,
       Component: resolveWidgetComponent(mod),
       manifest,
     }),
@@ -76,11 +76,11 @@ export function defineWidgetWebComponent({ React, ReactDOM, manifest }) {
  *
  * @param {object} o
  * @param {any} o.React
- * @param {any} o.ReactDOM
+ * @param {any} o.createRoot
  * @param {Function} o.Component   the widget component (resolved from its dist)
  * @param {import('@openeventkit/widgets/core/manifest').WidgetManifest} o.manifest
  */
-function defineWebComponent({ React, ReactDOM, Component, manifest }) {
+function defineWebComponent({ React, createRoot, Component, manifest }) {
   // Shared with the host-side renderer so the tag we register and the tag it
   // awaits can never drift.
   const tag = webComponentTag(manifest.name);
@@ -93,6 +93,17 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
   // boundary can't see across the shadow into a different React instance. On a
   // widget render/lifecycle throw it renders nothing and reports the error out
   // through the host (`onError`), so the host can show its own fallback.
+  // Announces the tree's first commit — the root-API analog of legacy
+  // render's completion callback. Sits BELOW the error boundary: a throwing
+  // first render unwinds before this subtree commits, so its effect never
+  // runs and a failed first render announces nothing.
+  function FirstCommitSignal({ onCommit, children }) {
+    React.useLayoutEffect(() => {
+      onCommit();
+    }, []);
+    return children;
+  }
+
   class WidgetErrorBoundary extends React.Component {
     constructor(props) {
       super(props);
@@ -124,10 +135,21 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
       this._connected = false;
       this._mounted = false;
       this._painted = false; // first-commit-of-visit announced?
+      this._root = null; // React root for the current connected span of the visit
       // Report a widget render error out through the host as a DOM event; the
       // app-side renderer listens and raises it into its React-19 boundary.
       this._reportError = (error) => {
         this.dispatchEvent(new CustomEvent(WIDGET_ERROR_EVENT, { detail: { error } }));
+      };
+      // Announce the visit's first commit one frame later, when the browser
+      // has painted it. Once per visit — mount() resets the flag; a
+      // reconnect's fresh root re-commits and the flag absorbs it.
+      this._announcePaint = () => {
+        if (this._painted) return;
+        this._painted = true;
+        requestAnimationFrame(() => {
+          this.dispatchEvent(new CustomEvent(WIDGET_PAINTED_EVENT, { bubbles: true }));
+        });
       };
     }
 
@@ -170,10 +192,7 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
     unmount() {
       this._mounted = false;
       this._props = null;
-      if (this._shadow) {
-        ReactDOM.unmountComponentAtNode(this._shadow.container);
-        this._shadow.dispose();
-      }
+      this._teardown();
     }
 
     connectedCallback() {
@@ -210,34 +229,36 @@ function defineWebComponent({ React, ReactDOM, Component, manifest }) {
       // reactComponent renderer supplies.
       const widget = React.createElement(Component, this._props);
       const wrapped = wrapTree ? wrapTree(widget) : widget;
-      ReactDOM.render(
+      // One root per connected span: created lazily on the first render after
+      // a mount or a reconnect (an unmounted React 18 root cannot be reused).
+      this._root ??= createRoot(this._shadow.container);
+      this._root.render(
         React.createElement(
           WidgetErrorBoundary,
           { onError: this._reportError },
-          React.createElement(ShadowRootContext.Provider, { value: this._shadow.root }, wrapped),
+          React.createElement(
+            FirstCommitSignal,
+            { onCommit: this._announcePaint },
+            React.createElement(ShadowRootContext.Provider, { value: this._shadow.root }, wrapped),
+          ),
         ),
-        this._shadow.container,
-        () => this._announcePaint(),
       );
     }
 
-    // Announce the visit's first commit one frame later, when the browser has
-    // painted it. Once per visit; a render that threw never commits, so a
-    // failed first render announces nothing.
-    _announcePaint() {
-      if (this._painted) return;
-      this._painted = true;
-      requestAnimationFrame(() => {
-        this.dispatchEvent(new CustomEvent(WIDGET_PAINTED_EVENT, { bubbles: true }));
-      });
+    // Shared by unmount() and disconnectedCallback — the two run back-to-back
+    // when React removes the element (DOM removal first, effect cleanup
+    // after), so the root guard makes the second call a no-op.
+    _teardown() {
+      if (this._root) {
+        this._root.unmount();
+        this._root = null;
+      }
+      if (this._shadow) this._shadow.dispose();
     }
 
     disconnectedCallback() {
       this._connected = false;
-      if (this._shadow) {
-        ReactDOM.unmountComponentAtNode(this._shadow.container);
-        this._shadow.dispose();
-      }
+      this._teardown();
     }
   }
 

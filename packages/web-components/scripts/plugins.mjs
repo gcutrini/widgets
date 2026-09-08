@@ -213,18 +213,18 @@ export const baseOptions = () => ({
   logLevel: 'warning',
 });
 
-// The per-widget entry is pure boilerplate — inject React/ReactDOM and register
-// the custom element from the widget's shared `manifest` export. The i18n seed
-// import is external in the shared variant (runs once in the shared graph) and
-// bundles in standalone.
+// The per-widget entry is pure boilerplate — inject React/createRoot and
+// register the custom element from the widget's shared `manifest` export. The
+// i18n seed import is external in the shared variant (runs once in the shared
+// graph) and bundles in standalone.
 export const widgetEntry = (name) => ({
   contents: `
 import '@openeventkit/widgets/compat/uicore-i18n';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { manifest } from '@openeventkit/widgets/${name}/manifest';
 import { defineWidgetWebComponent } from './src/element/defineWidgetWebComponent.js';
-defineWidgetWebComponent({ React, ReactDOM, manifest });
+defineWidgetWebComponent({ React, createRoot, manifest });
 `,
   resolveDir: pkgRoot,
   sourcefile: `${name}.wc.js`,
