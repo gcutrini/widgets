@@ -6,7 +6,7 @@ import { createReactComponentRenderer } from '../renderers/react-component';
 
 /**
  * jsdom notes: style mechanics (constructable vs <style> fallback) are owned
- * by widget-core's widget-shadow tests — nothing here asserts on styles.
+ * by core's widget-shadow tests — nothing here asserts on styles.
  * useIsomorphicLayoutEffect resolves to useLayoutEffect, which testing-library
  * flushes synchronously, so no waitFor is needed; resolveComponent stays
  * synchronous (no lazy loading) for the same reason.

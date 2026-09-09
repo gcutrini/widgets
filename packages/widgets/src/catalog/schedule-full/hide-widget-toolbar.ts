@@ -1,5 +1,5 @@
 /**
- * The host renders its own MUI schedule controls (`ScheduleToolbar`) and the
+ * The host renders its own schedule controls and the
  * schedule shows no heading, so the widget's built-in title and button-bar
  * (timezone / 12-24h / Print / Share / view toggle) are both redundant —
  * hide them.

@@ -29,4 +29,6 @@ export const registrationManifest: WidgetManifest = {
   elementAttrs: { 'aria-label': 'Registration form' },
 };
 
+// Uniform alias so the web-component entry codegen can import `{ manifest }`
+// (@openeventkit/web-components' scripts/build.mjs) regardless of widget.
 export { registrationManifest as manifest };

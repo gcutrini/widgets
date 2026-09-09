@@ -8,7 +8,7 @@
  *   node scripts/analyze-widgets.mjs --check   # CI guard (exit 1 on drift; root pnpm analyze:check)
  *   widgets-analyze --update-baseline  # accept the current unknowns (workspace only)
  *
- * Step 2 of RUNTIME-REQUIREMENTS.md. No build side effects.
+ * Step 3 of RUNTIME-REQUIREMENTS.md. No build side effects.
  *
  * --check fails when a uicore path is imported but outside the served runtime surface
  * (would resolve to {} in the shared build), or when a NEW unrecognized dep

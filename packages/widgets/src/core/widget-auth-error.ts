@@ -8,7 +8,7 @@
  * dialog itself. It raises this window event instead; the host's <WidgetAuthErrorDialog>,
  * mounted with its providers, listens and owns the entire user-facing
  * treatment. Same producer-outside-React pattern as the widget needsLogin
- * bridge.
+ * callback the host wires.
  */
 
 export const WIDGET_AUTH_ERROR_EVENT = 'widget-auth-error';

@@ -10,10 +10,9 @@
  * Neither side of the port names uicore or the host's session internals.
  *
  * Resolution differs by module graph:
- *  - Host / reactComponent: the host's register-host module
- *    (`src/components/widget/register-host.ts` in the reference host) calls
- *    `registerHostAuth`, setting the module `singleton`; uicore-host is in the
- *    same graph and reads it.
+ *  - Host / reactComponent: the host's one-time widget-host registration
+ *    calls `registerHostAuth`, setting the module `singleton`; uicore-host is
+ *    in the same graph and reads it.
  *  - Bundle / webComponent: the bundle has its own copy of this module; the
  *    element's `mount()` registers the host impl into it before
  *    anything renders (the renderer hands the ports across the DOM).

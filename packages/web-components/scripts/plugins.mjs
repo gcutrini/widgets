@@ -153,7 +153,7 @@ export const sharedExternals = (sharedSpecifiers) => ({
       // - default + named (browser-ESM component modules): a merged
       //   { __esModule, default, ...named } object, so BOTH
       //   _interopRequireDefault(require(s)).default and require(s).namedThing
-      //   work — the shape the deleted to-module-exports produced.
+      //   work.
       // - no default: the namespace itself.
       contents:
         `import * as __ns from ${JSON.stringify(args.path)};\n` +

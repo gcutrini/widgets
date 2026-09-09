@@ -165,7 +165,7 @@ export function createWebComponentRenderer(
     // the one mount() just delivered.
     const sentRef = useRef<Record<string, unknown> | null>(null);
 
-    // The visit lifecycle. The widget's bundle has its own copies of the widget-core
+    // The visit lifecycle. The widget's bundle has its own copies of the core
     // ports; hand it the host impls through the element — the only channel
     // between the two module graphs — together with the complete initial prop
     // set in one mount() call. The cleanup ends the visit: it runs on real
