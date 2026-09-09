@@ -95,15 +95,16 @@ binaries they reference:
   `src/lib/vendor-css/<name>.ts` (`export const sheet: VendorSheet`). Outputs
   are committed, so a fresh clone typechecks without running it. Regeneration
   happens only here — hosts never run this script.
-- Font and image binaries land in `assets/` (committed). Generated url()
-  references carry the `__WIDGET_ASSETS__` placeholder; `createWidgetShadow`
-  substitutes it with `HostConfig.assetBaseUrl` at use time.
+- The font binaries and static CSS files land in `assets/` (committed).
+  Generated url() references carry the `__WIDGET_ASSETS__` placeholder;
+  `createWidgetShadow` substitutes it with `HostConfig.assetBaseUrl` at use
+  time.
 - A host serves `assets/` wherever it wants and says where in
-  `HostConfig.assetBaseUrl`. Empty (the default) means the site root: the
-  reference host copies this package's pre-built `assets/` into its `public/`
-  (its `scripts/sync-widget-assets.mjs`, run by its `copy:widget-assets`
-  script at `predev` / `prebuild` — a copy, never a regeneration) and leaves
-  the base empty.
+  `HostConfig.assetBaseUrl`: it runs this package's `widgets-assets --out
+  <dir>` bin (a copy, never a regeneration) against the directory it serves
+  from. Empty base (the default) means the site root — the reference host
+  runs `widgets-assets --out public` at `predev`/`prebuild` and leaves the
+  base empty.
 
 ## The layered architecture
 

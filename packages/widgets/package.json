@@ -4,6 +4,9 @@
   "private": true,
   "description": "Bridge layer for legacy React 16 / Redux / uicore-4 widget packages consumed by a host event site. Isolates the legacy dep tree from the host, and re-exports the mount/core surfaces as ./mount and ./core subpaths so a host needs only this one widget dependency.",
   "type": "module",
+  "bin": {
+    "widgets-assets": "./scripts/copy-assets.mjs"
+  },
   "scripts": {
     "assets": "node scripts/generate-assets.mjs"
   },
