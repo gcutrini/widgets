@@ -39,8 +39,7 @@ export const UICORE_DIR = path.dirname(
  * scheduler. In the monorepo one store serves both graphs and these aliases
  * are no-ops; when this package is `link:`ed from its own repo, its imports
  * would otherwise resolve that repo's physical copies — two MUI/emotion
- * runtimes with split contexts in one page (verified via a webpack
- * module-graph probe). Ownership differs from uicore: MUI/emotion/scheduler
+ * runtimes with split contexts in one page. Ownership differs from uicore: MUI/emotion/scheduler
  * are the HOST's UI stack, so each family is pinned to the copy the host
  * resolves (uicore stays kit-owned — it is this package's domain). Anchoring
  * host-side also keeps the host's own MUI untouched when this package is

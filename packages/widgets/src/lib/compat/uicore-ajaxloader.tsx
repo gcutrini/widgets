@@ -4,18 +4,17 @@
  * The shared runtime serves this module under the
  * `openstack-uicore-foundation/lib/components/ajaxloader` specifier, so every
  * widget dist that imports AjaxLoader gets this instead of uicore's default.
- * It renders the host's sign-out overlay markup (AuthTransitionOverlay): a MUI
- * `<Backdrop>` with a `<CircularProgress color="inherit" />`, so the
- * in-widget loader matches the host's overlays.
+ * It renders a MUI `<Backdrop>` with a `<CircularProgress color="inherit" />`,
+ * so the in-widget loader matches the host's overlays.
  *
  * Backdrop and CircularProgress are bare imports from the pinned MUI-5 tree —
  * they bundle into this module's runtime chunk (esbuild splitting dedupes them
  * across chunks), and the theme reaches them through the served
  * @emotion/react.
  *
- * The spinner is fixed (MUI CircularProgress) for now. If a widget ever needs
- * a different loader, this could take the component as a prop/port instead —
- * see this package's UPSTREAM.md.
+ * The spinner is fixed (MUI CircularProgress); a widget needing a different
+ * loader would take the component through a port instead — see this package's
+ * UPSTREAM.md.
  */
 import React from 'react';
 import Backdrop from '@mui/material/Backdrop';

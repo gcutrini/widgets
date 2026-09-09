@@ -9,7 +9,7 @@
  * scrolls it into view, and removes the consumed `event` param from the
  * fragment.
  *
- * Same bridge shape as the `kit/bridges/`: `(root) => cleanup`.
+ * Same bridge shape as `lib/bridges/`: `(root) => cleanup`.
  */
 
 const SCROLL_DELAY_MS = 800;

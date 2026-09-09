@@ -11,8 +11,8 @@
  * rule — generic or hashed — only matches inside the container subtree.
  * (@scope: Chrome 118+, Safari 17.4+, Firefox 128+.)
  *
- * `@font-face` registration is handled globally by ShadowRoot's
- * font-face injection for the same sheets; only class rules (e.g.
+ * `@font-face` registration is handled globally by createWidgetShadow's
+ * font-face hoisting to document.head for the same sheets; only class rules (e.g.
  * `.fa { font-family: FontAwesome }`) need to resolve here.
  *
  * Deduplicated per (container, sheet ids) process-wide; the injected

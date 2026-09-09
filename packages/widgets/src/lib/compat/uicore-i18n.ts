@@ -9,11 +9,11 @@
  *
  * Without this seed, any uicore string that renders before some other
  * uicore entrypoint happens to self-seed shows the raw key (e.g. an error
- * modal displaying `errors.session_expired`). The host's reactComponent
- * renderer imports this module alongside the other compat shims, and the
- * each widget's web-component entry imports it (an external, served once by the
- * shared runtime graph), so the
- * dictionary exists before any widget bundle loads, on every page.
+ * modal displaying `errors.session_expired`). The reactComponent renderer
+ * imports this module alongside the other compat shims, and each widget's
+ * web-component entry imports it (an external, served once by the shared
+ * runtime graph), so the dictionary exists before any widget bundle loads,
+ * on every page.
  *
  * Site-specific overrides (a broader dictionary loader) can layer on top
  * later: `T.setTexts` merges by replacement, so a later seed with a fuller
