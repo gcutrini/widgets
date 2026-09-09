@@ -1,10 +1,10 @@
 /**
  * Build-time re-export shim for react-dom, adding the `findDOMNode` React 19
- * dropped. The rule in `@openeventkit/widgets/webpack-compat` (applied
- * by `applyWidgetCompat` from the host's `next.config.ts`) aliases `react-dom` to this
- * file **only inside react-select@2**, so react-select's static `import { findDOMNode } from
- * 'react-dom'` resolves at build time instead of emitting a "not exported"
- * warning. Everything else keeps the real react-dom.
+ * dropped. The rule in `@openeventkit/widgets/webpack-compat` (applied when a
+ * host runs `applyWidgetCompat` in its bundler config) aliases `react-dom` to
+ * this file **only inside react-select@2**, so react-select's static
+ * `import { findDOMNode } from 'react-dom'` resolves at build time instead of
+ * emitting a "not exported" warning. Everything else keeps the real react-dom.
  *
  * `export *` forwards react-dom's real named exports (createPortal, …) — the
  * same function instances, so portals still attach to the same React tree —

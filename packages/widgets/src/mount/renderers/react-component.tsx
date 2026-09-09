@@ -23,7 +23,7 @@ import {
   type WidgetShadow,
 } from '../../core';
 import { useMutationSafeProps } from '../mutation-safe-props';
-import { useHostRef } from '../use-host-ref';
+import { useElementRef } from '../use-element-ref';
 import type { ManifestMountProps } from '../mount-props';
 import { ShadowRootContext } from '../../lib/context/shadow-root-context';
 
@@ -70,7 +70,7 @@ export function createReactComponentRenderer(
   const { resolveComponent, wrapShadowTree, Boundary } = options;
 
   function ReactComponentMount({ manifest, composition, ref: forwardedRef }: ManifestMountProps) {
-    const { ref: hostRef, setRef: setHostRef } = useHostRef(forwardedRef);
+    const { ref: elementRef, setRef: setElementRef } = useElementRef(forwardedRef);
     const [shadow, setShadow] = useState<WidgetShadow | null>(null);
 
     // One component per manifest — resolution (and any lazy-load setup) runs
@@ -85,7 +85,7 @@ export function createReactComponentRenderer(
     const isolated = useMutationSafeProps(composition.props);
 
     useIsomorphicLayoutEffect(() => {
-      const host = hostRef.current;
+      const host = elementRef.current;
       if (!host || host.shadowRoot) return;
       const prepared = createWidgetShadow(host, manifest);
       setShadow(prepared);
@@ -101,7 +101,7 @@ export function createReactComponentRenderer(
 
     return createElement(
       manifest.elementTag ?? 'div',
-      { ref: setHostRef, ...manifest.elementAttrs },
+      { ref: setElementRef, ...manifest.elementAttrs },
       shadow
         ? createPortal(
             wrapShadowTree ? (

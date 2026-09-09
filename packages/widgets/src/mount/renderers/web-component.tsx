@@ -12,7 +12,7 @@ import { webComponentTag } from '../../core';
 import { getHostAuth, type HostAuth } from '../../core/host-auth';
 import { getHostConfig, type HostConfig } from '../../core/host-config';
 import { useMutationSafeProps } from '../mutation-safe-props';
-import { useHostRef } from '../use-host-ref';
+import { useElementRef } from '../use-element-ref';
 import { WIDGET_ERROR_EVENT } from '../../core/widget-error';
 import type { WebComponentMountProps } from '../mount-props';
 
@@ -111,7 +111,7 @@ export function createWebComponentRenderer(
     // identity — the widget's own bundle owns the manifest.
     const tag = webComponentTag(name);
     const bundleSrc = `${bundleBasePath}/${name}.shared.js`;
-    const { ref: elementRef, setRef: setHostRef } = useHostRef<WidgetElement>(forwardedRef);
+    const { ref: elementRef, setRef: setElementRef } = useElementRef<WidgetElement>(forwardedRef);
     const [defined, setDefined] = useState(false);
     const [error, setError] = useState<Error | null>(null);
 
@@ -205,7 +205,7 @@ export function createWebComponentRenderer(
     // here, exactly as in the react-component renderer.)
     if (error) throw error;
 
-    return createElement(tag, { ref: setHostRef });
+    return createElement(tag, { ref: setElementRef });
   }
 
   // Not a boundary itself: the mount THROWS load/render errors (see above), so

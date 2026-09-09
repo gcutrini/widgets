@@ -161,7 +161,7 @@ src/mount/  (./mount barrel; renderers + compat via their own subpaths)
   configure-widget-host.ts   configureWidgetHost (exported as ./host, NOT on the barrel — it pulls uicore)
   renderers/            react-component · web-component (generic mount factories; hosts inject
                         lazy-loading, error boundary, bundle base path)
-  use-host-ref.ts       fans a forwarded ref out alongside the renderer's internal one
+  use-element-ref.ts    fans a forwarded ref out alongside the renderer's internal one
   mutation-safe-props.ts   shallow-copy so a widget's in-place prop mutations can't reach host state
   compat/               find-dom-node · react-element-symbol · react-dom-with-find-dom-node (React-19 shims)
 ```

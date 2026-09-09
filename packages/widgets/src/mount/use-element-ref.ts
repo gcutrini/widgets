@@ -10,12 +10,12 @@ function assignRef<T>(ref: Ref<T> | undefined, value: T | null): void {
 }
 
 /**
- * A mount's handle on its host element, shared with the caller: `setRef` goes
- * on the rendered element and fans the node out to the mount's own `ref` and
- * to the forwarded one, so `<SomeWidget ref={…}>` behaves like any React
+ * A mount's handle on the widget's element, shared with the caller: `setRef`
+ * goes on the rendered element and fans the node out to the mount's own `ref`
+ * and to the forwarded one, so `<SomeWidget ref={…}>` behaves like any React
  * component's ref without the mount depending on whether a caller passed one.
  */
-export function useHostRef<T extends HTMLElement = HTMLElement>(
+export function useElementRef<T extends HTMLElement = HTMLElement>(
   forwarded: Ref<HTMLElement> | undefined,
 ): {
   ref: { current: T | null };

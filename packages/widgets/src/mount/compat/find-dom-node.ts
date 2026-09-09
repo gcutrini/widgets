@@ -4,11 +4,10 @@
  * React 19 removed `findDOMNode`. Next.js 16's App Router renders all
  * client components with its own bundled React 19 (`next/dist/compiled/
  * react-dom`) and rewrites every bare `react-dom` import in client code —
- * including inside `node_modules` widget dists — to that copy. So even
- * though this workspace pins `react-dom@18.3.1` (which *does* export
- * `findDOMNode`), the widgets never see it: their `require("react-dom")`
- * resolves to Next's `findDOMNode`-less build. A package-level `react-dom`
- * dependency can't override this — the alias is applied at bundle time.
+ * including inside `node_modules` widget dists — to that copy, so a
+ * widget's `require("react-dom")` resolves to Next's `findDOMNode`-less
+ * build. No package pin can change that — the alias is applied at bundle
+ * time.
  *
  * Several legacy widgets call `findDOMNode` unconditionally:
  *   - `lite-schedule-widget` — `CSSTransitionGroupChild` (the animated

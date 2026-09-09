@@ -17,7 +17,7 @@ import { createRequire } from 'node:module';
  * `resolveAlias` is a global specifier map with no per-module scoping — so the
  * scoped react-select `react-dom` shim below can't be expressed there (a
  * global alias would recurse through the shim's own react-dom import). The
- * runtime patch in @openeventkit/widget-mount/compat/find-dom-node is
+ * runtime patch in @openeventkit/widgets/mount/compat/find-dom-node is
  * bundler-agnostic and still covers widgets that read `ReactDOM.findDOMNode`
  * off the namespace.
  */
