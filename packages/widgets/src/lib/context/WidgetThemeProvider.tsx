@@ -24,6 +24,6 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
  */
 const widgetTheme = createTheme({ typography: { fontFamily: 'var(--font_family)' } });
 
-export function MuiThemeBridge({ children }: { children: ReactNode }) {
+export function WidgetThemeProvider({ children }: { children: ReactNode }) {
   return <ThemeProvider theme={widgetTheme}>{children}</ThemeProvider>;
 }

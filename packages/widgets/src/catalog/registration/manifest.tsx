@@ -3,7 +3,7 @@ import type { WidgetManifest } from '../../core/manifest';
 import { tooltipBridge } from '../../lib/bridges/tooltip';
 import { emotionMirrorBridge } from '../../lib/bridges/emotion-mirror';
 import { EmotionShadowProvider } from '../../lib/context/EmotionShadowProvider';
-import { MuiThemeBridge } from '../../lib/context/MuiThemeBridge';
+import { WidgetThemeProvider } from '../../lib/context/WidgetThemeProvider';
 import { registrationSheets, registrationStyles } from './vendor-styles';
 
 export const registrationManifest: WidgetManifest = {
@@ -16,14 +16,14 @@ export const registrationManifest: WidgetManifest = {
   // injects into document.head (react-select company field, etc.).
   bridges: [tooltipBridge, emotionMirrorBridge],
   // The widget's MUI subtree styles via emotion@11 — point its cache at the shadow
-  // (EmotionShadowProvider) and give it the event font (MuiThemeBridge, inside so
+  // (EmotionShadowProvider) and give it the event font (WidgetThemeProvider, inside so
   // the emotion cache sits above MUI).
   wrapTree: (children) => (
     <EmotionShadowProvider cacheKey="w-registration">
-      <MuiThemeBridge>{children}</MuiThemeBridge>
+      <WidgetThemeProvider>{children}</WidgetThemeProvider>
     </EmotionShadowProvider>
   ),
-  // v5-era MUI (dist + the MuiThemeBridge/emotion wrapTree).
+  // v5-era MUI (dist + the WidgetThemeProvider/emotion wrapTree).
   runtimeNeeds: ['pin:mui5'],
   elementTag: 'section',
   elementAttrs: { 'aria-label': 'Registration form' },

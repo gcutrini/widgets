@@ -71,8 +71,8 @@ surface is a named entry in the exports map.
     libraries (emotion mirror, click-outside retarget, tooltip, scoped portal
     CSS); manifests declare them, `createWidgetShadow` runs them.
   - `context/` — `shadow-root-context` (`ShadowRootContext` + `useShadowRoot`),
-    `EmotionShadowProvider`, `MuiThemeBridge` (a `wrapTree` React provider —
-    not a `WidgetBridge`, despite the name).
+    `EmotionShadowProvider`, `WidgetThemeProvider` (the `wrapTree` provider
+    handing a widget's own MUI the event-font theme).
   - `styles/` — shared hand-authored CSS adopted into the shadow root.
   - `vendor-css/` — generated vendor CSS modules (see “Vendor CSS and asset
     binaries” below).

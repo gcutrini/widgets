@@ -434,7 +434,7 @@ resurfacing as "unexplained."
 - **Repo**: `fntechgit/my-orders-tickets-widget`, `src/components/CustomTheme.js`.
 - **Resolves**: its own MUI `ThemeProvider` sets palette/sizes but no
   `typography.fontFamily`, so MUI text falls back to Roboto — and, being the inner
-  provider, it overrides the host `MuiThemeBridge`. Under isolation the widget's
+  provider, it overrides the `WidgetThemeProvider` wrap. Under isolation the widget's
   MUI text doesn't match the event font.
 - **Change**: add `typography: { fontFamily: 'var(--font_family)' }` to the
   createTheme (it already reads `--color_background_dark`, so a CSS var fits).

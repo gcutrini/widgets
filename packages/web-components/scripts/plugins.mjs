@@ -101,7 +101,7 @@ export const mui5PinPlugin = {
 
 // my-tickets ships its own MUI theme (CustomTheme) that sets no fontFamily, so
 // its MUI text falls back to Roboto — and, being the inner ThemeProvider, it
-// overrides the host-side MuiThemeBridge. Patch its inlined createTheme at
+// overrides the wrapTree WidgetThemeProvider. Patch its inlined createTheme at
 // load. A dist where the marker no longer matches fails the build — a silent
 // skip would ship the widget rendering Roboto.
 export const myTicketsFontPlugin = {

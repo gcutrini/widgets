@@ -69,7 +69,7 @@ used, not whole libraries.
   attach inside the shadow.
 - **`@mui/system` / `@mui/material/styles`** live solely in the chunk, so theme +
   `styled` are coherent.
-- Widgets still create their **own** theme objects (via `MuiThemeBridge`); sharing
+- Widgets still create their **own** theme objects (via `WidgetThemeProvider`); sharing
   the MUI *code* does not force a shared *theme*.
 
 ## Analyzer guard
