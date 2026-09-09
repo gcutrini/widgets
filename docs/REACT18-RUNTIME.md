@@ -14,9 +14,8 @@ for these widgets is the rebuild wave (UPSTREAM entry 8), not a runtime swap.
 - The `react-star-ratings>react` override is `18.3.1` in `pnpm-workspace.yaml`
   and in host-side override blocks (overrides shadow, they don't merge).
 - The runtime's react entry is plain — no back-fills. React 18 natively
-  carries `useSyncExternalStore` and `useId`, the two APIs the runtime used
-  to back-fill for react-toastify and react-content-loader (the latter was a
-  production crash class — UPSTREAM entry 18, resolved). The
+  carries `useSyncExternalStore` and `useId`, the two APIs react-toastify
+  and react-content-loader need (UPSTREAM entry 18). The
   `use-sync-external-store` dependency stays: uicore's served chunks import
   its shim entries.
 - The MUI pin token is `pin:mui5` (`mui5PinPlugin`) — it pins bundles to this

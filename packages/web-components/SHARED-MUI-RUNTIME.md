@@ -41,10 +41,11 @@ cache + react). Bare package roots are barrels and stay local; other
 `@emotion` helpers are stateless and bundle locally. Nothing is hand-listed,
 so the surface cannot drift from what the code imports.
 
-There are **no bare `@mui` barrels** in the surface — the two that existed
-(my-tickets' `@mui/material`, full-schedule's `@mui/base`) were subpath-fixed
-upstream (UPSTREAM entries), so the chunk carries only the components actually
-used, not whole libraries.
+The served surface carries **no bare `@mui` barrels**: my-tickets'
+`@mui/material` barrel was subpath-fixed upstream (released in 1.0.18);
+full-schedule's `@mui/base` fix is merged but unreleased, so its dist still
+bundles that one barrel locally (baselined in `acceptedMuiMissing`) — it never
+enters the served surface.
 
 ## Build mechanics
 

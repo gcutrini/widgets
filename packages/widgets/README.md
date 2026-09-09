@@ -38,7 +38,7 @@ settings via HostConfig, the auth-error event), never a direct host import.
 The package is **subpath-only** — no root export, no `main`/`types`; every
 surface is a named entry in the exports map.
 
-- `src/<widget>/` — `manifest.ts(x)` + `vendor-styles.ts` per widget, plus any
+- `src/catalog/<widget>/` — `manifest.ts(x)` + `vendor-styles.ts` per widget, plus any
   widget-specific bits (e.g. `schedule-lite/transition-group.ts`,
   `schedule-full/{deep-link,hide-widget-toolbar}.ts`). `.tsx` when the manifest
   needs JSX, e.g. a `wrapTree` that renders an `EmotionShadowProvider`
@@ -49,7 +49,7 @@ surface is a named entry in the exports map.
   nothing beyond core siblings and react types. It holds `createWidgetShadow`,
   the `WidgetManifest` type (incl. `WidgetBridge`), `webComponentTag`, the
   host ports (`host-auth`, `host-config`), and the DOM event contracts
-  (`widget-auth-error`, `widget-notify`, `widget-error`).
+  (`widget-auth-error`, `widget-notify`, `widget-error`, `widget-painted`).
 - `src/mount/` (`./mount`, `./mount/renderers/react-component`,
   `./mount/renderers/web-component`, `./mount/compat/*`, `./host`)
   — the React-19 host mounting layer: `<Widget>`, the `WidgetRenderers`
@@ -118,7 +118,7 @@ HOST (separate repo)           pages, DAL, and one configureWidgetHost() call
 HOST src/widgets/catalog/<w>/          index / Client / compose / types  (host integration glue)
    ▼ imports (host → widgets)
 @openeventkit/widgets          ← THIS PACKAGE
-   src/<widget>/    manifest + vendor-styles (uicore-bound, per widget)
+   src/catalog/<widget>/    manifest + vendor-styles (uicore-bound, per widget)
    src/lib/         uicore-host, compat/*, bridges/, context/, vendor-css/
    src/mount/  ──▶  src/core/
      <Widget>, WidgetRenderers +  framework-free kernel: createWidgetShadow,
@@ -168,8 +168,8 @@ fire, so the host renders none (see `CONSTRAINTS.md` RC-R).
 
 ## Writing a new widget
 
-- **Here (uicore-bound):** add `src/<widget>/manifest.ts` (dist `load`,
-  `vendorSheets`, `bridges`, `elementTag`) + `src/<widget>/vendor-styles.ts`;
+- **Here (uicore-bound):** add `src/catalog/<widget>/manifest.ts` (dist `load`,
+  `vendorSheets`, `bridges`, `elementTag`) + `src/catalog/<widget>/vendor-styles.ts`;
   export `./<widget>/manifest` from `package.json`.
 - **In the host (its `src/widgets/catalog/<widget>/`):** `index.tsx` (fetch + derive + render
   `<Client>`), `compose.ts` (`use<Widget>Composition` → `{ props }`),

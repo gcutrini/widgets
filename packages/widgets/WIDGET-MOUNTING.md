@@ -51,7 +51,7 @@ code you don't ship.
 
 ## The homes
 
-Dependencies flow one way. uicore is contained in the `src/lib/` + `src/<widget>/`
+Dependencies flow one way. uicore is contained in the `src/lib/` + `src/catalog/<widget>/`
 modules; the esbuild bundle pulls only framework-free code. Everything lives in
 `@openeventkit/widgets`, split into three layers:
 
@@ -61,7 +61,7 @@ src/core/  (./core)      framework-free kernel — imported by BOTH the host and
 src/mount/ (./mount)     React mount contract — <Widget>, WidgetRenderers, the renderer slots,
    ▲                     the generic renderer factories, configureWidgetHost (./host),
    │                     and the React-19 compat / prop-mutation-safety utilities. Host-side only.
-src/<widget>/ + src/lib/ the uicore-bound part of each widget: manifest + vendor-styles.
+src/catalog/<widget>/ + src/lib/ the uicore-bound part of each widget: manifest + vendor-styles.
    ▲                     (integration glue — compose/Client/index — lives in the host, src/widgets/catalog/<w>.)
 HOST (separate repo)     builds its two renderers from the ./mount/renderers/react-component and
                          ./mount/renderers/web-component factories and hands them to
@@ -81,10 +81,11 @@ src/core/  (./core barrel + ./core/* wildcards)
   widget-shadow.ts   createWidgetShadow() → WidgetShadow             (the one shadow primitive)
   vendor-sheet.ts    VendorSheet
   host-auth.ts       HostAuth port — session presence + logout the host registers
-  host-config.ts     HostConfig port — apiBaseUrl / idpBaseUrl / oauth2ClientId / timeApiUrl the host registers
+  host-config.ts     HostConfig port — apiBaseUrl / idpBaseUrl / oauth2ClientId / timeApiUrl / assetBaseUrl the host registers
   widget-auth-error.ts   the 401/403 DOM event the injected uicore auth handler raises and the host dialog handles
   widget-notify.ts   the notification DOM event the sweetalert2 shim raises and the host dialog handles
   widget-error.ts    the render-error DOM event the bundle's boundary raises and the host-side renderer rethrows
+  widget-painted.ts  the first-commit DOM event the element announces (host skeletons reveal on it)
 
 src/lib/bridges/   (implementations of the WidgetBridge contract)
   emotion-mirror.ts · click-outside-retarget.ts · tooltip.ts · scoped-portal-css.ts
@@ -192,7 +193,7 @@ export interface WidgetRenderers {
 //   <Registration composition={…} />   <ExtraQuestions composition={…} />
 ```
 
-### 3 · The uicore-bound part — `src/<widget>/` + `src/lib/`
+### 3 · The uicore-bound part — `src/catalog/<widget>/` + `src/lib/`
 
 Per widget, just the `manifest` (loads the dist, declares sheets/bridges/tag) and
 `vendor-styles` (its CSS). Everything else about a widget — data fetch, live-state

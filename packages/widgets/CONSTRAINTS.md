@@ -66,7 +66,7 @@ Most are legacy React 16 / Redux 4.x class-heavy code, pre-bundled by webpack ye
 ## The widgets in play
 
 Every widget spans two places: its uicore-bound `manifest` + `vendor-styles`
-live here at `src/<name>/`, and its integration glue lives in
+live here at `src/catalog/<name>/`, and its integration glue lives in
 the host at `src/widgets/catalog/<name>/` — `index.tsx` (Server Component) fetches data,
 `Client.tsx` binds live state via `compose.ts` and renders the widget's runtime
 entry, which mounts the dist inside a shadow root via `createWidgetShadow`.
@@ -266,7 +266,7 @@ Every Gatsby Redux action the widget expects becomes a hand-ported async functio
 
 ### RC-L — Marketing key registry shaped by widget consumption
 
-`src/lib/marketing/keys.ts` catalogs ~35 marketing settings. Roughly 65% exist purely because a widget prop reads them.
+The host's `src/lib/api/shared/marketing.ts` registry catalogs ~35 marketing settings. Roughly 65% exist purely because a widget prop reads them.
 
 **Downstream:**
 
@@ -391,7 +391,7 @@ Several of the host's widget modules set default values for widget props (in the
 
 ### RC-U — Shadow-DOM widget hosting
 
-Widget modules under this package's `src/<name>/` mount their widget inside an open shadow root via `createWidgetShadow`. The containment gain — widget CSS scoped, per-widget root for Sentry + Redux, ambient host-app styles kept out — comes at the cost of a specific set of shadow-DOM/legacy-widget mismatches that we work around in `createWidgetShadow` (`src/core/widget-shadow.ts`) and `src/lib/bridges/`.
+Widget modules under this package's `src/catalog/<name>/` mount their widget inside an open shadow root via `createWidgetShadow`. The containment gain — widget CSS scoped, per-widget root for Sentry + Redux, ambient host-app styles kept out — comes at the cost of a specific set of shadow-DOM/legacy-widget mismatches that we work around in `createWidgetShadow` (`src/core/widget-shadow.ts`) and `src/lib/bridges/`.
 
 **Downstream:**
 

@@ -132,7 +132,7 @@ resurfacing as "unexplained."
   covered only `UPDATE_LOGGED_USER`). Awaiting merge → publish → pin 3.1.4.
 
 - **Host shim removal condition (spans entries 1–3)**: the reference
-  host's `src/widgets/composition/widget-safe-profile.ts` defaults
+  host's `src/widgets/shared/useWidgetSafeProfile.ts` defaults
   `schedule_summit_events` / `rsvp` to `[]` before the profile crosses into
   full / lite / upcoming — the same `missing field → []` guard these three
   PRs add in the reducer. Its **array-defaulting is removable only once all
@@ -189,7 +189,7 @@ resurfacing as "unexplained."
   null-user spread.
 - **Host workaround today**: that unguarded read crashes the widget on a
   `null → profile` transition (a user logging in while it's already
-  mounted). The reference host's `src/widgets/upcoming-events/Client.tsx`
+  mounted). The reference host's `src/widgets/catalog/upcoming-events/Client.tsx`
   passes a `getKey` to
   `createWidgetClient` deriving `userProfile.id ?? 'anon'`, so that
   transition becomes a clean remount instead of an in-place compare. The
@@ -323,7 +323,7 @@ resurfacing as "unexplained."
 
 ### 8. Umbrella: React-19 modernization wave (not a version bump)
 > **Alternative strategy:** isolating each widget as a web component
-> "web component" deletes the same shims *without* modernizing — evaluated with a
+> deletes the same shims *without* modernizing — evaluated with a
 > working POC in [ISOLATION-STRATEGY.md](../web-components/ISOLATION-STRATEGY.md). Web components and modernization are not
 > exclusive; this entry is the long-term debt-paydown path.
 - The coordinated future move: each widget rebuilds its dist on modern
@@ -438,8 +438,9 @@ resurfacing as "unexplained."
   MUI text doesn't match the event font.
 - **Change**: add `typography: { fontFamily: 'var(--font_family)' }` to the
   createTheme (it already reads `--color_background_dark`, so a CSS var fits).
-- **Contained (implemented)**: `myTicketsFontPlugin` in `build.mjs` patches the
-  dist's inlined createTheme at load to inject that fontFamily. Delete the patch
+- **Contained (implemented)**: `myTicketsFontPlugin` (web-components
+  `scripts/plugins.mjs`, selected via the `quirk:myTicketsFont` token) patches
+  the dist's inlined createTheme at load to inject that fontFamily. Delete the patch
   once upstream ships. Sibling of entry 9 (both cosmetic my-orders theme fixes).
 - **Status**: contained in the web-component build; the upstream one-liner is the resolution.
 
@@ -454,17 +455,17 @@ the shared runtime:
   awaiting release + pin).
 - **my-orders-tickets** `@mui/material` barrel → per-component subpaths across 52
   files — [PR #110](https://github.com/fntechgit/my-orders-tickets-widget/pull/110)
-  (merged; awaiting release + pin).
+  (released in 1.0.18, pinned).
 - **uicore** (v4.x) `company-input-v2` `@mui/material` subpaths **+**
   `query-actions` whole-`lodash` → `lodash/debounce` —
   [PR #323](https://github.com/OpenStackweb/openstack-uicore-foundation/pull/323)
   (merged). The lodash half alone removes ~30 KB gzip from the shared runtime (whole
   lodash was bundled for a single `debounce`).
-- **Until #59 and #110 are released**: full-schedule and my-tickets import the
-  `@mui/base` / `@mui/material` barrels and bundle their own MUI copy. The
-  `acceptedMuiMissing` list in `analyze-widgets.baseline.json` (`@mui/base`,
-  `@mui/material`) accepts those two barrels so `analyze-widgets.mjs --check`
-  passes; drop the entries when the released dists land.
+- **Until #59 is released**: full-schedule imports the `@mui/base` barrel and
+  bundles its own copy of it. The `acceptedMuiMissing` list in
+  `analyze-widgets.baseline.json` (`@mui/base`) accepts that barrel so
+  `analyze-widgets.mjs --check` passes; drop the entry when the released dist
+  lands.
 - **Guard**: `analyze-widgets.mjs --check` now flags any bare-root import of a
   subpath-capable lib; the pre-existing ones it surfaced (`react-bootstrap` in
   speakers/live-event/schedule-lite/schedule-full, `lodash` in schedule-filters)
@@ -569,7 +570,7 @@ Ranked by readiness, blast radius, and the release-batching noted above:
 11. **Entry 14** (S) — the barrel→subpath PRs
     ([#59](https://github.com/fntechgit/full-schedule-widget/pull/59) and
     [#110](https://github.com/fntechgit/my-orders-tickets-widget/pull/110),
-    both merged, awaiting release + pin;
+    #59 merged awaiting release + pin, #110 released in 1.0.18 and pinned;
     [#323](https://github.com/OpenStackweb/openstack-uicore-foundation/pull/323)
     merged); high value/low risk — merge → publish → pin → drop
     `acceptedMuiMissing`.
