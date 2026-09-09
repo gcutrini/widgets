@@ -52,8 +52,8 @@ surface is a named entry in the exports map.
   (`widget-auth-error`, `widget-notify`, `widget-error`).
 - `src/mount/` (`./mount`, `./mount/renderers/react-component`,
   `./mount/renderers/web-component`, `./mount/compat/*`, `./host`)
-  — the React-19 host mounting layer: `<Widget>`, the `WidgetRenderer`
-  interface + registry, the `WidgetComposition` contract, the two generic
+  — the React-19 host mounting layer: `<Widget>`, the `WidgetRenderers`
+  registry, the `WidgetComposition` contract, the two generic
   renderer factories, `mutation-safe-props`, the React-19 compat shims, and
   `configureWidgetHost` (exported as `./host` — see "The host's setup call").
 - `src/lib/` — everything not tied to one widget (by coupling, not consumer count: a generic module stays here even while only one widget uses it):
@@ -120,7 +120,7 @@ HOST src/widgets/catalog/<w>/          index / Client / compose / types  (host i
    src/<widget>/    manifest + vendor-styles (uicore-bound, per widget)
    src/lib/         uicore-host, compat/*, bridges/, context/, vendor-css/
    src/mount/  ──▶  src/core/
-     <Widget>, WidgetRenderer +   framework-free kernel: createWidgetShadow,
+     <Widget>, WidgetRenderers +  framework-free kernel: createWidgetShadow,
      registry, React-19 shims,    the WidgetManifest type (incl. WidgetBridge),
      mutation-safe-props,         the ports (host-auth, host-config), and the
      configureWidgetHost          widget-auth-error / -notify / -error events

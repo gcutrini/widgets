@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import type { ManifestMountProps, WebComponentMountProps } from './widget-renderer';
+import type { ManifestMountProps, WebComponentMountProps } from './mount-props';
 
 /**
  * The two ways a widget can mount — the host supplies both at setup

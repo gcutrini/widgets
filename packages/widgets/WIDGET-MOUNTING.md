@@ -155,10 +155,10 @@ element machinery).
 src/mount/  (./mount barrel; renderers + compat via their own subpaths)
   create-widget-component.tsx   builds the per-widget components the catalog entries export
   Widget.tsx            internal dispatcher; picks the renderer from the identity prop
-  widget-renderer.ts    the two Mount prop types
+  mount-props.ts        the two Mount prop types
   composition.ts        WidgetComposition, WidgetComposer (the mount layer's input contract)
   registry.ts           WidgetRenderers — the two named renderer slots the host fills
-  configureWidgetHost.ts   configureWidgetHost (exported as ./host, NOT on the barrel — it pulls uicore)
+  configure-widget-host.ts   configureWidgetHost (exported as ./host, NOT on the barrel — it pulls uicore)
   renderers/            react-component · web-component (generic mount factories; hosts inject
                         lazy-loading, error boundary, bundle base path)
   use-host-ref.ts       fans a forwarded ref out alongside the renderer's internal one

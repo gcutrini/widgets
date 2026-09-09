@@ -11,7 +11,7 @@
  * bridge.
  */
 
-export const WIDGET_AUTH_ERROR_EVENT = 'openeventkit:widget-auth-error';
+export const WIDGET_AUTH_ERROR_EVENT = 'widget-auth-error';
 
 export type WidgetAuthErrorStatus = 401 | 403;
 

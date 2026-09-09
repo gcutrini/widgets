@@ -7,5 +7,5 @@ export type { WidgetRenderers } from './registry';
 export type {
   ManifestMountProps,
   WebComponentMountProps,
-} from './widget-renderer';
+} from './mount-props';
 export type { WidgetComposition, WidgetComposer } from './composition';

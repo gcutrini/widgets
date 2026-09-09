@@ -12,7 +12,7 @@
  * generic errors, validation, success — comes here).
  */
 
-export const WIDGET_NOTIFY_EVENT = 'openeventkit:widget-notify';
+export const WIDGET_NOTIFY_EVENT = 'widget-notify';
 
 export type WidgetNotifyIcon = 'success' | 'error' | 'warning' | 'info' | 'question';
 

@@ -24,7 +24,7 @@ import {
 } from '../../core';
 import { useMutationSafeProps } from '../mutation-safe-props';
 import { useHostRef } from '../use-host-ref';
-import type { ManifestMountProps } from '../widget-renderer';
+import type { ManifestMountProps } from '../mount-props';
 import { ShadowRootContext } from '../../lib/context/shadow-root-context';
 
 // Attach the shadow before paint so the raw host element never flashes; fall

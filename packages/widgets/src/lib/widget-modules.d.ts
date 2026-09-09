@@ -1,4 +1,16 @@
-// Ambient declarations for widget packages that ship without TypeScript types.
+// Ambient declarations for modules that ship without TypeScript types.
+// Module paths must match the import specifiers exactly (some dists resolve
+// via /dist, others /dist/index or /dist/index.js). Each block repeats its
+// react import on purpose: a top-level import would turn this file into a
+// module and the declarations into augmentations.
+
+// ─── Widget dists — untyped pre-built bundles, one default-exported component ───
+
+declare module 'event-feedback-widget/dist' {
+  import type { ComponentType } from 'react';
+  const Widget: ComponentType<Record<string, unknown>>;
+  export default Widget;
+}
 
 declare module 'full-schedule-widget/dist' {
   import type { ComponentType } from 'react';
@@ -12,18 +24,10 @@ declare module 'lite-schedule-widget/dist' {
   export default Widget;
 }
 
-declare module 'schedule-filter-widget/dist' {
+declare module 'live-event-widget/dist/index.js' {
   import type { ComponentType } from 'react';
   const Widget: ComponentType<Record<string, unknown>>;
   export default Widget;
-}
-
-declare module 'summit-registration-lite/dist/components/registration-form' {
-  import type { ComponentType } from 'react';
-  type WidgetProps = Record<string, unknown> & { [key: string]: unknown };
-  export const RegistrationForm: ComponentType<WidgetProps>;
-  const _default: ComponentType<WidgetProps>;
-  export default _default;
 }
 
 declare module 'my-orders-tickets-widget/dist/index' {
@@ -34,13 +38,7 @@ declare module 'my-orders-tickets-widget/dist/index' {
 
 declare module 'my-orders-tickets-widget/dist/i18n';
 
-declare module 'upcoming-events-widget/dist' {
-  import type { ComponentType } from 'react';
-  const Widget: ComponentType<Record<string, unknown>>;
-  export default Widget;
-}
-
-declare module 'live-event-widget/dist/index.js' {
+declare module 'schedule-filter-widget/dist' {
   import type { ComponentType } from 'react';
   const Widget: ComponentType<Record<string, unknown>>;
   export default Widget;
@@ -52,7 +50,20 @@ declare module 'speakers-widget/dist' {
   export default Widget;
 }
 
+declare module 'summit-registration-lite/dist/components/registration-form' {
+  import type { ComponentType } from 'react';
+  export const RegistrationForm: ComponentType<Record<string, unknown>>;
+  const _default: ComponentType<Record<string, unknown>>;
+  export default _default;
+}
 
+declare module 'upcoming-events-widget/dist' {
+  import type { ComponentType } from 'react';
+  const Widget: ComponentType<Record<string, unknown>>;
+  export default Widget;
+}
+
+// ─── uicore modules — only the surfaces we call are typed ───
 
 declare module 'openstack-uicore-foundation/lib/components/extra-questions' {
   import type { ComponentType, RefObject } from 'react';
@@ -80,12 +91,6 @@ declare module 'openstack-uicore-foundation/lib/components/extra-questions' {
   }
   const ExtraQuestionsForm: ComponentType<ExtraQuestionsFormProps>;
   export default ExtraQuestionsForm;
-}
-
-declare module 'event-feedback-widget/dist' {
-  import type { ComponentType } from 'react';
-  const Widget: ComponentType<Record<string, unknown>>;
-  export default Widget;
 }
 
 declare module 'openstack-uicore-foundation/lib/utils/config' {

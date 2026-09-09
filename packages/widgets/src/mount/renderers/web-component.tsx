@@ -14,7 +14,7 @@ import { getHostConfig, type HostConfig } from '../../core/host-config';
 import { useMutationSafeProps } from '../mutation-safe-props';
 import { useHostRef } from '../use-host-ref';
 import { WIDGET_ERROR_EVENT } from '../../core/widget-error';
-import type { WebComponentMountProps } from '../widget-renderer';
+import type { WebComponentMountProps } from '../mount-props';
 
 /** The element's host-facing surface (defined by the widget's bundle). */
 type WidgetElement = HTMLElement & {

@@ -41,7 +41,7 @@ export function Widget(props: WidgetProps) {
 // Loud in development (the overlay surfaces it), a warned blank in
 // production — a widget region is not worth crashing a live page over.
 function missingRenderer(slot: keyof WidgetRenderers): null {
-  const message = `[widget-mount] no "${slot}" renderer — did the host call its widget-host registration (configureWidgetHost) before rendering widgets?`;
+  const message = `[widgets] no "${slot}" renderer — did the host call its widget-host registration (configureWidgetHost) before rendering widgets?`;
   if (process.env.NODE_ENV !== 'production') throw new Error(message);
   console.warn(message);
   return null;
