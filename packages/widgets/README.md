@@ -185,6 +185,6 @@ what it does, and which upstream fix would let us delete it.
 
 ## Related docs
 
-- [`WIDGET-MOUNTING.md`](./WIDGET-MOUNTING.md) — the mounting contract
+- [`WIDGET-MOUNTING.md`](./WIDGET-MOUNTING.md) — the mounting contract, incl. the prop-stability contract
 - [`CONSTRAINTS.md`](./CONSTRAINTS.md) — widget-integration trade-offs
 - [`ISOLATION-STRATEGY.md`](../web-components/ISOLATION-STRATEGY.md) — the web-component path and its trade-offs

@@ -4,7 +4,7 @@
 >
 > **What this is not.** A refactor plan for our own decisions. Those live in the task list. If a workaround here looks fixable, it isn't — check the "why the widgets force it" column and the "what upstream fix would remove it" column.
 >
-> **One hosting model, two renderers.** Every widget mounts through the Widget contract (`manifest` + `compose` + `Client` → `<Widget>`) into a shadow root — see `RC-U`. `<Widget>` picks a renderer: `reactComponent` (the host's React 19, into a `createWidgetShadow`) or `webComponent` (the widget's own React 18 as a self-contained custom element). Both are shadow-DOM, so the trade-offs below apply to both.
+> **One hosting model, two renderers.** Every widget mounts into a shadow root through its runtime entry — see `RC-U`. The import path picks the renderer: `@openeventkit/widgets/<widget>/react` (the host's React 19, into a `createWidgetShadow`) or `@openeventkit/widgets/<widget>/web-component` (the widget's own React 18 as a self-contained custom element). Both are shadow-DOM, so the trade-offs below apply to both.
 >
 > **Host paths.** Constraints marked HOST are configuration the host owns, not this repo. Bare `src/…` paths in host-side items (`src/widgets/catalog/<w>/`, `src/widgets/host/…`, `src/lib/…`) are the reference host's, not this repo's.
 
@@ -34,7 +34,7 @@
   - [RC-S — Ambient module declarations for untyped dists](#rc-s--ambient-module-declarations-for-untyped-dists)
   - [RC-T — Composer defaults masking widget defaults](#rc-t--composer-defaults-masking-widget-defaults)
   - [RC-U — Shadow-DOM widget hosting](#rc-u--shadow-dom-widget-hosting)
-  - [RC-V — Legacy widgets run on React 19, not the pinned React 18](#rc-v--legacy-widgets-run-on-react-19-not-the-pinned-react-18)
+  - [RC-V — Legacy widgets run on Next's vendored React 19](#rc-v--legacy-widgets-run-on-nexts-vendored-react-19)
   - [RC-W — Legacy widgets mutate the props we hand them](#rc-w--legacy-widgets-mutate-the-props-we-hand-them)
   - [RC-X — my-orders-tickets-widget owns its token reads through uicore](#rc-x--my-orders-tickets-widget-owns-its-token-reads-through-uicore)
   - [RC-Y — web component hosting bundles its own React (≥17)](#rc-y--web-component-hosting-bundles-its-own-react-17)
@@ -57,7 +57,7 @@ The widgets covered by this document:
 | `live-event-widget` | 4.0.4 | Currently-live event hero |
 | `speakers-widget` | 4.0.2 | Speaker grid |
 | `event-feedback-widget` | 2.0.1 | Post-session feedback form |
-| `my-orders-tickets-widget` | 1.0.16 | Order + ticket management, receipt PDF |
+| `my-orders-tickets-widget` | 1.0.18 | Order + ticket management, receipt PDF |
 | `summit-registration-lite` | 7.0.10 | Ticket-purchase flow with Stripe |
 | `openstack-uicore-foundation` | 4.2.34 | Shared inputs (dropdown, checkbox, text, etc.), Clock context, IDP helpers |
 
@@ -68,8 +68,8 @@ Most are legacy React 16 / Redux 4.x class-heavy code, pre-bundled by webpack ye
 Every widget spans two places: its uicore-bound `manifest` + `vendor-styles`
 live here at `src/<name>/`, and its integration glue lives in
 the host at `src/widgets/catalog/<name>/` — `index.tsx` (Server Component) fetches data,
-`Client.tsx` binds live state via `compose.ts`, and `<Widget>` mounts the dist
-inside a shadow root via `createWidgetShadow`.
+`Client.tsx` binds live state via `compose.ts` and renders the widget's runtime
+entry, which mounts the dist inside a shadow root via `createWidgetShadow`.
 This adds CSS containment, a stable per-widget root for Sentry, and bridges for
 shadow-DOM-hostile library behaviors. See `RC-U`.
 
@@ -85,14 +85,14 @@ The widgets and `openstack-uicore-foundation` were written when React 16 was cur
 
 **Downstream:**
 
-- **A.1 — React pinned to `^18.3.1` project-wide.** `openstack-uicore-foundation` uses `react-select@2.4.4` in its `dropdown`, `radio-list`, `checkbox-list` inputs. `react-select@2.4.4` calls `ReactDOM.findDOMNode`. React 19 removed `findDOMNode`. Every widget that reaches for a uicore input (schedule widgets, extra-questions form, registration form, my-orders-tickets) crashes at runtime on React 19. We downgraded project-wide. This forecloses React 19 features (`use()` hook, `useActionState`, `useOptimistic`, ref-as-prop, `<Context>` as its own provider).
+- **A.1 — `findDOMNode` in every uicore input → two mitigations.** `openstack-uicore-foundation` uses `react-select@2.4.4` in its `dropdown`, `radio-list`, `checkbox-list` inputs. `react-select@2.4.4` calls `ReactDOM.findDOMNode`. React 19 removed `findDOMNode`, so every widget that reaches for a uicore input (schedule widgets, extra-questions form, registration form, my-orders-tickets) would crash on the host's React 19. On the `/react` path the `find-dom-node` runtime shim re-attaches an implementation before any widget loads (V.1); on the `/web-component` path the widget runs on the bundled React 18.3.1, which still ships `findDOMNode` (RC-Y).
 - **A.2 — Widgets own their Redux store; the host renders none.** Legacy widgets call `useSelector`/`useDispatch` unconditionally, so each that reads from a store mounts its own inner `<Provider>` with its own store before its selectors fire; those that don't, never call `useSelector`/`connect`. The host adds no Provider. Widgets still cannot share state or a store across a page — inherent to the widgets, not to us.
 - **A.3 — Legacy peer warnings are accepted, not suppressed.** Install prints the widgets' React-16-era peer complaints (React version mismatches; optional transitive peers like `react-native`, `@react-three/fiber`, `react-onclickoutside` that we never install). pnpm reads `pnpm.peerDependencyRules` only at the installing workspace's root — this repo's root declares none, and so does the reference host's — the warnings are noise by design, and a NEW warning is still signal worth reading.
 - **A.5 — `react-final-form@6` + `final-form@4` pinned.** uicore `ExtraQuestionsForm` is built on final-form v4. We inherit the whole v4/v6 API.
 
 **Why the widgets force it.** All of the above trace to one fact: uicore is on `react-select@2.4.4`. Every dropdown/radio/checkbox input in every widget goes through this component, and it uses `findDOMNode`. There is no per-widget workaround.
 
-**What upstream fix would remove it.** uicore replaces `react-select@2.4.4` with a modern release. Removes A.1 (React version pin), and unblocks widgets running on React 19. A.2 (per-instance Redux) would still remain — separate cause.
+**What upstream fix would remove it.** uicore replaces `react-select@2.4.4` with a modern release. Removes A.1 (the `findDOMNode` mitigations), and unblocks widgets running natively on React 19. A.2 (per-instance Redux) would still remain — separate cause.
 
 ---
 
@@ -423,23 +423,23 @@ Widget modules under this package's `src/<name>/` mount their widget inside an o
 
 ---
 
-### RC-V — Legacy widgets run on React 19, not the pinned React 18
+### RC-V — Legacy widgets run on Next's vendored React 19
 
-The widget dists are React-16-era (`react-bootstrap@0.33.1`, `react-select@2.4.4`, `react-transition-group@1`, legacy lifecycles + legacy context). We pin `react`/`react-dom@18.3.1`, but **that pin does not reach the widgets at runtime**: Next 16's App Router renders every client module — our code *and* the widget dists in `node_modules` — with the React it vendors inside `next` (`next/dist/compiled/react*`, currently `19.3.0-canary`), aliasing bare `react`/`react-dom` imports to it at bundle time. The installed React 18 governs only types + Vitest/jsdom tests. So the widgets run on **React 19** in the browser, and there is no package-level way to change that (only the Next major, or Pages Router, would). Consequences we carry:
+The widget dists are React-16-era (`react-bootstrap@0.33.1`, `react-select@2.4.4`, `react-transition-group@1`, legacy lifecycles + legacy context). On the `/react` path they run on the host's React 19 — and not even the installed one: Next 16's App Router renders every client module — our code *and* the widget dists in `node_modules` — with the React it vendors inside `next` (`next/dist/compiled/react*`, currently `19.3.0-canary`), aliasing bare `react`/`react-dom` imports to it at bundle time. The installed React (`^19.2.8`) governs types + Vitest/jsdom tests. No package pin can change what runs in the browser (only the Next major, or Pages Router, would). Consequences we carry:
 
 **Downstream:**
 
-- **V.1 — `findDOMNode` removed in React 19 → runtime shim.** `react-transition-group@1`'s `CSSTransitionGroupChild` calls `ReactDOM.findDOMNode(this)` on enter/leave; React 19 removed `findDOMNode`, so the `lite-schedule-widget` `EventList` threw `findDOMNode is not a function` and the whole schedule fell to the error boundary. `src/mount/compat/find-dom-node.ts` re-attaches a `findDOMNode` implementation onto the react-dom module object (walks the class instance's `_reactInternals` fiber to its first host node) — imported for side-effect by the reactComponent renderer, so it runs before any `next/dynamic` widget loads. Affects **dev and prod**. Removing the react-dom-as-dependency experiment confirmed the alias wins over `node_modules` nesting — a package pin can't fix it.
+- **V.1 — `findDOMNode` removed in React 19 → runtime shim.** `react-transition-group@1`'s `CSSTransitionGroupChild` calls `ReactDOM.findDOMNode(this)` on enter/leave; React 19 removed `findDOMNode`, so the `lite-schedule-widget` `EventList` threw `findDOMNode is not a function` and the whole schedule fell to the error boundary. `src/mount/compat/find-dom-node.ts` re-attaches a `findDOMNode` implementation onto the react-dom module object (walks the class instance's `_reactInternals` fiber to its first host node) — imported for side-effect by the reactComponent renderer, so it runs before any `next/dynamic` widget loads. Affects **dev and prod**. Next's vendored alias wins over any `node_modules` nesting, so a package pin can't fix it.
 
 - **V.2 — StrictMode double-mount breaks `react-transition-group@1` → `reactStrictMode: false`.** The enter/appear fade adds `.items-enter` (opacity 0.01), then adds `.items-enter-active` (opacity 1) via a `requestAnimationFrame` guarded by `if (this.mounted)`. React StrictMode's dev-only mount→unmount→remount leaves `mounted` false when the rAF fires, so the `-active` class is never added and list items stay stuck at **opacity 0.01 — invisible** (schedule looks empty even when the user has events). This is dev-only (StrictMode is a no-op in prod) but constant in development. Root fix: **`reactStrictMode: false`** in the host's `next.config.ts` — these widgets predate concurrent mode and can never be StrictMode-clean, so StrictMode yields only this breakage plus doubled warnings. Note StrictMode double-mount is a React **18** feature too, so this is not fixed by downgrading React — only by disabling StrictMode.
 
 - **V.3 — Belt-and-suspenders CSS fade (`schedule-lite/transition-group.ts`).** Independent of V.2, the enter/appear fade is re-expressed as a CSS keyframe animation keyed to `.items-enter`/`.items-appear` alone (reaches opacity 1 without the JS `-active` step). Adopted via `manifest.inlineStyles` on the lite schedule. With StrictMode off the native transition works and this is redundant insurance; it also guards prod against any non-StrictMode timing hiccup. Scoped to `transitionName="items"`.
 
-- **V.4 — Residual legacy-context / UNSAFE-lifecycle warnings.** `react-bootstrap` `Nav`/`Navbar` (`childContextTypes`/`contextTypes`) and `react-select` `AutosizeInput` (`UNSAFE_componentWillReceiveProps`) emit React 19 deprecation warnings. `reactStrictMode: false` silences the StrictMode-gated variants ("within a strict-mode tree", UNSAFE-in-strict-mode) and the doubling; the base "removed in React 19" notices from react-bootstrap persist. They are **warnings, not failures** — legacy context still functions (day/track tab navigation verified working) — and only fully disappear when the widgets are replaced (Round 6).
+- **V.4 — Residual legacy-context / UNSAFE-lifecycle warnings.** `react-bootstrap` `Nav`/`Navbar` (`childContextTypes`/`contextTypes`) and `react-select` `AutosizeInput` (`UNSAFE_componentWillReceiveProps`) emit React 19 deprecation warnings. `reactStrictMode: false` silences the StrictMode-gated variants ("within a strict-mode tree", UNSAFE-in-strict-mode) and the doubling; the base "removed in React 19" notices from react-bootstrap persist. They are **warnings, not failures** — legacy context still functions (day/track tab navigation verified working) — and only fully disappear when the widgets are rebuilt against React 19.
 
 **Why the widgets force it.** They target a pre-concurrent, pre-React-19 world; Next 16 gives them React 19 + (by default) StrictMode regardless of our pin.
 
-**What upstream fix would remove it.** Widgets rebuilt against React 19 (drop `findDOMNode`/`react-transition-group@1`, migrate off legacy context and UNSAFE lifecycles) — then V.1–V.4 all collapse and StrictMode can be restored. Realistic only for widgets we own or fork (overlaps RC-A.1). Separately, aligning our installed `react`/`@types` to 19 (tracked outside this doc) would make tests run on the real runtime so these surface in CI instead of the browser — but doesn't change what the widgets need.
+**What upstream fix would remove it.** Widgets rebuilt against React 19 (drop `findDOMNode`/`react-transition-group@1`, migrate off legacy context and UNSAFE lifecycles) — then V.1–V.4 all collapse and StrictMode can be restored. Realistic only for widgets we own or fork (overlaps RC-A.1).
 
 ---
 
@@ -570,7 +570,7 @@ as any widget dist externalizes uicore.
 
 ### RC-Y — web component hosting bundles its own React (≥17)
 
-An alternative to the RC-U/RC-V shadow model: package a legacy widget as a self-contained custom element (`<speakers-widget>`, `<schedule-lite>`) that bundles its OWN React and mounts the widget in a shadow root, isolated from the host's React 19. This deletes the RC-V version shims (`findDOMNode`, StrictMode, legacy-context warnings) by isolation — the widget runs on a React it was built against, not the host's — at the cost of shipping a second React per web component (mitigated by a shared-runtime build variant). The full design, POC, and size accounting are in [ISOLATION-STRATEGY.md](../web-components/ISOLATION-STRATEGY.md); this entry records the one trade-off that constrains which React a web component may bundle.
+An alternative to the RC-U/RC-V shadow model: package a legacy widget as a self-contained custom element (`<speakers-widget>`, `<schedule-lite>`) that bundles its OWN React and mounts the widget in a shadow root, isolated from the host's React 19. This deletes the RC-V version shims (`findDOMNode`, StrictMode, legacy-context warnings) by isolation — the widget runs on a React it was built against, not the host's — at the cost of shipping a second React per web component (mitigated by a shared-runtime build variant). The full isolation model and its trade-offs are in [ISOLATION-STRATEGY.md](../web-components/ISOLATION-STRATEGY.md); this entry records the one trade-off that constrains which React a web component may bundle.
 
 **Downstream:**
 

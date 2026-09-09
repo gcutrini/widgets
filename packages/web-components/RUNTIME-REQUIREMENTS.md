@@ -1,22 +1,16 @@
 # Per-widget runtime requirements (declared, orchestrated, verified)
 
-> Status: **implemented.** Companion to [ISOLATION-STRATEGY.md](./ISOLATION-STRATEGY.md),
+> Companion to [ISOLATION-STRATEGY.md](./ISOLATION-STRATEGY.md),
 > [SHARED-MUI-RUNTIME.md](./SHARED-MUI-RUNTIME.md), [CONSTRAINTS.md](../widgets/CONSTRAINTS.md),
 > [UPSTREAM.md](../widgets/UPSTREAM.md). This describes how the web-component build decides
 > which polyfills, pins, and shims each widget gets.
 
-## Problem it solved
-
 Build-time concerns — the MUI-5 pin, Node builtin stubs, the my-tickets font
-patch — used to be attached to **the build**, not to the
-**widgets that need them**: `build.mjs` applied every plugin to every widget, and
-some self-scoped by hacky entry-name string matching (`entry.includes('my-tickets')`).
-A widget that needed nothing special still paid for all of it, and the scoping
-rotted.
-
-The manifest was already the right home for per-widget declaration — each widget
-declares its `bridges`, `vendorSheets`, `wrapTree`, `elementTag`. Build concerns
-now live there too.
+patch — attach to the **widgets that need them**, not to the build: the
+manifest is the home for per-widget declaration (each widget already declares
+its `bridges`, `vendorSheets`, `wrapTree`, `elementTag` there), so build
+concerns live there too, and a widget that needs nothing special pays for
+nothing.
 
 ## The model: declare → orchestrate → verify
 
@@ -88,21 +82,12 @@ the declaration or `--check` fails.
 - **declared-vs-derived** — the `runtimeNeeds` mismatch above.
 - **unrecognized deps** — a dep no `RULES` entry covers, unless baselined.
 
-## Done vs open
-
-**Done:** the declarative vocabulary + `NEEDS_TO_PLUGINS`/`selectPlugins`
-orchestration; the analyzer verifier + all four guards; per-widget plugin
-selection (byte-identical output vs the old global-plugin build, proving it a
-pure refactor).
-
-**Open:**
-- **reactComponent per-widget shims.** The React-19 compat shims
-  (`find-dom-node`, `react-element-symbol`) are still imported unconditionally by
-  the reactComponent renderer; they could be keyed on the signature like the
-  web-component plugins are.
-
 ## Open questions / risks
 
+- **reactComponent per-widget shims.** The React-19 compat shims
+  (`find-dom-node`, `react-element-symbol`) are imported unconditionally by
+  the reactComponent renderer; they could be keyed on the signature like the
+  web-component plugins are.
 - **Robustness of the source scans** — the analyzer regex-reads the widget
   manifests for its lists; a reformat can break a scraper. The runtime
   surfaces themselves are plain data / derivation (policy.mjs), no

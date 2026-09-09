@@ -1,28 +1,23 @@
 # Shared MUI runtime surface
 
-> Status: **implemented + browser-verified.** Companion to
-> [ISOLATION-STRATEGY.md](./ISOLATION-STRATEGY.md),
+> Companion to [ISOLATION-STRATEGY.md](./ISOLATION-STRATEGY.md),
 > [RUNTIME-REQUIREMENTS.md](./RUNTIME-REQUIREMENTS.md), [UPSTREAM.md](../widgets/UPSTREAM.md),
 > [CONSTRAINTS.md](../widgets/CONSTRAINTS.md). MUI is a shared runtime layer for the
 > web-component widgets, the way React 18 and uicore already are.
 
-## Problem it solved
+## Why MUI is served
 
-The web-component widgets run their own React 18 in a shadow root, and MUI 5 is a
-**peer dependency of uicore** (`openstack-uicore-foundation` declares
-`@mui/material`, `@mui/icons-material`, `@emotion/react`, `@emotion/styled` as
-peers). uicore's built `lib/*` therefore emits bare `require("@mui/material/...")`
-and leaves the consumer — us — to satisfy it. The build used to satisfy it by
-**bundling MUI into every output that touched it**, so `@mui/system` (the ~92 KB
-styling engine) was bundled ~3× (in the shared runtime via `company-input-v2`, and again
-in `registration.shared.js` and `my-tickets.shared.js`), with MUI component code
-duplicated wherever widgets overlapped.
+MUI 5 is a **peer dependency of uicore** (`openstack-uicore-foundation`
+declares `@mui/material`, `@mui/icons-material`, `@emotion/react`,
+`@emotion/styled` as peers), so uicore's built `lib/*` emits bare
+`require("@mui/material/...")` and leaves the consumer — us — to satisfy it.
+Bundling would satisfy it at a multiple: `@mui/system` (the ~92 KB styling
+engine) into every output that touches MUI, with MUI component code duplicated
+wherever widgets overlap. So MUI gets the same treatment as react and the
+uicore submodules: served **once** by the shared runtime, external to every
+`.shared.js`.
 
-React solved this long ago: served **once** by the shared runtime, external to
-every `.shared.js`. uicore submodules do the same. MUI was the one heavy peer that
-never got this treatment.
-
-## The shipped design: import-map-served MUI chunks
+## The design: import-map-served MUI chunks
 
 The served MUI surface is part of the shared runtime: the build generates one
 ES-module chunk per served `@mui/*` / `@emotion/*` specifier into `runtime/`,
@@ -81,23 +76,9 @@ used, not whole libraries.
 
 `analyze-widgets.mjs --check` derives each widget's direct `@mui/*`/`@emotion/*`
 imports and fails on: **MISSING** (imported, not exposed → would resolve to `{}`),
-**UNUSED** (exposed, unimported), or a **bare barrel** reappearing. It caught a
-real hand-miss during bring-up (`@mui/icons-material/EmailRounded` from the
-reg-lite dist), which is why the surface is generated + guarded rather than
-hand-kept.
-
-## Measured result (gzip)
-
-- Non-MUI pages fetch no MUI chunks at all (the graph never imports them);
-  the MUI pages de-duplicated the ~3× `@mui/system` copies into split chunks
-  fetched once.
-
-## Verified
-
-`my-tickets` renders a full, styled MUI interface (Tabs, Buttons, Search, cards)
-in Nunito Sans inside its shadow root, with MUI served once from the shared
-runtime chunks and emotion shared across the shadow boundary — no
-`createContext`/`{}`/resolver errors.
+**UNUSED** (exposed, unimported), or a **bare barrel** reappearing — the surface
+is generated + guarded rather than hand-kept, so a hand-miss fails CI instead
+of resolving to `{}` in the browser.
 
 ## Open
 

@@ -158,23 +158,32 @@ src/mount/  (./mount barrel; renderers + compat via their own subpaths)
   widget-renderer.ts    the two Mount prop types
   composition.ts        WidgetComposition, WidgetComposer (the mount layer's input contract)
   registry.ts           WidgetRenderers — the two named renderer slots the host fills
-  configure-widget-host.ts   configureWidgetHost (exported as ./host, NOT on the barrel — it pulls uicore)
+  configureWidgetHost.ts   configureWidgetHost (exported as ./host, NOT on the barrel — it pulls uicore)
   renderers/            react-component · web-component (generic mount factories; hosts inject
                         lazy-loading, error boundary, bundle base path)
+  use-host-ref.ts       fans a forwarded ref out alongside the renderer's internal one
   mutation-safe-props.ts   shallow-copy so a widget's in-place prop mutations can't reach host state
   compat/               find-dom-node · react-element-symbol · react-dom-with-find-dom-node (React-19 shims)
 ```
 
 ```tsx
-export type RendererId = 'react-component' | 'web-component';
-
 // Two Mount contracts on purpose: the widget's own bundle owns the manifest,
 // so the web-component Mount takes only the widget's name; the react-component
-// Mount runs the widget from its full manifest on the host React. The host
-// fills both slots at setup:
+// Mount runs the widget from its full manifest on the host React. Both forward
+// a ref to the host element. The host fills both slots at setup:
+export interface ManifestMountProps {
+  manifest: WidgetManifest;
+  composition: WidgetComposition;
+  ref?: Ref<HTMLElement>;
+}
+export interface WebComponentMountProps {
+  name: string;
+  composition: WidgetComposition;
+  ref?: Ref<HTMLElement>;
+}
 export interface WidgetRenderers {
-  reactComponent?: ComponentType<{ manifest: WidgetManifest; composition: WidgetComposition }>;
-  webComponent?: ComponentType<{ name: string; composition: WidgetComposition }>;
+  reactComponent?: ComponentType<ManifestMountProps>;
+  webComponent?: ComponentType<WebComponentMountProps>;
 }
 
 // The import path picks the renderer — consumers never render <Widget>:
@@ -262,6 +271,52 @@ export interface WidgetComposition {
 export type WidgetComposer<TServerProps = void> =
   (serverProps: TServerProps) => WidgetComposition | null;   // null = required data not ready
 ```
+
+## The stability contract
+
+The legacy widgets treat props as **owned, mutable state** and **re-derive their
+entire internal store whenever a prop changes identity**, while a React context
+app changes references often. Without a contract, an unrelated host re-render
+(e.g. logout raising an overlay flag) re-clones the ~40-event array into fresh
+references and the widget re-initializes — a visible flicker. The contract
+couples the widget to the host's **data**, not its **render cadence**:
+
+> **A widget's props change identity if and only if its data actually changed.**
+
+If that holds, the renderer memoizes on the mutation-safe props and React skips
+the legacy subtree on any unrelated host re-render. It is enforced at three
+points (host hook names below are the reference host's):
+
+1. **Stable sources.** Realtime data (`useRealTimeEvents`, `useRealTimeSummit`)
+   comes from `useSyncExternalStore` — stable until a real update. `userProfile`
+   is memoized (`useWidgetSafeProfile`). Server props are constant per mount.
+2. **Stable callbacks — *and* they read live state.** Every `use*Callbacks`
+   hook returns a **memoized** bundle of **`useCallback`'d** members. Never hand
+   a widget an inline arrow or a fresh object literal.
+
+   The second half matters just as much: a callback handed to a widget must be
+   **stable in identity *and* read its reactive inputs live at call time** —
+   never bake a reactive value (like `isLoggedIn`) into the callback's identity.
+   A legacy widget captures a callback in its memoized event rows and **never
+   re-threads a new one**, so a callback whose identity changes when auth flips
+   leaves the widget holding the stale (anonymous) version — a post-login click
+   then re-defers and reopens the login modal. The host's auth guard therefore
+   returns a stable callback that reads `isLoggedIn` live from a ref (the
+   `useEffectEvent` shape). Rule: **stable identity, live reads.**
+3. **Isolate only on change.** `useMutationSafeProps`
+   (`src/mount/mutation-safe-props.ts`, applied by both renderers) re-clones a
+   prop only when its source reference changed, and returns the same object
+   otherwise — so unchanged data yields the same element and the legacy subtree
+   is skipped. (It also preserves the widget's own in-place mutations between
+   renders, which the legacy model expects. It exists because the widgets
+   mutate what they're handed — CONSTRAINTS RC-W.)
+
+For a composer this means: return **memoized data + `useCallback`'d callbacks** —
+nothing that changes identity on an unrelated render — and don't re-implement
+isolation or memoization yourself; the renderers own that for every widget. If
+a widget mutates a **nested** prop value (not just a top-level field), escalate
+`mutation-safe-props` to a deep copy for that prop — see the note in that
+module.
 
 ## The call site
 

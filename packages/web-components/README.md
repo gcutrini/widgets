@@ -7,8 +7,8 @@ host's module graph. The package ships two bins — `widgets-build` and
 `widgets-analyze` — that hosts run from their own installs; `esbuild` is a
 regular dependency for that reason.
 
-See [ISOLATION-STRATEGY.md](./ISOLATION-STRATEGY.md) for the full strategy, POC evidence, and the
-per-widget plan.
+See [ISOLATION-STRATEGY.md](./ISOLATION-STRATEGY.md) for the isolation model,
+the per-widget trade-offs, and the irreducible residuals.
 
 ## Structure — and where each part ultimately lives
 
@@ -32,7 +32,7 @@ src/           everything below is bundled into the web-component bundles
   element/     the custom-element machinery
     defineWidgetWebComponent.js   custom element on injected React 18; delegates
                               shadow setup to core createWidgetShadow
-    resolve-component.js      picks the component out of a webpack-UMD dist
+    resolveWidgetComponent.js     picks the component out of a webpack-UMD dist
   shims/       esbuild inject targets, referenced only by build.mjs
     import-meta-url-shim.js          (standalone IIFE only; ESM has it native)
 ```
@@ -56,8 +56,8 @@ git ref until npm publishing.
 | Piece | Eventual home |
 |---|---|
 | `src/*` (element/shims) | **a published shared kit package** — extracted from this `@openeventkit/web-components` package |
-| each widget's entry (generated in `scripts/build.mjs`) + its CSS | **each widget's own repo** (it owns its dep graph + export shape, so `resolve-component` isn't even needed there) |
-| the host-side renderers + per-widget data composition | **the host** (`src/widgets/host/renderers/`, `src/widgets/<widget>/` in the reference host) |
+| each widget's entry (generated in `scripts/build.mjs`) + its CSS | **each widget's own repo** (it owns its dep graph + export shape, so `resolveWidgetComponent` isn't even needed there) |
+| the host-side renderers + per-widget data composition | **the host** (`src/widgets/host/registerHost.ts`, `src/widgets/catalog/<widget>/` in the reference host) |
 
 Today all build-side roles live here while we prototype; the `src/` vs
 entry split makes those moves mechanical.
@@ -71,6 +71,15 @@ entry split makes those moves mechanical.
   This is the variant the reference host loads.
 - **standalone** — `‹name›.standalone.js`, React 18 bundled in. Drop-in for a
   host that loads no runtime chunks. Opt-in build.
+
+Neither variant enters the host's React-19 module graph — isolation holds both
+ways. The shared runtime's interop surface is the import map: one generated
+ES-module chunk per served bare specifier, single-instance stateful internals
+via esbuild code-splitting, `import-map.json` as the resolution table the host
+inlines before any widget module loads. A third-party integrator who wants zero
+coordination loads standalone; the reference host inlines the map once and
+loads each widget's shared module — one React 18 for all web components, small
+per-widget bytes.
 
 ## Build
 
