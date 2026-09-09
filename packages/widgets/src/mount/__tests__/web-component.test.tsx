@@ -1,8 +1,10 @@
+import { Component, type ReactNode } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { registerHostAuth, type HostAuth } from '../../core/host-auth';
 import { registerHostConfig, type HostConfig } from '../../core/host-config';
 import { webComponentTag } from '../../core';
+import { WIDGET_ERROR_EVENT } from '../../core/widget-error';
 import { createWebComponentRenderer } from '../renderers/web-component';
 
 const auth: HostAuth = { isSignedIn: async () => true, logout: () => {} };
@@ -36,6 +38,23 @@ class FakeWidget extends HTMLElement {
   }
 }
 customElements.define(webComponentTag('demo'), FakeWidget);
+
+class TestBoundary extends Component<
+  { name: string; children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? (
+      <div data-testid="fallback">{this.props.name}</div>
+    ) : (
+      this.props.children
+    );
+  }
+}
 
 describe('web-component renderer', () => {
   const realAppend = document.head.appendChild.bind(document.head);
@@ -101,6 +120,51 @@ describe('web-component renderer', () => {
     await waitFor(() => expect(mountCalls).toHaveLength(1));
     unmount();
     expect(unmountCalls).toBe(1);
+  });
+
+  it('a widget-error event from the element reaches the injected Boundary', async () => {
+    const Mount = createWebComponentRenderer({
+      bundleBasePath: '/web-components',
+      Boundary: TestBoundary,
+    });
+    const { container, getByTestId } = render(
+      <Mount name="demo" composition={{ props: { a: 1 } }} />,
+    );
+    await waitFor(() => expect(mountCalls).toHaveLength(1));
+    const el = container.querySelector(webComponentTag('demo'))!;
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    act(() => {
+      el.dispatchEvent(
+        new CustomEvent(WIDGET_ERROR_EVENT, {
+          detail: { error: new Error('widget render error') },
+        }),
+      );
+    });
+    spy.mockRestore();
+    expect(getByTestId('fallback').textContent).toBe('demo');
+  });
+
+  it('a bundle that never defines its element reaches the Boundary after the define timeout', async () => {
+    vi.useFakeTimers();
+    try {
+      const Mount = createWebComponentRenderer({
+        bundleBasePath: '/web-components',
+        Boundary: TestBoundary,
+      });
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const { getByTestId } = render(
+        <Mount name="never-defined" composition={{ props: {} }} />,
+      );
+      // The script "loads" at once (mocked appendChild), so only the
+      // whenDefined race remains — advance past the define timeout.
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(20_000);
+      });
+      spy.mockRestore();
+      expect(getByTestId('fallback').textContent).toBe('never-defined');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('a strict-mode style remount opens a fresh visit with the current props', async () => {

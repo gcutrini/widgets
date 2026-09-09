@@ -130,10 +130,8 @@ function defineWebComponent({ React, createRoot, Component, manifest }) {
     //     a standalone host that only removes the node still gets cleanup.
     constructor() {
       super();
-      this._props = null; // null = no open visit
+      this._props = null; // null = no open visit (DOM connection comes from the element's own isConnected)
       this._shadow = null; // WidgetShadow: { root, container, dispose } — permanent once created (attachShadow is one-way)
-      this._connected = false;
-      this._mounted = false;
       this._painted = false; // first-commit-of-visit announced?
       this._root = null; // React root for the current connected span of the visit
       // Report a widget render error out through the host as a DOM event; the
@@ -166,7 +164,6 @@ function defineWebComponent({ React, createRoot, Component, manifest }) {
       registerHostConfig(hostConfig);
       configureUicoreOnce();
       this._props = { ...props };
-      this._mounted = true;
       this._painted = false;
       this._renderIfReady();
     }
@@ -177,7 +174,7 @@ function defineWebComponent({ React, createRoot, Component, manifest }) {
      * outside an open visit.
      */
     setProps(props) {
-      if (!this._mounted) return;
+      if (this._props === null) return;
       this._props = { ...props };
       this._render();
     }
@@ -190,18 +187,16 @@ function defineWebComponent({ React, createRoot, Component, manifest }) {
      * after disconnectedCallback already tore the tree down.
      */
     unmount() {
-      this._mounted = false;
       this._props = null;
       this._teardown();
     }
 
     connectedCallback() {
-      this._connected = true;
       this._renderIfReady();
     }
 
     _renderIfReady() {
-      if (!this._connected || !this._mounted) return;
+      if (!this.isConnected || this._props === null) return;
       if (this._shadow) {
         // Reconnect after a disconnect (the host moved the element in the DOM):
         // disconnectedCallback disposed the bridges, so restart them before
@@ -257,7 +252,6 @@ function defineWebComponent({ React, createRoot, Component, manifest }) {
     }
 
     disconnectedCallback() {
-      this._connected = false;
       this._teardown();
     }
   }

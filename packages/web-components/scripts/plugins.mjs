@@ -36,13 +36,9 @@ export const nodePolyfills = polyfillNode({
   },
 });
 
-// uicore pulls moment-timezone, whose default build carries the full 1900-2100
-// tz-transition dataset (~715 KB); redirect to the 10-year-range dataset.
-// sweetalert2 (~78 KB) is aliased to the widget-notify shim so the real library
-// never bundles. See lib/compat/uicore-swal.
-export // @openeventkit/widgets must be installed next to this package (its 0.1.0 is
+// @openeventkit/widgets must be installed next to this package (its 0.1.0 is
 // not on a registry — hosts override it to a git ref until it publishes).
-const resolveWidgetsCompat = (name) => {
+export const resolveWidgetsCompat = (name) => {
   try {
     return require.resolve(`@openeventkit/widgets/compat/${name}`);
   } catch {
@@ -52,6 +48,10 @@ const resolveWidgetsCompat = (name) => {
   }
 };
 
+// uicore pulls moment-timezone, whose default build carries the full 1900-2100
+// tz-transition dataset (~715 KB); redirect to the 10-year-range dataset.
+// sweetalert2 (~78 KB) is aliased to the widget-notify shim so the real library
+// never bundles. See lib/compat/uicore-swal.
 const vendorAlias = {
   'moment-timezone': require.resolve('moment-timezone/builds/moment-timezone-with-data-10-year-range'),
   get sweetalert2() { return resolveWidgetsCompat('uicore-swal'); },

@@ -123,8 +123,9 @@ export interface WidgetManifest {
 }
 ```
 
-The manifest declares no prop contract for the web component — the element takes
-its props at runtime via a `setProps(obj)` method the renderer calls. The one
+The manifest declares no prop contract for the web component — the renderer
+hands the element its initial props in `mount({ ... props })` and replaces them
+via `setProps(obj)` while the visit is open. The one
 web-component-specific block is `runtimeNeeds`: the build-actionable requirement
 tokens the esbuild build orchestrates from (see
 ../web-components/RUNTIME-REQUIREMENTS.md).

@@ -99,7 +99,7 @@ export function createReactComponentRenderer(
       return manifest.wrapTree ? manifest.wrapTree(widget) : widget;
     }, [LegacyWidget, isolated, manifest]);
 
-    const mounted = createElement(
+    return createElement(
       manifest.elementTag ?? 'div',
       { ref: setHostRef, ...manifest.elementAttrs },
       shadow
@@ -113,13 +113,17 @@ export function createReactComponentRenderer(
           )
         : null,
     );
-
-    return Boundary ? (
-      <Boundary name={manifest.name}>{mounted}</Boundary>
-    ) : (
-      mounted
-    );
   }
 
-  return ReactComponentMount;
+  // Not a boundary itself: a throw anywhere in the mount's render (including
+  // resolveComponent) must land in the host's Boundary, so it sits above —
+  // the same shape as the web-component renderer.
+  function BoundedReactComponentMount({ manifest, composition, ref }: ManifestMountProps) {
+    const mounted = (
+      <ReactComponentMount manifest={manifest} composition={composition} ref={ref} />
+    );
+    return Boundary ? <Boundary name={manifest.name}>{mounted}</Boundary> : mounted;
+  }
+
+  return BoundedReactComponentMount;
 }
