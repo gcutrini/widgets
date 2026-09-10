@@ -154,15 +154,15 @@ element machinery).
 
 ```
 src/mount/  (./mount barrel; renderers + compat via their own subpaths)
-  create-widget-component.tsx   builds the per-widget components the catalog entries export
+  createWidgetComponent.tsx   builds the per-widget components the catalog entries export
   Widget.tsx            internal dispatcher; picks the renderer from the identity prop
   mount-props.ts        the two Mount prop types
   composition.ts        WidgetComposition, WidgetComposer (the mount layer's input contract)
   registry.ts           WidgetRenderers — the two named renderer slots the host fills
-  configure-widget-host.ts   configureWidgetHost (exported as ./host, NOT on the barrel — it pulls uicore)
+  configureWidgetHost.ts   configureWidgetHost (exported as ./host, NOT on the barrel — it pulls uicore)
   renderers/            react-component · web-component (generic mount factories; hosts inject
                         lazy-loading, error boundary, bundle base path)
-  use-element-ref.ts    fans a forwarded ref out alongside the renderer's internal one
+  useElementRef.ts    fans a forwarded ref out alongside the renderer's internal one
   mutation-safe-props.ts   shallow-copy so a widget's in-place prop mutations can't reach host state
   compat/               find-dom-node · react-element-symbol · react-dom-with-find-dom-node (React-19 shims)
 ```

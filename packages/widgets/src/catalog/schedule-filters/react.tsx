@@ -1,6 +1,6 @@
 'use client';
 
-import { createReactComponentWidget } from '../../mount/create-widget-component';
+import { createReactComponentWidget } from '../../mount/createWidgetComponent';
 import { scheduleFiltersManifest } from './manifest';
 
 /** schedule-filters on the host React, from its full manifest. */

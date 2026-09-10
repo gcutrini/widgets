@@ -2,7 +2,7 @@ export {
   createWebComponentWidget,
   createReactComponentWidget,
   type WidgetComponentProps,
-} from './create-widget-component';
+} from './createWidgetComponent';
 export type { WidgetRenderers } from './registry';
 export type {
   ManifestMountProps,

@@ -6,7 +6,7 @@ import type { WidgetComposition } from './composition';
 import { getRenderers, type WidgetRenderers } from './registry';
 
 /**
- * Internal dispatcher behind the per-widget components (`create-widget-component`
+ * Internal dispatcher behind the per-widget components (`createWidgetComponent`
  * builds them; consumers import `@openeventkit/widgets/<widget>/web-component`
  * or `.../react` and never render this directly). Mounts a widget by handing
  * its live composition to a renderer, chosen by which identity prop is

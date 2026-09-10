@@ -12,7 +12,7 @@ import { webComponentTag } from '../../core';
 import { getHostAuth, type HostAuth } from '../../core/host-auth';
 import { getHostConfig, type HostConfig } from '../../core/host-config';
 import { useMutationSafeProps } from '../mutation-safe-props';
-import { useElementRef } from '../use-element-ref';
+import { useElementRef } from '../useElementRef';
 import { WIDGET_ERROR_EVENT } from '../../core/widget-error';
 import type { WebComponentMountProps } from '../mount-props';
 

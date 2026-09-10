@@ -1,6 +1,6 @@
 'use client';
 
-import { createWebComponentWidget } from '../../mount/create-widget-component';
+import { createWebComponentWidget } from '../../mount/createWidgetComponent';
 
 /**
  * schedule-lite on the web-component runtime — its own bundle owns the manifest,

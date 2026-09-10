@@ -23,7 +23,7 @@ import {
   type WidgetShadow,
 } from '../../core';
 import { useMutationSafeProps } from '../mutation-safe-props';
-import { useElementRef } from '../use-element-ref';
+import { useElementRef } from '../useElementRef';
 import type { ManifestMountProps } from '../mount-props';
 import { ShadowRootContext } from '../../lib/context/shadow-root-context';
 
