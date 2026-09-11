@@ -1,6 +1,6 @@
 # openeventkit widgets
 
-The widget layer for [event-site-next](https://github.com/gcutrini/event-site-next):
+The widget layer for [next-event-site](https://github.com/fntechgit/next-event-site):
 the legacy openstack event-site widgets (schedule, registration, my-tickets, …)
 packaged so a modern React host can mount them without inheriting their era.
 A pnpm workspace of two packages:
